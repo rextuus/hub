@@ -28,38 +28,45 @@ class SeedProjectsCommand extends Command
 
         $projects = [
             [
-                'name' => 'Password Manager',
-                'description' => 'A simple tool to store and manage your passwords securely.',
+                'name' => 'ESC Voting',
+                'description' => 'Der ultimative Begleiter für deinen Eurovision Song Contest Abend. Verwalte Länder, gib Stimmen ab und verfolge Live-Ergebnisse mit Leichtigkeit.',
+                'icon' => 'lucide:star',
+                'image' => 'https://images.unsplash.com/photo-1459749411177-042180ce673f?auto=format&fit=crop&q=80&w=400&h=250',
+                'route' => 'app_esc_voting_index',
+            ],
+            [
+                'name' => 'Passwort-Manager',
+                'description' => 'Ein einfaches Tool, um deine Passwörter sicher zu speichern und zu verwalten.',
                 'icon' => 'lucide:key',
                 'image' => 'https://picsum.photos/seed/password/400/250',
             ],
             [
-                'name' => 'Image Optimizer',
-                'description' => 'Quickly compress and optimize your images for the web.',
+                'name' => 'Bild-Optimierer',
+                'description' => 'Komprimiere und optimiere deine Bilder schnell für das Web.',
                 'icon' => 'lucide:image',
                 'image' => 'https://picsum.photos/seed/image/400/250',
             ],
             [
-                'name' => 'JSON Validator',
-                'description' => 'Check and format your JSON strings with ease.',
+                'name' => 'JSON-Validator',
+                'description' => 'Überprüfe und formatiere deine JSON-Strings mit Leichtigkeit.',
                 'icon' => 'lucide:file-json',
                 'image' => 'https://picsum.photos/seed/json/400/250',
             ],
             [
-                'name' => 'Unit Converter',
-                'description' => 'Convert between different units of measurement.',
+                'name' => 'Einheiten-Umrechner',
+                'description' => 'Rechne zwischen verschiedenen Maßeinheiten um.',
                 'icon' => 'lucide:scale',
                 'image' => 'https://picsum.photos/seed/scale/400/250',
             ],
             [
-                'name' => 'Code Snippets',
-                'description' => 'Keep track of your most used code snippets in one place.',
+                'name' => 'Code-Snippets',
+                'description' => 'Behalte deine meistgenutzten Code-Snippets an einem Ort im Blick.',
                 'icon' => 'lucide:code-2',
                 'image' => 'https://picsum.photos/seed/code/400/250',
             ],
             [
-                'name' => 'To-Do List',
-                'description' => 'Organize your daily tasks and never miss a deadline.',
+                'name' => 'To-Do-Liste',
+                'description' => 'Organisiere deine täglichen Aufgaben und verpasse keine Deadline mehr.',
                 'icon' => 'lucide:check-square',
                 'image' => 'https://picsum.photos/seed/todo/400/250',
             ],
@@ -74,7 +81,7 @@ class SeedProjectsCommand extends Command
             $project->setDescription($p['description']);
             $project->setIcon($p['icon']);
             $project->setImage($p['image']);
-            // Routes don't exist yet, so we leave them null
+            $project->setRoute($p['route'] ?? null);
             $this->entityManager->persist($project);
         }
 

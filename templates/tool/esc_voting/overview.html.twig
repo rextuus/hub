@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Overview - ESC Voting{% endblock %}
+
+{% block body %}
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-3">Live-Rangliste</h1>
+        <p class="lead opacity-75">Sieh dir an, wer aktuell das Rennen um die ESC-Trophäe anführt.</p>
+    </div>
+</div>
+
+<div class="container projects-container pb-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="project-card p-4">
+                <h2 class="h4 fw-bold mb-4 d-flex align-items-center">
+                    {{ ux_icon('lucide:list-ordered', {class: 'me-2 text-primary'}) }} Aktueller Stand
+                </h2>
+                <div class="alert alert-info d-flex align-items-center">
+                    {{ ux_icon('lucide:info', {class: 'me-3', style: 'font-size: 1.5em;'}) }}
+                    <div>
+                        Voting-Ergebnisse erscheinen hier, sobald die ersten Stimmen abgegeben wurden.
+                        <strong>Testdaten:</strong> Aktuell wird eine Platzhalter-Rangliste angezeigt.
+                    </div>
+                </div>
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Land</th>
+                                <th class="text-end">Gesamtpunkte</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                            {{ ux_icon('lucide:trophy', {style: 'font-size: 0.8em;'}) }}
+                                        </div>
+                                        <span class="fw-semibold">Deutschland</span>
+                                    </div>
+                                </td>
+                                <td class="text-end fw-bold text-primary">0</td>
+                            </tr>
+                            <!-- More countries will be listed here dynamically later -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="project-card p-4 mb-4">
+                <h3 class="h5 fw-bold mb-3">Statistiken</h3>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Abgegebene Stimmen:</span>
+                    <span class="fw-bold">0</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Eindeutige Voter:</span>
+                    <span class="fw-bold">0</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Letztes Update:</span>
+                    <span class="small">Gerade eben</span>
+                </div>
+            </div>
+
+            <div class="project-card p-4 border-primary border-opacity-25 bg-primary bg-opacity-5">
+                <h3 class="h5 fw-bold mb-3 text-primary">Deine Stimme zählt!</h3>
+                <p class="small text-muted mb-3">Vergiss nicht, alle Auftritte zu bewerten, um deinen Favoriten zum Sieg zu verhelfen.</p>
+                <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary w-100">
+                    {{ ux_icon('lucide:star', {class: 'me-2'}) }} Zurück zum Voting
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

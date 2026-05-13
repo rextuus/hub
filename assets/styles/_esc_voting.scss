@@ -1,0 +1,165 @@
+// ESC Voting Tool Specific Styles
+
+.esc-voting-container {
+    .voting-slot {
+        min-height: 100px;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+        border: 1.5px dashed #cbd5e1;
+        pointer-events: auto;
+        padding: 0.25rem;
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+
+        &.voting-slot-large {
+            min-height: 150px;
+            background: #ffffff;
+            border-width: 2px;
+        }
+
+        .points-badge-small {
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+        }
+
+        .slot-content {
+            width: 100%;
+
+            .d-flex {
+                flex-direction: column;
+                justify-content: center !important;
+
+                span.fw-semibold {
+                    font-size: 0.85rem;
+                }
+            }
+        }
+
+        button {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+        }
+
+        @media (min-width: 768px) {
+            // Keep the same look on desktop for now as requested by "only 5 rows"
+            // If the user wants a more horizontal look on desktop, we can adjust here.
+            // But they said "Sodass es am Ende nur noch 5 Zeilen sind", which implies 2 columns.
+        }
+
+        * {
+            pointer-events: none;
+        }
+
+        button {
+            pointer-events: auto;
+        }
+
+        &.slot-filled {
+            background: #ffffff;
+            border-style: solid;
+            border-color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        &.drag-over {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+    }
+
+    .points-badge {
+        width: 32px;
+        height: 32px;
+        background: #1e293b;
+        color: white;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .points-badge-large {
+        width: 54px;
+        height: 54px;
+        background: #1e293b;
+        color: #fbbf24;
+        border-radius: 12px;
+        font-size: 1.8rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .points-badge-small {
+        width: 34px;
+        height: 34px;
+        background: #1e293b;
+        color: white;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .x-small {
+        font-size: 0.75rem;
+    }
+
+    .country-item {
+        cursor: grab;
+        transition: all 0.2s ease;
+        min-height: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        &:active {
+            cursor: grabbing;
+        }
+
+        &.draggable:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        &.selected-country {
+            background: #f1f5f9;
+            cursor: default;
+        }
+
+        &.pending-selection {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+            background-color: #eff6ff !important;
+        }
+    }
+}
+
+.shadow-inner {
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.italic { font-style: italic; }
+
+@media (max-width: 991.98px) {
+    .esc-voting-container {
+        .voting-slots {
+            margin-bottom: 2rem;
+        }
+    }
+}
+
+// Voting table specific refinements
+.table-hover {
+    tbody tr {
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+    }
+}

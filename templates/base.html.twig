@@ -22,8 +22,12 @@
         {% endif %}
     </head>
     <body>
-        {{ include('_header.html.twig') }}
+        {% if show_header|default(true) %}
+            {{ include('_header.html.twig') }}
+        {% endif %}
         {% block body %}{% endblock %}
-        {{ include('_footer.html.twig') }}
+        {% if show_footer|default(true) %}
+            {{ include('_footer.html.twig') }}
+        {% endif %}
     </body>
 </html>

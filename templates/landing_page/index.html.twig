@@ -7,9 +7,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <span class="badge badge-custom px-3 py-2 mb-3">Unified Platform</span>
-                <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">Your Personal Toolset</h1>
-                <p class="lead mb-0 opacity-75">A curated collection of small, powerful tools designed to simplify your daily developer workflow. Everything you need, all in one place.</p>
+        <span class="badge badge-custom px-3 py-2 mb-3">Zentralisierte Plattform</span>
+        <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">Dein persönliches Toolset</h1>
+        <p class="lead mb-0 opacity-75">Eine kuratierte Sammlung kleiner, leistungsstarker Werkzeuge, die deinen täglichen Entwickler-Workflow vereinfachen. Alles, was du brauchst, an einem Ort.</p>
             </div>
         </div>
     </div>
@@ -35,11 +35,11 @@
                         <div class="mt-auto">
                             {% if project.route or project.url %}
                                 <a href="{{ project.route ? path(project.route) : project.url }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-                                    Open Tool {{ ux_icon('lucide:arrow-right', {class: 'ms-2', style: 'font-size: 0.8em;'}) }}
+                                    Tool öffnen {{ ux_icon('lucide:arrow-right', {class: 'ms-2', style: 'font-size: 0.8em;'}) }}
                                 </a>
                             {% else %}
-                                <button class="btn btn-light w-100 disabled" title="Coming soon">
-                                    Coming Soon
+                                <button class="btn btn-light w-100 disabled" title="In Kürze verfügbar">
+                                    In Kürze verfügbar
                                 </button>
                             {% endif %}
                         </div>

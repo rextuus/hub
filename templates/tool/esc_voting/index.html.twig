@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ESC Voting - Hub{% endblock %}
+
+{% block body %}
+<div class="hero-section text-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <span class="badge badge-custom px-3 py-2 mb-3">Tool im Rampenlicht</span>
+                <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">ESC Voting Tool</h1>
+                <p class="lead mb-0 opacity-75">Der ultimative Begleiter für deinen Eurovision Song Contest Abend. Verwalte Länder, gib Stimmen ab und verfolge Live-Ergebnisse mit Leichtigkeit.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container projects-container pb-5">
+    <div class="row g-4">
+        <!-- Main Description -->
+        <div class="col-12 col-lg-8">
+            <div class="project-card p-5 h-100">
+                <h2 class="h3 fw-bold mb-4">Über das ESC Voting Tool</h2>
+                <p>Dieses Tool wurde entwickelt, um die Spannung des Eurovision Song Contests direkt in dein Wohnzimmer zu bringen. Egal ob du eine Watch-Party veranstaltest oder einfach nur zuschaust, unser Tool bietet ein nahtloses Erlebnis, um deine Lieblings-Performances zu verfolgen.</p>
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                            {{ ux_icon('lucide:check', {style: 'font-size: 1.2em;'}) }}
+                        </div>
+                        <span>Echtzeit-Länderverfolgung basierend auf den offiziellen Startnummern.</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                            {{ ux_icon('lucide:check', {style: 'font-size: 1.2em;'}) }}
+                        </div>
+                        <span>Professionelles Bewertungssystem (1-12 Punkte).</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                            {{ ux_icon('lucide:check', {style: 'font-size: 1.2em;'}) }}
+                        </div>
+                        <span>Live-Rangliste und Voting-Übersicht.</span>
+                    </li>
+                </ul>
+                <div class="mt-5">
+                    <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary btn-lg px-5">
+                        Jetzt mit dem Voting beginnen {{ ux_icon('lucide:play', {class: 'ms-2'}) }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links Sidebar -->
+        <div class="col-12 col-lg-4">
+            <div class="row g-4 h-100">
+                <div class="col-12">
+                    <div class="project-card p-4 h-100">
+                        <h3 class="h5 fw-bold mb-3">Schnellnavigation</h3>
+                        <div class="d-grid gap-3">
+                            <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-between p-3 text-start">
+                                <div>
+                                    <div class="fw-bold">Stimmen abgeben</div>
+                                    <small class="text-muted">Bewerte jeden Auftritt</small>
+                                </div>
+                                {{ ux_icon('lucide:star') }}
+                            </a>
+                            <a href="{{ path('app_esc_voting_overview') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-between p-3 text-start">
+                                <div>
+                                    <div class="fw-bold">Rangliste</div>
+                                    <small class="text-muted">Live-Ergebnisse im Überblick</small>
+                                </div>
+                                {{ ux_icon('lucide:trophy') }}
+                            </a>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('admin') }}" class="btn btn-outline-dark d-flex align-items-center justify-content-between p-3 text-start border-dashed">
+                                    <div>
+                                        <div class="fw-bold">Länder verwalten</div>
+                                        <small class="text-muted">Admin-Bereich</small>
+                                    </div>
+                                    {{ ux_icon('lucide:settings') }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
