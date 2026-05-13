@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{{ path('app_landing_page') }}">
+            <div class="bg-primary bg-opacity-25 rounded-3 p-1 me-2 d-flex align-items-center">
+                {{ ux_icon('lucide:layout-grid', {class: 'text-white'}) }}
+            </div>
+            <span class="fw-bold tracking-tight">HUB</span>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="{{ path('admin') }}">
+                            {{ ux_icon('lucide:settings', {class: 'me-1', style: 'font-size: 0.9em;'}) }} Admin
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                    {% if app.user %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center px-3" type="button" data-bs-toggle="dropdown">
+                                {{ ux_icon('lucide:user', {class: 'me-2'}) }} {{ app.user.userIdentifier }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center text-danger py-2" href="{{ path('app_logout') }}">
+                                        {{ ux_icon('lucide:log-out', {class: 'me-2'}) }} Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-primary btn-sm d-flex align-items-center px-4" href="{{ path('app_login') }}">
+                            {{ ux_icon('lucide:log-in', {class: 'me-2'}) }} Login
+                        </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

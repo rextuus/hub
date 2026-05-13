@@ -31,39 +31,49 @@ class SeedProjectsCommand extends Command
                 'name' => 'Password Manager',
                 'description' => 'A simple tool to store and manage your passwords securely.',
                 'icon' => 'lucide:key',
+                'image' => 'https://picsum.photos/seed/password/400/250',
             ],
             [
                 'name' => 'Image Optimizer',
                 'description' => 'Quickly compress and optimize your images for the web.',
                 'icon' => 'lucide:image',
+                'image' => 'https://picsum.photos/seed/image/400/250',
             ],
             [
                 'name' => 'JSON Validator',
                 'description' => 'Check and format your JSON strings with ease.',
                 'icon' => 'lucide:file-json',
+                'image' => 'https://picsum.photos/seed/json/400/250',
             ],
             [
                 'name' => 'Unit Converter',
                 'description' => 'Convert between different units of measurement.',
                 'icon' => 'lucide:scale',
+                'image' => 'https://picsum.photos/seed/scale/400/250',
             ],
             [
                 'name' => 'Code Snippets',
                 'description' => 'Keep track of your most used code snippets in one place.',
                 'icon' => 'lucide:code-2',
+                'image' => 'https://picsum.photos/seed/code/400/250',
             ],
             [
                 'name' => 'To-Do List',
                 'description' => 'Organize your daily tasks and never miss a deadline.',
                 'icon' => 'lucide:check-square',
+                'image' => 'https://picsum.photos/seed/todo/400/250',
             ],
         ];
+
+        // Clean up existing projects to avoid duplicates if re-seeding
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Project')->execute();
 
         foreach ($projects as $p) {
             $project = new Project();
             $project->setName($p['name']);
             $project->setDescription($p['description']);
             $project->setIcon($p['icon']);
+            $project->setImage($p['image']);
             // Routes don't exist yet, so we leave them null
             $this->entityManager->persist($project);
         }

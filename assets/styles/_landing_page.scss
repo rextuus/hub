@@ -1,0 +1,73 @@
+.hero-section {
+    padding: 100px 0 120px;
+    background: #1e293b;
+    color: white;
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-custom {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+}
+
+.project-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: var(--primary-color);
+
+        .project-image-wrapper img {
+            transform: scale(1.1);
+        }
+
+        .icon-wrapper {
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(10deg);
+        }
+    }
+}
+
+.project-image-wrapper {
+    height: 180px;
+    overflow: hidden;
+
+    img {
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+}
+
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: #eff6ff;
+    color: var(--primary-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.projects-container {
+    margin-top: -60px;
+    position: relative;
+    z-index: 10;
+}

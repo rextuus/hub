@@ -3,72 +3,44 @@
 {% block title %}Hub - Your Mini App Collection{% endblock %}
 
 {% block body %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5 shadow-sm">
+<div class="hero-section text-center">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="{{ path('app_landing_page') }}">
-            {{ ux_icon('lucide:layout-grid', {class: 'me-2 text-primary'}) }}
-            <span class="fw-bold">Hub</span>
-        </a>
-        <button class="navbar-expand-lg" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center">
-                {% if is_granted('ROLE_ADMIN') %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('admin') }}">
-                            {{ ux_icon('lucide:settings', {class: 'me-1'}) }}Admin
-                        </a>
-                    </li>
-                {% endif %}
-                <li class="nav-item ms-lg-3">
-                    {% if app.user %}
-                        <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
-                                {{ ux_icon('lucide:user', {class: 'me-1'}) }}{{ app.user.userIdentifier }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item d-flex align-items-center text-danger" href="{{ path('app_logout') }}">
-                                    {{ ux_icon('lucide:log-out', {class: 'me-2'}) }}Logout
-                                </a></li>
-                            </ul>
-                        </div>
-                    {% else %}
-                        <a class="btn btn-primary d-flex align-items-center" href="{{ path('app_login') }}">
-                            {{ ux_icon('lucide:log-in', {class: 'me-1'}) }}Login
-                        </a>
-                    {% endif %}
-                </li>
-            </ul>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <span class="badge badge-custom px-3 py-2 mb-3">Unified Platform</span>
+                <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">Your Personal Toolset</h1>
+                <p class="lead mb-0 opacity-75">A curated collection of small, powerful tools designed to simplify your daily developer workflow. Everything you need, all in one place.</p>
+            </div>
         </div>
     </div>
-</nav>
+</div>
 
-<div class="container">
-    <div class="row mb-5">
-        <div class="col-lg-8 mx-auto text-center">
-            <h1 class="display-4 fw-bold mb-3">Welcome to your Tool Hub</h1>
-            <p class="lead text-muted">A collection of small, powerful tools designed to make your daily tasks easier. All in one place, sharing the comfort of a unified platform.</p>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-5">
+<div class="container projects-container pb-5">
+    <div class="row g-4">
         {% for project in projects %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm hover-shadow border-0 transition">
-                    <div class="card-body p-4 text-center">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
-                            {{ ux_icon(project.icon, {style: 'width: 2rem; height: 2rem;'}) }}
+            <div class="col-12 col-lg-6 col-xl-4">
+                <div class="project-card d-flex flex-column h-100 overflow-hidden">
+                    {% if project.image %}
+                        <div class="project-image-wrapper">
+                            <img src="{{ project.image }}" class="img-fluid w-100" alt="{{ project.name }}">
                         </div>
-                        <h3 class="h5 card-title fw-bold mb-3">{{ project.name }}</h3>
-                        <p class="card-text text-muted mb-4 small">{{ project.description }}</p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
-                        <div class="d-grid">
+                    {% endif %}
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <div class="icon-wrapper">
+                            {{ ux_icon(project.icon) }}
+                        </div>
+                        <h3 class="h4 fw-bold mb-3">{{ project.name }}</h3>
+                        <p class="text-muted mb-4 flex-grow-1">{{ project.description }}</p>
+
+                        <div class="mt-auto">
                             {% if project.route or project.url %}
-                                <a href="{{ project.route ? path(project.route) : project.url }}" class="btn btn-outline-primary">Open Tool</a>
+                                <a href="{{ project.route ? path(project.route) : project.url }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                                    Open Tool {{ ux_icon('lucide:arrow-right', {class: 'ms-2', style: 'font-size: 0.8em;'}) }}
+                                </a>
                             {% else %}
-                                <button class="btn btn-outline-secondary disabled" title="Coming soon">Coming Soon</button>
+                                <button class="btn btn-light w-100 disabled" title="Coming soon">
+                                    Coming Soon
+                                </button>
                             {% endif %}
                         </div>
                     </div>
@@ -76,19 +48,10 @@
             </div>
         {% endfor %}
     </div>
-
-    <footer class="text-center text-muted py-5 border-top">
-        <p>&copy; {{ "now"|date("Y") }} Hub. All rights reserved.</p>
-    </footer>
 </div>
 
 <style>
-    .hover-shadow:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-    }
-    .transition {
-        transition: all 0.3s ease;
-    }
+    .fw-extra-bold { font-weight: 800; }
+    .tracking-tight { letter-spacing: -0.025em; }
 </style>
 {% endblock %}
