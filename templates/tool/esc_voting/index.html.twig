@@ -8,8 +8,8 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <span class="badge badge-custom px-3 py-2 mb-3">Tool im Rampenlicht</span>
-                <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">ESC Voting Tool</h1>
-                <p class="lead mb-0 opacity-75">Der ultimative Begleiter für deinen Eurovision Song Contest Abend. Verwalte Länder, gib Stimmen ab und verfolge Live-Ergebnisse mit Leichtigkeit.</p>
+                <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">ESC Voting</h1>
+                <p class="lead mb-0 opacity-75">Bewerte die Auftritte und erstelle dein eigenes ESC-Ranking.</p>
             </div>
         </div>
     </div>
@@ -17,56 +17,57 @@
 
 <div class="container projects-container pb-5">
     <div class="row g-4">
-        <!-- Main Description -->
         <div class="col-12 col-lg-8">
-            <div class="project-card p-5 h-100">
-                <h2 class="h3 fw-bold mb-4">Über das ESC Voting Tool</h2>
-                <p>Dieses Tool wurde entwickelt, um die Spannung des Eurovision Song Contests direkt in dein Wohnzimmer zu bringen. Egal ob du eine Watch-Party veranstaltest oder einfach nur zuschaust, unser Tool bietet ein nahtloses Erlebnis, um deine Lieblings-Performances zu verfolgen.</p>
-                <ul class="list-unstyled mt-4">
-                    <li class="mb-3 d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
-                            {{ ux_icon('lucide:check', {style: 'font-size: 1.2em;'}) }}
+            <div class="project-card p-5 h-100 shadow-lg border-primary border-opacity-25">
+                <h2 class="h3 fw-bold mb-4 text-center">Dein Voting</h2>
+
+                <div class="mt-4">
+                    {% if has_existing_ballot %}
+                        <div class="text-center mb-4">
+                            <div class="alert alert-success d-inline-block px-4 py-3 rounded-4 border-0 shadow-sm mb-4">
+                                <span class="d-flex align-items-center">
+                                    {{ ux_icon('lucide:check-circle', {class: 'me-2'}) }}
+                                    Du hast bereits abgestimmt!
+                                </span>
+                            </div>
+                            <div class="d-grid gap-3 col-md-8 mx-auto">
+                                <a href="{{ path('app_esc_voting_vote_edit') }}" class="btn btn-primary btn-lg py-3 shadow-sm fw-bold">
+                                    {{ ux_icon('lucide:edit-3', {class: 'me-2'}) }} Deine Wertung bearbeiten
+                                </a>
+                                <a href="{{ path('app_esc_voting_overview') }}" class="btn btn-outline-secondary py-3">
+                                    Zur Rangliste {{ ux_icon('lucide:trophy', {class: 'ms-2'}) }}
+                                </a>
+                            </div>
                         </div>
-                        <span>Echtzeit-Länderverfolgung basierend auf den offiziellen Startnummern.</span>
-                    </li>
-                    <li class="mb-3 d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
-                            {{ ux_icon('lucide:check', {style: 'font-size: 1.2em;'}) }}
-                        </div>
-                        <span>Professionelles Bewertungssystem (1-12 Punkte).</span>
-                    </li>
-                    <li class="mb-3 d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
-                            {{ ux_icon('lucide:check', {style: 'font-size: 1.2em;'}) }}
-                        </div>
-                        <span>Live-Rangliste und Voting-Übersicht.</span>
-                    </li>
-                </ul>
-                <div class="mt-5">
-                    {% if user %}
-                        <div class="alert alert-info d-inline-block px-4 py-3 mb-4 rounded-4 border-0 shadow-sm">
-                            <span class="d-flex align-items-center">
-                                {{ ux_icon('lucide:user', {class: 'me-2 text-primary'}) }}
-                                Angemeldet als <strong>{{ user.userIdentifier }}</strong>
-                            </span>
-                        </div>
-                        <div>
-                            <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary btn-lg px-5 shadow-sm">
-                                Jetzt mit dem Voting beginnen {{ ux_icon('lucide:play', {class: 'ms-2'}) }}
-                            </a>
+                    {% elseif user %}
+                        <div class="text-center">
+                            <div class="alert alert-info d-inline-block px-4 py-3 mb-4 rounded-4 border-0 shadow-sm">
+                                <span class="d-flex align-items-center">
+                                    {{ ux_icon('lucide:user', {class: 'me-2 text-primary'}) }}
+                                    Angemeldet als <strong>{{ user.userIdentifier }}</strong>
+                                </span>
+                            </div>
+                            <div>
+                                <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary btn-lg px-5 py-3 shadow-sm fw-bold rounded-pill">
+                                    Jetzt Voting starten {{ ux_icon('lucide:play', {class: 'ms-2'}) }}
+                                </a>
+                            </div>
                         </div>
                     {% else %}
-                        <form method="post" class="col-md-8 mx-auto mt-4">
-                            <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden bg-white">
-                                <span class="input-group-text bg-white border-0 ps-4">
-                                    {{ ux_icon('lucide:user', {class: 'text-muted'}) }}
-                                </span>
-                                <input type="text" name="voter_name" class="form-control border-0 py-3" placeholder="Dein Name für die Wertung..." value="{{ voter_name }}" required>
-                                <button type="submit" class="btn btn-primary px-4 fw-bold">
-                                    Los geht's {{ ux_icon('lucide:arrow-right', {class: 'ms-1'}) }}
-                                </button>
+                        <form method="post" class="col-md-10 mx-auto mt-2">
+                            <div class="voter-name-input-wrapper mb-4">
+                                <label for="voter_name" class="form-label fw-bold text-muted mb-3 text-center d-block">Wie heißt du?</label>
+                                <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden border border-primary border-2">
+                                    <span class="input-group-text bg-white border-0 ps-4">
+                                        {{ ux_icon('lucide:user', {class: 'text-primary', style: 'font-size: 1.4em;'}) }}
+                                    </span>
+                                    <input type="text" id="voter_name" name="voter_name" class="form-control border-0 py-4 fw-bold" placeholder="Dein Name..." value="{{ voter_name }}" required autocomplete="off">
+                                    <button type="submit" class="btn btn-primary px-5 fw-extra-bold text-uppercase tracking-wider">
+                                        Go! {{ ux_icon('lucide:zap', {class: 'ms-1'}) }}
+                                    </button>
+                                </div>
                             </div>
-                            <p class="small text-muted mt-3">Gib deinen Namen ein, um deine Wertung zu speichern oder <a href="{{ path('app_login') }}" class="text-primary text-decoration-none">melde dich an</a>.</p>
+                            <p class="small text-muted text-center mt-4">Deine Wertung wird für diesen Abend gespeichert. <br>Oder <a href="{{ path('app_login') }}" class="text-primary fw-bold text-decoration-none border-bottom border-primary border-2">einloggen</a> für dauerhafte Speicherung.</p>
                         </form>
                     {% endif %}
                 </div>
@@ -120,5 +121,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
