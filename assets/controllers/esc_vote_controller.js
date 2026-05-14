@@ -40,7 +40,7 @@ export default class extends Controller {
         const countryId = event.currentTarget.dataset.countryId;
 
         // If already selected, do nothing
-        if (Object.values(this.choices).includes(countryId)) {
+        if (Object.values(this.choices).some(id => id == countryId)) {
             return;
         }
 
@@ -78,12 +78,12 @@ export default class extends Controller {
         const countryId = countryItem.dataset.countryId;
 
         // If a country is already selected for a field, it should not be possible to click it in the pool
-        if (Object.values(this.choices).includes(countryId)) {
+        if (Object.values(this.choices).some(id => id == countryId)) {
             return;
         }
 
         // If it's already the pending one, deselect it
-        if (this.pendingCountryId === countryId) {
+        if (this.pendingCountryId == countryId) {
             this.pendingCountryId = null;
         } else {
             // Select as pending
@@ -96,7 +96,7 @@ export default class extends Controller {
     selectCountry(points, countryId) {
         // If this country is already selected in another slot, remove it from there
         for (const [p, id] of Object.entries(this.choices)) {
-            if (id === countryId) {
+            if (id == countryId) {
                 this.clearSlot(p);
             }
         }
@@ -148,7 +148,7 @@ export default class extends Controller {
             const isLarge = slot.classList.contains('voting-slot-large');
 
             if (countryId) {
-                const countryEl = this.countryTargets.find(c => c.dataset.countryId === countryId);
+                const countryEl = this.countryTargets.find(c => c.dataset.countryId == countryId);
                 if (countryEl) {
                     slot.classList.remove('slot-empty');
                     slot.classList.add('slot-filled', 'border-solid');
@@ -178,7 +178,7 @@ export default class extends Controller {
         const selectedIds = Object.values(this.choices);
         this.countryTargets.forEach(country => {
             const countryId = country.dataset.countryId;
-            if (selectedIds.includes(countryId)) {
+            if (selectedIds.some(id => id == countryId)) {
                 country.classList.add('opacity-50', 'selected-country');
                 country.classList.remove('draggable', 'pending-selection');
                 country.setAttribute('draggable', 'false');
@@ -187,7 +187,7 @@ export default class extends Controller {
                 country.classList.add('draggable');
                 country.setAttribute('draggable', 'true');
 
-                if (this.pendingCountryId === countryId) {
+                if (this.pendingCountryId == countryId) {
                     country.classList.add('pending-selection');
                 } else {
                     country.classList.remove('pending-selection');

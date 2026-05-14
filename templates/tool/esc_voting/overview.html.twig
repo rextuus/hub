@@ -9,20 +9,27 @@
          data-controller="esc-results"
          data-esc-results-countries-value="{{ countries|json_encode }}"
          data-esc-results-ballots-value="{{ ballots|json_encode }}"
-         data-esc-results-session-key-value="esc_results_revelation">
+         data-esc-results-session-key-value="esc_results_revelation"
+         data-esc-results-show-points-value="false">
 
         <div class="row mb-3">
             <div class="col-12 px-2 px-md-3 d-flex align-items-center justify-content-between">
-                <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm">
+                <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm text-dark">
                     {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} Zurück
                 </a>
                 <h1 class="h5 fw-bold mb-0 text-white d-none d-md-block">ESC Voting - Ergebnisse</h1>
                 <div class="d-flex align-items-center gap-2 gap-md-3">
                     <span class="text-white small" data-esc-results-target="voterStatus">Warte auf Start...</span>
-                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm" data-action="click->esc-results#reset">
+                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark" data-action="click->esc-results#reset">
                         {{ ux_icon('lucide:rotate-ccw', {class: 'me-1'}) }} Reset
                     </button>
-                    <button class="btn btn-warning fw-bold shadow-sm" data-action="click->esc-results#nextStep" data-esc-results-target="revealButton">
+                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark" data-action="click->esc-results#toggleDisplayMode">
+                        {{ ux_icon('lucide:replace', {class: 'me-1'}) }} <span data-esc-results-target="displayModeLabel">Punkte anzeigen</span>
+                    </button>
+                    <button class="btn btn-warning fw-bold shadow-sm text-dark" data-action="click->esc-results#revealAll">
+                        Alle zeigen
+                    </button>
+                    <button class="btn btn-warning fw-bold shadow-sm text-dark" data-action="click->esc-results#nextStep" data-esc-results-target="revealButton">
                         Punkte laden
                     </button>
                 </div>

@@ -1,11 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['row', 'podium1', 'podium2', 'podium3', 'revealButton', 'voterStatus'];
+    static targets = ['row', 'podium1', 'podium2', 'podium3', 'revealButton', 'voterStatus', 'displayModeLabel'];
     static values = {
         countries: Array,
         ballots: Array,
-        sessionKey: String
+        sessionKey: String,
+        showPoints: Boolean
     };
 
     connect() {
@@ -70,6 +71,25 @@ export default class extends Controller {
         this.updateButton();
     }
 
+    revealAll() {
+        if (this.currentBallotIndex >= this.ballotsValue.length) return;
+        if (!confirm('Möchtest du wirklich alle restlichen Punkte sofort zeigen?')) return;
+
+        for (let i = this.currentBallotIndex; i < this.ballotsValue.length; i++) {
+            this.applyBallot(this.ballotsValue[i], true);
+        }
+
+        this.currentBallotIndex = this.ballotsValue.length;
+        this.currentStep = 0;
+
+        sessionStorage.setItem(this.sessionKey + '_index', this.currentBallotIndex);
+        sessionStorage.setItem(this.sessionKey + '_step', this.currentStep);
+
+        this.sortResults();
+        this.render(false, true);
+        this.updateButton();
+    }
+
     reset() {
         if (!confirm('Möchtest du die Ergebnisse wirklich zurücksetzen?')) return;
 
@@ -88,6 +108,12 @@ export default class extends Controller {
         this.sortResults();
         this.render(false, true);
         this.updateButton();
+    }
+
+    toggleDisplayMode() {
+        this.showPointsValue = !this.showPointsValue;
+        this.displayModeLabelTarget.innerText = this.showPointsValue ? 'Initialen anzeigen' : 'Punkte anzeigen';
+        this.render(false, false);
     }
 
     revealPoints(ballot, pointsSubset) {
@@ -253,12 +279,19 @@ export default class extends Controller {
         if (!container) return;
 
         container.innerHTML = votes.map(v => {
-            let isFlipped = true;
-            if (ballotBeingRevealed && v.ballotId === ballotBeingRevealed.id) {
-                if (!revealedPointsSubset.includes(v.points)) {
-                    isFlipped = false;
+            let isFlipped = this.showPointsValue;
+
+            // If we are NOT in global "show points" mode, we still want to flip the badges
+            // that are currently being revealed or were already revealed in the current session
+            // BUT the user wants a switch, so if showPointsValue is FALSE, it should probably
+            // show initials UNLESS we are in the middle of a reveal animation.
+
+            if (!this.showPointsValue && ballotBeingRevealed && v.ballotId === ballotBeingRevealed.id) {
+                if (revealedPointsSubset.includes(v.points)) {
+                    isFlipped = true;
                 }
             }
+
             return `
                 <div class="voter-badge ${isFlipped ? 'is-flipped' : 'not-flipped'}" title="${v.voterName}: ${v.points} Pkt" data-voter-id="${v.ballotId}">
                     <div class="badge-front">${v.voterInitial}</div>

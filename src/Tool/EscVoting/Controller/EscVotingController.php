@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Tool\EscVoting\Repository\VoterRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,15 +25,17 @@ class EscVotingController extends AbstractController
         $user = $security->getUser();
         $sessionId = $session->getId();
 
+        $voterName = $session->get('esc_voter_name') ?: $request->cookies->get('esc_voter_name');
+
         if ($request->isMethod('POST')) {
             $name = $request->request->get('voter_name');
             if ($name) {
                 $session->set('esc_voter_name', $name);
-                return $this->redirectToRoute('app_esc_voting_vote');
+                $response = $this->redirectToRoute('app_esc_voting_vote');
+                $response->headers->setCookie(new Cookie('esc_voter_name', $name, strtotime('+30 days')));
+                return $response;
             }
         }
-
-        $voterName = $session->get('esc_voter_name');
 
         // Find existing voter
         $voter = null;
@@ -40,6 +43,10 @@ class EscVotingController extends AbstractController
             $voter = $voterRepository->findOneBy(['user' => $user]);
         } elseif ($voterName) {
             $voter = $voterRepository->findOneBy(['name' => $voterName, 'sessionId' => $sessionId]);
+            if (!$voter) {
+                // Try finding by name only if sessionId changed but we have a cookie
+                $voter = $voterRepository->findOneBy(['name' => $voterName], ['id' => 'DESC']);
+            }
         }
 
         $hasExistingBallot = false;
@@ -52,13 +59,19 @@ class EscVotingController extends AbstractController
         $ballotCount = $conn->fetchOne('SELECT COUNT(id) FROM esc_voting_ballot');
         $voteCount = $conn->fetchOne('SELECT COUNT(id) FROM esc_voting_vote');
 
-        return $this->render('tool/esc_voting/index.html.twig', [
+        $response = $this->render('tool/esc_voting/index.html.twig', [
             'voter_name' => $voterName,
             'user' => $user,
             'ballot_count' => $ballotCount,
             'vote_count' => $voteCount,
             'has_existing_ballot' => $hasExistingBallot,
         ]);
+
+        if ($voterName && !$request->cookies->has('esc_voter_name')) {
+            $response->headers->setCookie(new Cookie('esc_voter_name', $voterName, strtotime('+30 days')));
+        }
+
+        return $response;
     }
 
     #[Route('/esc-voting/vote/edit', name: 'app_esc_voting_vote_edit')]
@@ -66,13 +79,16 @@ class EscVotingController extends AbstractController
     {
         $user = $security->getUser();
         $sessionId = $request->getSession()->getId();
-        $voterName = $request->getSession()->get('esc_voter_name');
+        $voterName = $request->getSession()->get('esc_voter_name') ?: $request->cookies->get('esc_voter_name');
 
         $voter = null;
         if ($user instanceof User) {
             $voter = $voterRepository->findOneBy(['user' => $user]);
         } elseif ($voterName) {
             $voter = $voterRepository->findOneBy(['name' => $voterName, 'sessionId' => $sessionId]);
+            if (!$voter) {
+                $voter = $voterRepository->findOneBy(['name' => $voterName], ['id' => 'DESC']);
+            }
         }
 
         if ($voter) {
@@ -85,7 +101,7 @@ class EscVotingController extends AbstractController
 
                 $choices = [];
                 foreach ($votes as $vote) {
-                    $choices[$vote['points']] = $vote['country_id'];
+                    $choices[$vote['points']] = (string)$vote['country_id'];
                 }
 
                 $request->getSession()->set('esc_voting_choices', $choices);
@@ -106,11 +122,12 @@ class EscVotingController extends AbstractController
             $initialChoices = (object)[];
         }
 
+        $voterName = $request->getSession()->get('esc_voter_name') ?: $request->cookies->get('esc_voter_name');
         return $this->render('tool/esc_voting/vote.html.twig', [
             'countries' => $countryRepository->findBy([], ['startOrder' => 'ASC']),
             'allowed_points' => [1, 2, 3, 4, 5, 6, 7, 8, 10, 12],
             'initial_choices' => $initialChoices,
-            'voter_name' => $request->getSession()->get('esc_voter_name'),
+            'voter_name' => $voterName,
         ]);
     }
 
@@ -134,7 +151,7 @@ class EscVotingController extends AbstractController
         $votesData = $request->request->all('votes');
         $user = $security->getUser();
         $sessionId = $request->getSession()->getId();
-        $voterName = $request->getSession()->get('esc_voter_name');
+        $voterName = $request->getSession()->get('esc_voter_name') ?: $request->cookies->get('esc_voter_name');
 
         // Find or create Voter
         $voter = null;
@@ -142,6 +159,9 @@ class EscVotingController extends AbstractController
             $voter = $voterRepository->findOneBy(['user' => $user]);
         } elseif ($voterName) {
             $voter = $voterRepository->findOneBy(['name' => $voterName, 'sessionId' => $sessionId]);
+            if (!$voter) {
+                $voter = $voterRepository->findOneBy(['name' => $voterName], ['id' => 'DESC']);
+            }
         }
 
         if (!$voter) {
@@ -174,11 +194,15 @@ class EscVotingController extends AbstractController
 
         $entityManager->flush();
 
-        // Clear choices and voter name from session after successful submit
+        // Clear choices from session after successful submit
         $request->getSession()->remove('esc_voting_choices');
-        $request->getSession()->remove('esc_voter_name');
 
-        return $this->redirectToRoute('app_esc_voting_overview');
+        $response = $this->redirectToRoute('app_esc_voting_overview');
+        if ($voterName) {
+            $response->headers->setCookie(new Cookie('esc_voter_name', $voterName, strtotime('+30 days')));
+        }
+
+        return $response;
     }
 
     #[Route('/esc-voting/overview', name: 'app_esc_voting_overview')]
