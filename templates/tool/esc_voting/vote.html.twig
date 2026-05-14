@@ -5,8 +5,22 @@
 {% block title %}Vote - ESC Voting{% endblock %}
 
 {% block body %}
-    <div class="container-fluid px-1 px-md-3 py-2 py-md-5 esc-voting-container">
-        <form action="{{ path('app_esc_voting_vote_submit') }}" method="POST" data-controller="esc-vote">
+    <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container">
+        <div class="row mb-3">
+            <div class="col-12 d-flex align-items-center justify-content-between px-2 px-md-3">
+                <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm">
+                    {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} Zurück
+                </a>
+                <div class="d-flex align-items-center bg-white px-3 py-1 rounded-pill border shadow-sm">
+                    {{ ux_icon('lucide:user', {class: 'me-2 text-primary', style: 'font-size: 0.9em;'}) }}
+                    <span class="small fw-bold">{{ voter_name ?: (app.user ? app.user.userIdentifier : 'Gast') }}</span>
+                </div>
+            </div>
+        </div>
+        <form action="{{ path('app_esc_voting_vote_submit') }}" method="POST"
+              data-controller="esc-vote"
+              data-esc-vote-initial-choices-value="{{ initial_choices|json_encode }}"
+              data-esc-vote-update-url-value="{{ path('app_esc_voting_vote_update_choices') }}">
             <div class="row g-1 g-md-3">
                 <!-- Pool der Länder (Zuerst auf Mobile) -->
                 <div class="col-lg-5 order-2 order-lg-1">

@@ -2,7 +2,6 @@
 
 namespace App\Tool\EscVoting\Entity;
 
-use App\Entity\User;
 use App\Tool\EscVoting\Repository\VoteRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -26,9 +25,13 @@ class Vote
         #[ORM\Column]
         public int $points,
 
-        #[ORM\ManyToOne(targetEntity: User::class)]
+        #[ORM\ManyToOne(targetEntity: Voter::class)]
         #[ORM\JoinColumn(nullable: true)]
-        public ?User $voter = null,
+        public ?Voter $voter = null,
+
+        #[ORM\ManyToOne(targetEntity: Ballot::class, inversedBy: 'votes')]
+        #[ORM\JoinColumn(nullable: true)]
+        public ?Ballot $ballot = null,
 
         #[ORM\Column(length: 255, nullable: true)]
         public ?string $sessionId = null,

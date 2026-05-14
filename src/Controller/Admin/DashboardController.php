@@ -4,6 +4,8 @@ namespace App\Controller\Admin;
 
 use App\Tool\EscVoting\Controller\CountryCrudController;
 use App\Tool\EscVoting\Controller\VoteCrudController;
+use App\Tool\EscVoting\Controller\VoterCrudController;
+use App\Tool\EscVoting\Controller\BallotCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -33,6 +35,8 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('ESC Voting');
         yield MenuItem::linkToRoute('Öffentliche Seite', 'fas fa-external-link-alt', 'app_esc_voting_index');
         yield MenuItem::linkTo(CountryCrudController::class, 'Länder', 'fas fa-globe');
+        yield MenuItem::linkTo(VoterCrudController::class, 'Voter', 'fas fa-users');
+        yield MenuItem::linkTo(BallotCrudController::class, 'Stimmzettel', 'fas fa-envelope-open-text');
         yield MenuItem::linkTo(VoteCrudController::class, 'Stimmen', 'fas fa-star');
     }
 }

@@ -1,85 +1,139 @@
 {% extends 'base.html.twig' %}
+{% set show_header = false %}
+{% set show_footer = false %}
 
 {% block title %}Overview - ESC Voting{% endblock %}
 
 {% block body %}
-<div class="hero-section text-center py-5">
-    <div class="container">
-        <h1 class="display-5 fw-bold mb-3">Live-Rangliste</h1>
-        <p class="lead opacity-75">Sieh dir an, wer aktuell das Rennen um die ESC-Trophäe anführt.</p>
-    </div>
-</div>
+    <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container">
+        <div class="row mb-3">
+            <div class="col-12 px-2 px-md-3 d-flex align-items-center justify-content-between">
+                <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm">
+                    {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} Zurück
+                </a>
+                <h1 class="h5 fw-bold mb-0 text-white d-none d-md-block">ESC Voting - Ergebnisse</h1>
+            </div>
+        </div>
 
-<div class="container projects-container pb-5">
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="project-card p-4">
-                <h2 class="h4 fw-bold mb-4 d-flex align-items-center">
-                    {{ ux_icon('lucide:list-ordered', {class: 'me-2 text-primary'}) }} Aktueller Stand
-                </h2>
-                <div class="alert alert-info d-flex align-items-center">
-                    {{ ux_icon('lucide:info', {class: 'me-3', style: 'font-size: 1.5em;'}) }}
-                    <div>
-                        Voting-Ergebnisse erscheinen hier, sobald die ersten Stimmen abgegeben wurden.
-                        <strong>Testdaten:</strong> Aktuell wird eine Platzhalter-Rangliste angezeigt.
+        {% if results|length > 0 %}
+            <!-- Podium für die Top 3 -->
+            <div class="row mb-5 mt-4 justify-content-center align-items-end podium-container g-2">
+                {# Platz 2 #}
+                {% if results[1] is defined %}
+                    <div class="col-4 col-md-3 order-1">
+                        <div class="podium-card podium-2 shadow-lg text-center p-3 animate__animated animate__fadeInUp">
+                            <div class="podium-rank">2</div>
+                            <div class="podium-flag mb-2">
+                                <span class="fi fi-{{ results[1].countryCode|lower }}"></span>
+                            </div>
+                            <div class="podium-name fw-bold">{{ results[1].name }}</div>
+                            <div class="podium-points fw-extra-bold text-primary">{{ results[1].totalPoints }} Pkt</div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Platz 1 #}
+                {% if results[0] is defined %}
+                    <div class="col-4 col-md-4 order-2">
+                        <div class="podium-card podium-1 shadow-lg text-center p-4 animate__animated animate__fadeInUp">
+                            <div class="podium-crown">{{ ux_icon('lucide:crown', {class: 'text-warning'}) }}</div>
+                            <div class="podium-rank">1</div>
+                            <div class="podium-flag mb-2">
+                                <span class="fi fi-{{ results[0].countryCode|lower }}"></span>
+                            </div>
+                            <div class="podium-name fw-bold h5 mb-1">{{ results[0].name }}</div>
+                            <div class="podium-points fw-extra-bold h4 text-primary">{{ results[0].totalPoints }} Pkt</div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Platz 3 #}
+                {% if results[2] is defined %}
+                    <div class="col-4 col-md-3 order-3">
+                        <div class="podium-card podium-3 shadow-lg text-center p-3 animate__animated animate__fadeInUp">
+                            <div class="podium-rank">3</div>
+                            <div class="podium-flag mb-2">
+                                <span class="fi fi-{{ results[2].countryCode|lower }}"></span>
+                            </div>
+                            <div class="podium-name fw-bold">{{ results[2].name }}</div>
+                            <div class="podium-points fw-extra-bold text-primary">{{ results[2].totalPoints }} Pkt</div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-12">
+                <div class="project-card p-0 overflow-hidden shadow-lg border-0 bg-white">
+                    <div class="bg-dark text-white p-3 d-flex align-items-center">
+                        {{ ux_icon('lucide:list-ordered', {class: 'me-2 text-warning'}) }}
+                        <h2 class="h5 fw-bold mb-0">Gesamte Rangliste</h2>
+                        <span class="ms-auto badge bg-primary rounded-pill px-3">{{ ballot_count }} Stimmen</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 results-table">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 80px;">Rang</th>
+                                    <th>Land</th>
+                                    <th class="d-none d-md-table-cell">Wähler</th>
+                                    <th class="text-end pe-4">Gesamtpunkte</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr class="ranking-row {% if loop.index <= 3 %}bg-opacity-10 bg-primary{% endif %}">
+                                    <td class="ps-4">
+                                        <div class="rank-badge rank-{{ loop.index }}">
+                                            {{ loop.index }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3 country-flag-wrapper shadow-sm">
+                                                <span class="fi fi-{{ result.countryCode|lower }}"></span>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold country-name">{{ result.name }}</div>
+                                                <div class="voter-avatars mt-1 d-md-none">
+                                                    {% for vote in result.votes %}
+                                                        <div class="voter-avatar" title="{{ vote.voterDisplayName }} ({{ vote.points }} Pkt)">
+                                                            {{ vote.voterInitial }}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <div class="voter-avatars">
+                                            {% for vote in result.votes %}
+                                                <div class="voter-avatar" title="{{ vote.voterDisplayName }} ({{ vote.points }} Pkt)">
+                                                    {{ vote.voterInitial }}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <span class="fw-extra-bold text-dark h5 mb-0">{{ result.totalPoints|default(0) }}</span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-5">
+                                        {{ ux_icon('lucide:database-zap', {class: 'display-1 mb-3 text-light'}) }}
+                                        <p class="h5">Noch keine Daten verfügbar.</p>
+                                        <p class="small">Sei der Erste, der seine Stimme abgibt!</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-                <div class="table-responsive mt-4">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 60px;">#</th>
-                                <th>Land</th>
-                                <th class="text-end">Gesamtpunkte</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="fw-bold">1</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                            {{ ux_icon('lucide:trophy', {style: 'font-size: 0.8em;'}) }}
-                                        </div>
-                                        <span class="fw-semibold">Deutschland</span>
-                                    </div>
-                                </td>
-                                <td class="text-end fw-bold text-primary">0</td>
-                            </tr>
-                            <!-- More countries will be listed here dynamically later -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="project-card p-4 mb-4">
-                <h3 class="h5 fw-bold mb-3">Statistiken</h3>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Abgegebene Stimmen:</span>
-                    <span class="fw-bold">0</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Eindeutige Voter:</span>
-                    <span class="fw-bold">0</span>
-                </div>
-                <hr>
-                <div class="d-flex justify-content-between">
-                    <span class="text-muted">Letztes Update:</span>
-                    <span class="small">Gerade eben</span>
-                </div>
-            </div>
-
-            <div class="project-card p-4 border-primary border-opacity-25 bg-primary bg-opacity-5">
-                <h3 class="h5 fw-bold mb-3 text-primary">Deine Stimme zählt!</h3>
-                <p class="small text-muted mb-3">Vergiss nicht, alle Auftritte zu bewerten, um deinen Favoriten zum Sieg zu verhelfen.</p>
-                <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary w-100">
-                    {{ ux_icon('lucide:star', {class: 'me-2'}) }} Zurück zum Voting
-                </a>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

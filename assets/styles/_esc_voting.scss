@@ -139,6 +139,138 @@
     }
 }
 
+.results-table {
+    .ranking-row {
+        transition: transform 0.2s ease, background-color 0.2s ease;
+        &:hover {
+            background-color: rgba(59, 130, 246, 0.03) !important;
+        }
+    }
+
+    .rank-badge {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        font-weight: 800;
+        font-size: 0.9rem;
+
+        &.rank-1 { background: #fbbf24; color: #78350f; box-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+        &.rank-2 { background: #94a3b8; color: #1e293b; }
+        &.rank-3 { background: #d97706; color: #fff; }
+    }
+
+    .country-flag-wrapper {
+        width: 44px;
+        height: 30px;
+        overflow: hidden;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+
+        .fi {
+            font-size: 1.8rem;
+        }
+    }
+
+    .total-points {
+        color: #1e293b;
+    }
+}
+
+.podium-container {
+    .podium-card {
+        background: white;
+        border-radius: 20px;
+        position: relative;
+        transition: transform 0.3s ease;
+
+        .podium-rank {
+            font-size: 3rem;
+            font-weight: 900;
+            opacity: 0.1;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            line-height: 1;
+        }
+
+        .podium-flag {
+            .fi {
+                font-size: 4rem;
+                filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            }
+        }
+
+        &.podium-1 {
+            z-index: 2;
+            border: 2px solid #fbbf24;
+            background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+            padding-bottom: 3rem !important;
+
+            .podium-crown {
+                position: absolute;
+                top: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 2.5rem;
+            }
+
+            .podium-rank { color: #fbbf24; opacity: 0.2; }
+            .podium-flag .fi { font-size: 6rem; }
+        }
+
+        &.podium-2 {
+            border-bottom: 8px solid #94a3b8;
+            padding-bottom: 2rem !important;
+            .podium-rank { color: #94a3b8; }
+        }
+
+        &.podium-3 {
+            border-bottom: 8px solid #d97706;
+            padding-bottom: 1.5rem !important;
+            .podium-rank { color: #d97706; }
+        }
+    }
+}
+
+.voter-avatars {
+        display: flex;
+        flex-wrap: wrap;
+        gap: -5px; // overlap effect
+
+        .voter-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #475569;
+            margin-right: -8px;
+            transition: all 0.2s ease;
+            cursor: help;
+            position: relative;
+
+            &:hover {
+                z-index: 10;
+                margin-right: 0;
+            }
+        }
+    }
+
 .shadow-inner {
     box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
 }

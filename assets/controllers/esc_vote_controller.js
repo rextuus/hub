@@ -2,10 +2,15 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ['slot', 'slotContent', 'input', 'removeButton', 'country', 'submitButton'];
+    static values = {
+        initialChoices: Object,
+        updateUrl: String
+    };
 
     connect() {
-        this.choices = {}; // points => countryId
+        this.choices = { ...this.initialChoicesValue };
         this.pendingCountryId = null;
+        this.updateUI();
     }
 
     dragStart(event) {
@@ -72,24 +77,19 @@ export default class extends Controller {
         const countryItem = event.currentTarget;
         const countryId = countryItem.dataset.countryId;
 
+        // If a country is already selected for a field, it should not be possible to click it in the pool
         if (Object.values(this.choices).includes(countryId)) {
-            // Already selected, find where and remove
-            for (const [points, id] of Object.entries(this.choices)) {
-                if (id === countryId) {
-                    this.clearSlot(points);
-                    break;
-                }
-            }
+            return;
+        }
+
+        // If it's already the pending one, deselect it
+        if (this.pendingCountryId === countryId) {
             this.pendingCountryId = null;
         } else {
-            // If it's already the pending one, deselect it
-            if (this.pendingCountryId === countryId) {
-                this.pendingCountryId = null;
-            } else {
-                // Select as pending
-                this.pendingCountryId = countryId;
-            }
+            // Select as pending
+            this.pendingCountryId = countryId;
         }
+
         this.updateUI();
     }
 
@@ -116,7 +116,27 @@ export default class extends Controller {
         delete this.choices[points];
     }
 
+    persistChoices() {
+        if (!this.updateUrlValue) return;
+
+        const formData = new FormData();
+        for (const [points, countryId] of Object.entries(this.choices)) {
+            formData.append(`choices[${points}]`, countryId);
+        }
+
+        fetch(this.updateUrlValue, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+    }
+
     updateUI() {
+        // Save to session
+        this.persistChoices();
+
         // Update all slots
         this.slotTargets.forEach((slot, index) => {
             const points = slot.dataset.points;
