@@ -153,12 +153,12 @@ export default class extends Controller {
                     slot.classList.remove('slot-empty');
                     slot.classList.add('slot-filled', 'border-solid');
 
-                    const flag = countryEl.querySelector('.display-6').textContent;
                     const name = countryEl.dataset.countryName;
+                    const code = countryEl.dataset.countryCode;
 
                     content.innerHTML = `
                         <div class="d-flex align-items-center justify-content-center h-100 flex-column">
-                            <span class="${isLarge ? 'display-1' : 'display-4'} mb-1">${flag}</span>
+                            <span class="fi fi-${code.toLowerCase()} ${isLarge ? 'fs-1' : 'fs-4'} mb-1 shadow-sm rounded-1"></span>
                             <span class="fw-semibold ${isLarge ? 'fs-5' : 'x-small'} text-truncate w-100 px-1">${name}</span>
                         </div>
                     `;

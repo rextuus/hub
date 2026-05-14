@@ -109,12 +109,12 @@ class EscVotingController extends AbstractController
             $country = $countryRepository->find($countryId);
             if ($country) {
                 $vote = new Vote(
-                    $country,
-                    (int)$points,
-                    $voter,
-                    $sessionId
+                    country: $country,
+                    points: (int)$points,
+                    voter: $voter,
+                    ballot: $ballot,
+                    sessionId: $sessionId
                 );
-                $vote->ballot = $ballot;
                 $entityManager->persist($vote);
             }
         }

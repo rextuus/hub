@@ -39,7 +39,9 @@
                                          data-country-id="{{ country.id }}"
                                          data-country-name="{{ country.name }}"
                                          data-country-code="{{ country.countryCode }}">
-                                        <div class="display-6 mb-0" style="pointer-events: none;">{{ country.countryCode|upper|replace({'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'GB': '🇬🇧', 'UA': '🇺🇦', 'IL': '🇮🇱', 'SE': '🇸🇪', 'NO': '🇳🇴', 'CH': '🇨🇭', 'AT': '🇦🇹', 'BE': '🇧🇪', 'HR': '🇭🇷'}) }}</div>
+                                        <div class="mb-2" style="pointer-events: none;">
+                                            <span class="fi fi-{{ country.countryCode|lower }} fs-2 shadow-sm rounded-1"></span>
+                                        </div>
                                         <div class="x-small fw-medium text-truncate" style="pointer-events: none; font-size: 0.7rem;">{{ country.name }}</div>
                                     </div>
                                 </div>
