@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Tool\EscVoting\Controller;
 
 use App\Tool\EscVoting\Entity\Ballot;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -15,14 +15,13 @@ class BallotCrudController extends AbstractCrudController
         return Ballot::class;
     }
 
-    /*
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
+            IdField::new('id')->hideOnForm(),
+            \EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField::new('voter'),
+            \EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField::new('createdAt')->hideOnForm(),
+            \EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField::new('votes')->hideOnForm(),
         ];
     }
-    */
 }
