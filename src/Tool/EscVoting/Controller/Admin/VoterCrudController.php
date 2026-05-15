@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Tool\EscVoting\Controller;
+namespace App\Tool\EscVoting\Controller\Admin;
 
 use App\Tool\EscVoting\Entity\Voter;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 
 class VoterCrudController extends AbstractCrudController
 {
@@ -19,9 +21,15 @@ class VoterCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
-            TextField::new('name'),
-            AssociationField::new('user'),
-            TextField::new('sessionId'),
+            TextField::new('name', 'Name'),
+            AssociationField::new('user', 'Benutzer'),
+            TextField::new('sessionId', 'Session ID')->onlyOnDetail(),
         ];
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters
+            ->add(EntityFilter::new('user'));
     }
 }

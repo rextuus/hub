@@ -21,6 +21,29 @@ class Ballot
     #[ORM\OneToMany(mappedBy: 'ballot', targetEntity: Vote::class, cascade: ['persist', 'remove'])]
     public Collection $votes;
 
+    #[ORM\ManyToOne(targetEntity: EscEdition::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    public ?EscEdition $edition = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    public bool $isEditable = true;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function isEditable(): bool
+    {
+        return $this->isEditable;
+    }
+
+    public function setIsEditable(bool $isEditable): self
+    {
+        $this->isEditable = $isEditable;
+        return $this;
+    }
+
     public function __construct(
         #[ORM\ManyToOne(targetEntity: Voter::class)]
         #[ORM\JoinColumn(nullable: false)]

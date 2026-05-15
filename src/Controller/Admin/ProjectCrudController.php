@@ -20,12 +20,12 @@ class ProjectCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
-            TextField::new('name'),
-            TextField::new('description'),
-            TextField::new('icon')->setHelp('Lucide icon name (e.g. lucide:key)'),
-            TextField::new('image')->setHelp('Image URL'),
-            TextField::new('route')->setHelp('Symfony route name'),
-            TextField::new('url')->setHelp('External URL'),
+            TextField::new('name', 'Name'),
+            TextField::new('description', 'Beschreibung'),
+            TextField::new('icon', 'Icon')->setHelp('Lucide icon name (e.g. lucide:key)'),
+            TextField::new('image', 'Bild')->setHelp('Image URL'),
+            TextField::new('route', 'Route')->setHelp('Symfony route name'),
+            TextField::new('url', 'URL')->setHelp('External URL'),
         ];
     }
 }

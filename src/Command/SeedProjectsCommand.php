@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:seed-projects',
+    name: 'app:projects:seed',
     description: 'Seeds dummy projects for the landing page.',
 )]
 class SeedProjectsCommand extends Command

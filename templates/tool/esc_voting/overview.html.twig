@@ -5,7 +5,7 @@
 {% block title %}Overview - ESC Voting{% endblock %}
 
 {% block body %}
-    <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container"
+    <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container overflow-x-hidden"
          data-controller="esc-results"
          data-esc-results-countries-value="{{ countries|json_encode }}"
          data-esc-results-ballots-value="{{ ballots|json_encode }}"
@@ -18,60 +18,61 @@
                     {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} Zurück
                 </a>
                 <h1 class="h5 fw-bold mb-0 text-white d-none d-md-block">ESC Voting - Ergebnisse</h1>
-                <div class="d-flex align-items-center gap-2 gap-md-3">
-                    <span class="text-white small" data-esc-results-target="voterStatus">Warte auf Start...</span>
-                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark" data-action="click->esc-results#reset">
-                        {{ ux_icon('lucide:rotate-ccw', {class: 'me-1'}) }} Reset
+                <div class="d-flex align-items-center gap-1 gap-md-2 flex-wrap justify-content-end">
+                    <span class="text-white small d-none d-sm-inline me-md-2" data-esc-results-target="voterStatus">Warte auf Start...</span>
+                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark px-2 border-0" data-action="click->esc-results#reset" title="Reset">
+                        {{ ux_icon('lucide:rotate-ccw', {class: 'me-1 d-none d-md-inline'}) }} Reset
                     </button>
-                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark" data-action="click->esc-results#toggleDisplayMode">
-                        {{ ux_icon('lucide:replace', {class: 'me-1'}) }} <span data-esc-results-target="displayModeLabel">Punkte anzeigen</span>
+                    <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark px-2 border-0" data-action="click->esc-results#toggleDisplayMode" title="Anzeige umschalten">
+                        {{ ux_icon('lucide:replace', {class: 'me-1 d-none d-md-inline'}) }} <span data-esc-results-target="displayModeLabel">Punkte</span>
                     </button>
-                    <button class="btn btn-warning fw-bold shadow-sm text-dark" data-action="click->esc-results#revealAll">
-                        Alle zeigen
-                    </button>
-                    <button class="btn btn-warning fw-bold shadow-sm text-dark" data-action="click->esc-results#nextStep" data-esc-results-target="revealButton">
-                        Punkte laden
-                    </button>
+                    <div class="ms-1 ms-md-2 d-flex gap-1 gap-md-2">
+                        <button class="btn btn-link btn-sm text-white-50 text-decoration-none px-2" data-action="click->esc-results#revealAll">
+                            Alle
+                        </button>
+                        <button class="btn btn-success btn-sm fw-bold shadow-sm px-3" data-action="click->esc-results#nextStep" data-esc-results-target="revealButton">
+                            Nächste Wertung
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Podium für die Top 3 -->
-        <div class="row mb-5 mt-4 justify-content-center align-items-end podium-container g-2">
+        <div class="row mb-4 mt-2 justify-content-center align-items-end podium-container g-1 g-md-2">
             {# Platz 2 #}
             <div class="col-4 col-md-3 order-1" data-esc-results-target="podium2">
-                <div class="podium-card podium-2 shadow-lg text-center p-3 animate__animated animate__fadeInUp">
+                <div class="podium-card podium-2 shadow-lg text-center p-2 p-md-3 animate__animated animate__fadeInUp">
                     <div class="podium-rank">2</div>
-                    <div class="podium-flag mb-2">
+                    <div class="podium-flag mb-1 mb-md-2">
                         <span class="fi"></span>
                     </div>
-                    <div class="podium-name fw-bold">-</div>
-                    <div class="podium-points fw-extra-bold text-primary"><span class="podium-points-value">0</span> Pkt</div>
+                    <div class="podium-name fw-bold small">-</div>
+                    <div class="podium-points fw-extra-bold text-primary small"><span class="podium-points-value">0</span> Pkt</div>
                 </div>
             </div>
 
             {# Platz 1 #}
             <div class="col-4 col-md-4 order-2" data-esc-results-target="podium1">
-                <div class="podium-card podium-1 shadow-lg text-center p-4 animate__animated animate__fadeInUp">
+                <div class="podium-card podium-1 shadow-lg text-center p-3 p-md-4 animate__animated animate__fadeInUp">
                     <div class="podium-crown">{{ ux_icon('lucide:crown', {class: 'text-warning'}) }}</div>
                     <div class="podium-rank">1</div>
-                    <div class="podium-flag mb-2">
+                    <div class="podium-flag mb-1 mb-md-2">
                         <span class="fi"></span>
                     </div>
-                    <div class="podium-name fw-bold h5 mb-1">-</div>
-                    <div class="podium-points fw-extra-bold h4 text-primary"><span class="podium-points-value">0</span> Pkt</div>
+                    <div class="podium-name fw-bold h6 mb-1">-</div>
+                    <div class="podium-points fw-extra-bold h5 text-primary"><span class="podium-points-value">0</span> Pkt</div>
                 </div>
             </div>
 
             {# Platz 3 #}
             <div class="col-4 col-md-3 order-3" data-esc-results-target="podium3">
-                <div class="podium-card podium-3 shadow-lg text-center p-3 animate__animated animate__fadeInUp">
+                <div class="podium-card podium-3 shadow-lg text-center p-2 p-md-3 animate__animated animate__fadeInUp">
                     <div class="podium-rank">3</div>
-                    <div class="podium-flag mb-2">
+                    <div class="podium-flag mb-1 mb-md-2">
                         <span class="fi"></span>
                     </div>
-                    <div class="podium-name fw-bold">-</div>
-                    <div class="podium-points fw-extra-bold text-primary"><span class="podium-points-value">0</span> Pkt</div>
+                    <div class="podium-name fw-bold small">-</div>
+                    <div class="podium-points fw-extra-bold text-primary small"><span class="podium-points-value">0</span> Pkt</div>
                 </div>
             </div>
         </div>
@@ -79,37 +80,37 @@
         <div class="row">
             <div class="col-12">
                 <div class="project-card p-0 overflow-hidden shadow-lg border-0 bg-white">
-                    <div class="bg-dark text-white p-3 d-flex align-items-center">
+                    <div class="bg-dark text-white p-2 p-md-3 d-flex align-items-center">
                         {{ ux_icon('lucide:list-ordered', {class: 'me-2 text-warning'}) }}
-                        <h2 class="h5 fw-bold mb-0">Gesamte Rangliste</h2>
-                        <span class="ms-auto badge bg-primary rounded-pill px-3">{{ ballot_count }} Stimmen</span>
+                        <h2 class="h6 h5-md fw-bold mb-0">Gesamte Rangliste</h2>
+                        <span class="ms-auto badge bg-primary rounded-pill px-2 px-md-3">{{ ballot_count }} Stimmen</span>
                     </div>
 
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0 results-table">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4" style="width: 80px;">Rang</th>
+                                    <th class="ps-2 ps-md-4" style="width: 50px; md-width: 80px;">Rang</th>
                                     <th>Land</th>
                                     <th class="d-none d-md-table-cell">Wähler</th>
-                                    <th class="text-end pe-4">Gesamtpunkte</th>
+                                    <th class="text-end pe-2 pe-md-4">Punkte</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for country in countries %}
                                 <tr class="ranking-row" data-esc-results-target="row" data-country-id="{{ country.id }}">
-                                    <td class="ps-4">
+                                    <td class="ps-2 ps-md-4">
                                         <div class="rank-badge rank-{{ loop.index }}">
                                             {{ loop.index }}
                                         </div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="me-3 country-flag-wrapper shadow-sm">
+                                            <div class="me-2 me-md-3 country-flag-wrapper shadow-sm">
                                                 <span class="fi fi-{{ country.countryCode|lower }}"></span>
                                             </div>
                                             <div>
-                                                <div class="fw-bold country-name">{{ country.name }}</div>
+                                                <div class="fw-bold country-name small fs-md-6">{{ country.name }}</div>
                                                 <div class="voter-avatars mt-1 d-md-none voter-avatars-container">
                                                     {# Dynamically filled #}
                                                 </div>
@@ -121,8 +122,8 @@
                                             {# Dynamically filled #}
                                         </div>
                                     </td>
-                                    <td class="text-end pe-4">
-                                        <span class="fw-extra-bold text-dark h5 mb-0 total-points">0</span>
+                                    <td class="text-end pe-2 pe-md-4">
+                                        <span class="fw-extra-bold text-dark total-points">0</span>
                                     </td>
                                 </tr>
                                 {% endfor %}

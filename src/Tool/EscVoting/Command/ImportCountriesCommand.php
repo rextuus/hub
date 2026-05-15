@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:esc:import',
+    name: 'app:esc:import-countries',
     description: 'Imports a hardcoded list of countries for ESC voting.',
 )]
 class ImportCountriesCommand extends Command

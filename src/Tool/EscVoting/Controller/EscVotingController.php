@@ -7,6 +7,7 @@ use App\Tool\EscVoting\Entity\Voter;
 use App\Tool\EscVoting\Entity\Vote;
 use App\Tool\EscVoting\Entity\Ballot;
 use App\Entity\User;
+use App\Tool\EscVoting\Repository\EscEditionRepository;
 use App\Tool\EscVoting\Repository\VoterRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,8 +20,10 @@ use Symfony\Bundle\SecurityBundle\Security;
 class EscVotingController extends AbstractController
 {
     #[Route('/esc-voting', name: 'app_esc_voting_index', methods: ['GET', 'POST'])]
-    public function index(Request $request, Security $security, EntityManagerInterface $entityManager, VoterRepository $voterRepository): Response
+    public function index(Request $request, Security $security, EntityManagerInterface $entityManager, VoterRepository $voterRepository, EscEditionRepository $escEditionRepository): Response
     {
+        $activeEdition = $escEditionRepository->findActive();
+
         $session = $request->getSession();
         $user = $security->getUser();
         $sessionId = $session->getId();
@@ -50,14 +53,34 @@ class EscVotingController extends AbstractController
         }
 
         $hasExistingBallot = false;
+        $isEditable = true;
         if ($voter) {
             $conn = $entityManager->getConnection();
-            $hasExistingBallot = (bool)$conn->fetchOne('SELECT 1 FROM esc_voting_ballot WHERE voter_id = :voterId', ['voterId' => $voter->id]);
+            $sql = 'SELECT id, is_editable FROM esc_voting_ballot WHERE voter_id = :voterId';
+            $params = ['voterId' => $voter->id];
+            if ($activeEdition) {
+                $sql .= ' AND edition_id = :editionId';
+                $params['editionId'] = $activeEdition->getId();
+            }
+            $existingBallot = $conn->fetchAssociative($sql, $params);
+            if ($existingBallot) {
+                $hasExistingBallot = true;
+                $isEditable = (bool)$existingBallot['is_editable'];
+            }
         }
 
         $conn = $entityManager->getConnection();
-        $ballotCount = $conn->fetchOne('SELECT COUNT(id) FROM esc_voting_ballot');
-        $voteCount = $conn->fetchOne('SELECT COUNT(id) FROM esc_voting_vote');
+        $ballotCountSql = 'SELECT COUNT(b.id) FROM esc_voting_ballot b';
+        $voteCountSql = 'SELECT COUNT(v.id) FROM esc_voting_vote v';
+        $countParams = [];
+        if ($activeEdition) {
+            $ballotCountSql .= ' WHERE b.edition_id = :editionId';
+            $voteCountSql .= ' JOIN esc_voting_ballot b ON v.ballot_id = b.id WHERE b.edition_id = :editionId';
+            $countParams['editionId'] = $activeEdition->getId();
+        }
+
+        $ballotCount = $conn->fetchOne($ballotCountSql, $countParams);
+        $voteCount = $conn->fetchOne($voteCountSql, $countParams);
 
         $response = $this->render('tool/esc_voting/index.html.twig', [
             'voter_name' => $voterName,
@@ -65,6 +88,8 @@ class EscVotingController extends AbstractController
             'ballot_count' => $ballotCount,
             'vote_count' => $voteCount,
             'has_existing_ballot' => $hasExistingBallot,
+            'is_editable' => $isEditable,
+            'active_edition' => $activeEdition,
         ]);
 
         if ($voterName && !$request->cookies->has('esc_voter_name')) {
@@ -75,8 +100,9 @@ class EscVotingController extends AbstractController
     }
 
     #[Route('/esc-voting/vote/edit', name: 'app_esc_voting_vote_edit')]
-    public function edit(Request $request, Security $security, VoterRepository $voterRepository, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Security $security, VoterRepository $voterRepository, EntityManagerInterface $entityManager, EscEditionRepository $escEditionRepository): Response
     {
+        $activeEdition = $escEditionRepository->findActive();
         $user = $security->getUser();
         $sessionId = $request->getSession()->getId();
         $voterName = $request->getSession()->get('esc_voter_name') ?: $request->cookies->get('esc_voter_name');
@@ -94,10 +120,24 @@ class EscVotingController extends AbstractController
         if ($voter) {
             $conn = $entityManager->getConnection();
             // Get latest ballot
-            $ballotId = $conn->fetchOne('SELECT id FROM esc_voting_ballot WHERE voter_id = :voterId ORDER BY id DESC LIMIT 1', ['voterId' => $voter->id]);
+            $sql = 'SELECT b.id, b.is_editable FROM esc_voting_ballot b WHERE b.voter_id = :voterId';
+            $params = ['voterId' => $voter->id];
+            if ($activeEdition) {
+                $sql .= ' AND b.edition_id = :editionId';
+                $params['editionId'] = $activeEdition->getId();
+            }
+            $sql .= ' ORDER BY b.id DESC LIMIT 1';
+            $ballotData = $conn->fetchAssociative($sql, $params);
 
-            if ($ballotId) {
-                $votes = $conn->fetchAllAssociative('SELECT country_id, points FROM esc_voting_vote WHERE ballot_id = :ballotId', ['ballotId' => $ballotId]);
+            if ($ballotData) {
+                if (!$ballotData['is_editable']) {
+                    $this->addFlash('error', 'Deine Stimmen wurden bereits abgegeben und können nicht mehr bearbeitet werden.');
+                    return $this->redirectToRoute('app_esc_voting_index');
+                }
+
+                $ballotId = $ballotData['id'];
+                $sql = 'SELECT v.country_id, v.points FROM esc_voting_vote v WHERE v.ballot_id = :ballotId';
+                $votes = $conn->fetchAllAssociative($sql, ['ballotId' => $ballotId]);
 
                 $choices = [];
                 foreach ($votes as $vote) {
@@ -115,8 +155,9 @@ class EscVotingController extends AbstractController
     }
 
     #[Route('/esc-voting/vote', name: 'app_esc_voting_vote')]
-    public function vote(Request $request, CountryRepository $countryRepository): Response
+    public function vote(Request $request, CountryRepository $countryRepository, EscEditionRepository $escEditionRepository): Response
     {
+        $activeEdition = $escEditionRepository->findActive();
         $initialChoices = $request->getSession()->get('esc_voting_choices', []);
         if (empty($initialChoices)) {
             $initialChoices = (object)[];
@@ -128,6 +169,7 @@ class EscVotingController extends AbstractController
             'allowed_points' => [1, 2, 3, 4, 5, 6, 7, 8, 10, 12],
             'initial_choices' => $initialChoices,
             'voter_name' => $voterName,
+            'active_edition' => $activeEdition,
         ]);
     }
 
@@ -146,8 +188,10 @@ class EscVotingController extends AbstractController
         CountryRepository $countryRepository,
         EntityManagerInterface $entityManager,
         VoterRepository $voterRepository,
+        EscEditionRepository $escEditionRepository,
         Security $security
     ): Response {
+        $activeEdition = $escEditionRepository->findActive();
         $votesData = $request->request->all('votes');
         $user = $security->getUser();
         $sessionId = $request->getSession()->getId();
@@ -173,8 +217,29 @@ class EscVotingController extends AbstractController
             $entityManager->persist($voter);
         }
 
-        $ballot = new Ballot($voter);
-        $entityManager->persist($ballot);
+        // Find existing ballot for this voter and edition
+        $ballot = $entityManager->getRepository(Ballot::class)->findOneBy([
+            'voter' => $voter,
+            'edition' => $activeEdition
+        ]);
+
+        if ($ballot) {
+            if (!$ballot->isEditable()) {
+                $this->addFlash('error', 'Deine Stimmen wurden bereits abgegeben und können nicht mehr bearbeitet werden.');
+                return $this->redirectToRoute('app_esc_voting_index');
+            }
+            // Remove old votes
+            foreach ($ballot->votes as $oldVote) {
+                $entityManager->remove($oldVote);
+            }
+            $ballot->votes->clear();
+        } else {
+            $ballot = new Ballot($voter);
+            $ballot->edition = $activeEdition;
+            // By default, new ballots are editable, but we could set it explicitly if needed
+            $ballot->setIsEditable(true);
+            $entityManager->persist($ballot);
+        }
 
         foreach ($votesData as $points => $countryId) {
             if (!$countryId) continue;
@@ -206,12 +271,19 @@ class EscVotingController extends AbstractController
     }
 
     #[Route('/esc-voting/overview', name: 'app_esc_voting_overview')]
-    public function overview(EntityManagerInterface $entityManager, CountryRepository $countryRepository): Response
+    public function overview(EntityManagerInterface $entityManager, CountryRepository $countryRepository, EscEditionRepository $escEditionRepository): Response
     {
+        $activeEdition = $escEditionRepository->findActive();
+
+        if ($activeEdition && !$activeEdition->isClosed() && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('warning', 'Die Ergebnisse werden erst nach Abschluss des ESC veröffentlicht.');
+            return $this->redirectToRoute('app_esc_voting_index');
+        }
+
         $conn = $entityManager->getConnection();
 
         // 1. Get all countries
-        $countriesSql = 'SELECT id, name, country_code as countryCode, start_order as startOrder FROM esc_voting_country ORDER BY start_order ASC';
+        $countriesSql = 'SELECT c.id, c.name, c.country_code as countryCode, c.start_order as startOrder FROM esc_voting_country c ORDER BY c.start_order ASC';
         $countries = $conn->fetchAllAssociative($countriesSql);
 
         // 2. Get all ballots with their votes
@@ -219,14 +291,19 @@ class EscVotingController extends AbstractController
             SELECT b.id as ballotId, v.name as voterName, u.email as userEmail
             FROM esc_voting_ballot b
             JOIN esc_voting_voter v ON b.voter_id = v.id
-            LEFT JOIN "user" u ON v.user_id = u.id
-            ORDER BY b.id ASC
+            LEFT JOIN `user` u ON v.user_id = u.id
         ';
-        $ballotsData = $conn->fetchAllAssociative($ballotsSql);
+        $ballotsParams = [];
+        if ($activeEdition) {
+            $ballotsSql .= ' WHERE b.edition_id = :editionId';
+            $ballotsParams['editionId'] = $activeEdition->getId();
+        }
+        $ballotsSql .= ' ORDER BY b.id ASC';
+        $ballotsData = $conn->fetchAllAssociative($ballotsSql, $ballotsParams);
 
         $ballots = [];
         foreach ($ballotsData as $bData) {
-            $votesSql = 'SELECT country_id as countryId, points FROM esc_voting_vote WHERE ballot_id = :ballotId';
+            $votesSql = 'SELECT v.country_id as countryId, v.points FROM esc_voting_vote v WHERE v.ballot_id = :ballotId';
             $votes = $conn->fetchAllAssociative($votesSql, ['ballotId' => $bData['ballotId']]);
 
             $identifier = $bData['userEmail'] ?: ($bData['voterName'] ?: 'Anonym');
@@ -241,14 +318,20 @@ class EscVotingController extends AbstractController
         }
 
         $voterCount = count($ballots);
-        $voteCountSql = 'SELECT COUNT(id) FROM esc_voting_vote';
-        $voteCount = $conn->fetchOne($voteCountSql);
+        $voteCountSql = 'SELECT COUNT(v.id) FROM esc_voting_vote v';
+        $voteCountParams = [];
+        if ($activeEdition) {
+            $voteCountSql .= ' JOIN esc_voting_ballot b ON v.ballot_id = b.id WHERE b.edition_id = :editionId';
+            $voteCountParams['editionId'] = $activeEdition->getId();
+        }
+        $voteCount = $conn->fetchOne($voteCountSql, $voteCountParams);
 
         return $this->render('tool/esc_voting/overview.html.twig', [
             'countries' => $countries,
             'ballots' => $ballots,
             'ballot_count' => $voterCount,
             'vote_count' => $voteCount,
+            'active_edition' => $activeEdition,
         ]);
     }
 }

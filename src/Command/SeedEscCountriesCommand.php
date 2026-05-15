@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:seed-esc-countries',
+    name: 'app:esc:seed-countries',
     description: 'Seeds ESC countries for the voting tool.',
 )]
 class SeedEscCountriesCommand extends Command

@@ -1,0 +1,55 @@
+# Use the front controller as index file. It serves as a fallback solution when
+# every other rewrite rule fails.
+# http://archive.apache.org/dist/httpd/docs/2.4/mod/mod_dir.html#indexorderonalaire
+DirectoryIndex index.php
+
+# By default, Apache does not allow access to files starting with a dot.
+# This is a good security practice, but it prevents access to .well-known/
+# which is used by Let's Encrypt and other tools.
+<IfModule mod_authz_core.c>
+    <Files ~ "^\.">
+        Require all denied
+    </Files>
+    <Files ~ "^(?i)\.well-known">
+        Require all granted
+    </Files>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Determine the RewriteBase automatically and set it as env variable 'base'
+    # http://archive.apache.org/dist/httpd/docs/2.4/mod/mod_rewrite.html#rewritebase
+    RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+    RewriteRule .* - [E=base:%1]
+
+    # Sets the HTTP_AUTHORIZATION header removed by Apache
+    RewriteCond %{HTTP:Authorization} .+
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%0]
+
+    # Redirect to URI without front controller to prevent duplicate content
+    # (with and without "index.php"). Only do this redirect on the initial
+    # rewrite cycle; otherwise we would get an endless redirect loop (request
+    # -> rewrite to front controller -> redirect -> request -> ...).
+    # So in case you get a "too many redirects" error or you always get redirected
+    # to "index.php", replace [L,R=301] with [L] in the following rule:
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^index\.php(?:/(.*)|$) %{ENV:base}/$1 [R=301,L]
+
+    # If the requested filename exists, simply serve it.
+    # We only want to let Apache serve files and not directories.
+    # Rewrite all other queries to the front controller.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ %{ENV:base}/index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        # When mod_rewrite is not available, we instruct a temporary redirect of
+        # the main page to the front controller explicitly so that the website
+        # and the generated links can still be used.
+        RedirectMatch 307 ^/$ /index.php/
+        # RedirectMatch works if the configuration is correct, but it's better
+        # to use mod_rewrite.
+    </IfModule>
+</IfModule>

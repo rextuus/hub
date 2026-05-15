@@ -5,15 +5,15 @@
 {% block title %}Vote - ESC Voting{% endblock %}
 
 {% block body %}
-    <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container">
-        <div class="row mb-3">
+    <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container overflow-x-hidden">
+        <div class="row mb-2 mb-md-3">
             <div class="col-12 d-flex align-items-center justify-content-between px-2 px-md-3">
-                <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm">
-                    {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} Zurück
+                <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-2 px-md-3 shadow-sm">
+                    {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} <span class="d-none d-md-inline">Zurück</span>
                 </a>
-                <div class="d-flex align-items-center bg-white px-3 py-1 rounded-pill border shadow-sm">
-                    {{ ux_icon('lucide:user', {class: 'me-2 text-primary', style: 'font-size: 0.9em;'}) }}
-                    <span class="small fw-bold">{{ voter_name ?: (app.user ? app.user.userIdentifier : 'Gast') }}</span>
+                <div class="d-flex align-items-center bg-white px-2 px-md-3 py-1 rounded-pill border shadow-sm">
+                    {{ ux_icon('lucide:user', {class: 'me-1 me-md-2 text-primary', style: 'font-size: 0.8em;'}) }}
+                    <span class="x-small fw-bold">{{ voter_name ?: (app.user ? app.user.userIdentifier : 'Gast') }}</span>
                 </div>
             </div>
         </div>
@@ -24,12 +24,12 @@
             <div class="row g-1 g-md-3">
                 <!-- Pool der Länder (Zuerst auf Mobile) -->
                 <div class="col-lg-5 order-2 order-lg-1">
-                    <h5 class="mb-3 d-flex align-items-center text-dark fw-bold">
+                    <h5 class="mb-2 mb-md-3 d-flex align-items-center text-dark fw-bold small fs-md-5">
                         {{ ux_icon('lucide:list', {class: 'me-2 text-primary'}) }}
                         Länder Pool
                     </h5>
                     <div class="country-pool p-1 p-md-3 rounded-4 bg-light border shadow-inner">
-                        <div class="row g-1 g-md-2 overflow-auto" style="max-height: 400px; scrollbar-width: thin;">
+                        <div class="row g-1 g-md-2 mx-0" style="scrollbar-width: thin;">
                             {% for country in countries %}
                                 <div class="col-4 col-sm-3 col-lg-4">
                                     <div class="country-item p-1 p-md-2 rounded-3 border bg-white text-center shadow-sm draggable"
@@ -39,10 +39,10 @@
                                          data-country-id="{{ country.id }}"
                                          data-country-name="{{ country.name }}"
                                          data-country-code="{{ country.countryCode }}">
-                                        <div class="mb-2" style="pointer-events: none;">
-                                            <span class="fi fi-{{ country.countryCode|lower }} fs-2 shadow-sm rounded-1"></span>
+                                        <div class="mb-1 mb-md-2" style="pointer-events: none;">
+                                            <span class="fi fi-{{ country.countryCode|lower }} fs-4 fs-md-2 shadow-sm rounded-1"></span>
                                         </div>
-                                        <div class="x-small fw-medium text-truncate" style="pointer-events: none; font-size: 0.7rem;">{{ country.name }}</div>
+                                        <div class="x-small fw-medium text-truncate" style="pointer-events: none; font-size: 0.6rem; md-font-size: 0.7rem;">{{ country.name }}</div>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -52,16 +52,16 @@
 
                 <!-- Slots für Punkte -->
                 <div class="col-lg-7 order-1 order-lg-2">
-                    <h5 class="mb-3 d-flex align-items-center text-dark fw-bold">
+                    <h5 class="mb-2 mb-md-3 d-flex align-items-center text-dark fw-bold small fs-md-5">
                         {{ ux_icon('lucide:star', {class: 'me-2 text-warning'}) }}
                         Deine Wertung
                     </h5>
                     <div class="voting-slots shadow-sm p-1 p-md-3 rounded-4 bg-white border">
                         <!-- Reihe 1: 12 und 10 Punkte (Größer) -->
-                        <div class="row g-1 g-md-2 mb-2">
+                        <div class="row g-1 g-md-2 mb-1 mb-md-2">
                             {% for points in [12, 10] %}
                                 <div class="col-6">
-                                    <div class="voting-slot voting-slot-large d-flex align-items-center p-2 rounded-4 border-dashed slot-empty"
+                                    <div class="voting-slot voting-slot-large d-flex align-items-center p-1 p-md-2 rounded-3 rounded-md-4 border-dashed slot-empty"
                                          data-esc-vote-target="slot"
                                          data-points="{{ points }}"
                                          data-action="drop->esc-vote#drop dragover->esc-vote#allowDrop dragenter->esc-vote#allowDrop click->esc-vote#selectSlot">
@@ -71,7 +71,7 @@
                                         </div>
 
                                         <div class="flex-grow-1 slot-content py-1 d-flex flex-column align-items-center justify-content-center" data-esc-vote-target="slotContent">
-                                            <span class="text-muted fs-6 italic">Tippe ein Land...</span>
+                                            <span class="text-muted x-small fs-md-6 italic">Land tippen...</span>
                                         </div>
 
                                         <input type="hidden" name="votes[{{ points }}]" data-esc-vote-target="input" value="">
@@ -80,7 +80,7 @@
                                                 data-esc-vote-target="removeButton"
                                                 data-action="click->esc-vote#removeCountry"
                                                 data-points="{{ points }}">
-                                            {{ ux_icon('lucide:x-circle', {style: 'width: 24px; height: 24px;'}) }}
+                                            {{ ux_icon('lucide:x-circle', {style: 'width: 20px; height: 20px;'}) }}
                                         </button>
                                     </div>
                                 </div>
