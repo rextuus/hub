@@ -2,17 +2,27 @@
 
 {% block title %}ESC Voting - Hub{% endblock %}
 
+{% block header %}
+    {{ parent() }}
+{% endblock %}
+
 {% block body %}
 {% if active_edition and active_edition.bannerImage %}
-    <div class="esc-banner-top mb-0">
+    <div class="esc-banner-top mb-0 position-relative">
         {% if active_edition.bannerLink %}
             <a href="{{ active_edition.bannerLink }}" target="_blank">
         {% endif %}
-        <div class="banner-image-container position-relative" style="height: 50vh; min-height: 300px; max-height: 600px; overflow: hidden;">
+        <div class="banner-image-container position-relative" style="overflow: hidden;">
             <img src="{{ active_edition.bannerImage }}" alt="{{ active_edition.location }}" class="w-100 h-100" style="object-fit: cover;">
-            <div class="banner-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3rem;">
+            <div class="banner-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%); display: flex; align-items: flex-end; justify-content: center;">
                 <div class="container text-white text-center">
-                    <h1 class="display-1 fw-extra-bold mb-0 tracking-tight text-shadow" style="text-shadow: 0 4px 12px rgba(0,0,0,0.5);">{{ active_edition.location }} {{ active_edition.year }}</h1>
+                    <div class="banner-text-box d-inline-block rounded-4" style="backdrop-filter: blur(8px); background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <span class="d-block text-uppercase tracking-widest fw-light mb-1 esc-subtitle" style="opacity: 0.9;">Eurovision Song Contest</span>
+                        <h1 class="fw-black mb-0 tracking-tighter" style="font-weight: 900; line-height: 0.9;">
+                            <span class="text-primary-emphasis" style="color: #ff0055;">{{ active_edition.location }}</span>
+                            <span class="d-block d-md-inline ms-md-2" style="font-weight: 300; opacity: 0.8;">{{ active_edition.year }}</span>
+                        </h1>
+                    </div>
                 </div>
             </div>
         </div>
@@ -22,28 +32,9 @@
     </div>
 {% endif %}
 
-<div class="hero-section text-center py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                {% if not active_edition or not active_edition.bannerImage %}
-                    <span class="badge badge-custom px-3 py-2 mb-3">Tool im Rampenlicht</span>
-                    <h1 class="display-4 display-md-3 fw-extra-bold mb-4 tracking-tight">ESC Voting {% if active_edition %}{{ active_edition.year }}{% endif %}</h1>
-                {% endif %}
-                <p class="lead mb-0 opacity-75 fs-6 fs-md-4">
-                    {% if active_edition %}
-                        Bewerte die Auftritte in {{ active_edition.location }} und erstelle dein eigenes Ranking.
-                    {% else %}
-                        Bewerte die Auftritte und erstelle dein eigenes ESC-Ranking.
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container projects-container pb-5">
+<div class="container projects-container pt-4 pt-md-5 pb-5">
     <div class="row g-4">
+        <div class="col-12 col-lg-8">
             {% if not user and not voter_name %}
                 <div class="project-card p-4 p-md-5 h-100 shadow-lg border-primary border-opacity-25 text-center">
                     <h2 class="h3 fw-bold mb-4">Willkommen beim ESC Voting!</h2>
@@ -78,6 +69,9 @@
                     <div class="d-grid col-md-8 mx-auto">
                         <a href="{{ path('app_esc_voting_notes') }}" class="btn btn-primary btn-lg py-3 fw-bold rounded-pill shadow-sm mb-3">
                             {{ ux_icon('lucide:edit-3', {class: 'me-2'}) }} Zum Notizblock
+                        </a>
+                        <a href="{{ path('app_esc_voting_precalculation') }}" class="btn btn-outline-primary btn-lg py-3 fw-bold rounded-pill shadow-sm mb-3">
+                            {{ ux_icon('lucide:wand-sparkles', {class: 'me-2'}) }} Vorschlag aus Notizen
                         </a>
                         <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-outline-secondary btn-lg py-2 fw-bold rounded-pill shadow-sm">
                             Direkt zum Voting {{ ux_icon('lucide:arrow-right', {class: 'ms-2'}) }}
@@ -166,8 +160,8 @@
                         {% endif %}
                     </div>
                 </div>
-                {% endif %}
-            </div>
+            {% endif %}
+        </div>
 
             <!-- Quick Links Sidebar -->
         <div class="col-12 col-lg-4">

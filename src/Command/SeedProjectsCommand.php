@@ -29,7 +29,7 @@ class SeedProjectsCommand extends Command
         $projects = [
             [
                 'name' => 'ESC Voting',
-                'description' => 'Der ultimative Begleiter für deinen Eurovision Song Contest Abend. Verwalte Länder, gib Stimmen ab und verfolge Live-Ergebnisse mit Leichtigkeit.',
+                'description' => 'Dein Begleiter für den Eurovision Song Contest. Erstelle Notizen, berechne deinen Stimmzettel und verfolge die Ergebnisse.',
                 'icon' => 'lucide:star',
                 'image' => 'https://images.unsplash.com/photo-1459749411177-042180ce673f?auto=format&fit=crop&q=80&w=400&h=250',
                 'route' => 'app_esc_voting_index',

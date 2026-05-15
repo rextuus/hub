@@ -42,7 +42,7 @@ class InitEscCommand extends Command
             $io->note('Creating Project entity for ESC Voting...');
             $project = new Project();
             $project->setName('ESC Voting');
-            $project->setDescription('Der ultimative Begleiter für deinen Eurovision Song Contest Abend. Verwalte Länder, gib Stimmen ab und verfolge Live-Ergebnisse mit Leichtigkeit.');
+            $project->setDescription('Dein Begleiter für den Eurovision Song Contest. Erstelle Notizen, berechne deinen Stimmzettel und verfolge die Ergebnisse.');
             $project->setIcon('lucide:star');
             $project->setImage('https://images.unsplash.com/photo-1459749411177-042180ce673f?auto=format&fit=crop&q=80&w=400&h=250');
             $project->setRoute('app_esc_voting_index');

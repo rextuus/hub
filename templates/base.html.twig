@@ -26,9 +26,11 @@
         {% endif %}
     </head>
     <body class="overflow-x-hidden" style="width: 100vw; position: relative;">
-        {% if show_header|default(true) %}
-            {{ include('_header.html.twig') }}
-        {% endif %}
+        {% block header %}
+            {% if show_header|default(true) %}
+                {{ include('_header.html.twig') }}
+            {% endif %}
+        {% endblock %}
         {% block body %}{% endblock %}
         {% if show_footer|default(true) %}
             {{ include('_footer.html.twig') }}

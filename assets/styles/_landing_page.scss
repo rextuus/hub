@@ -59,11 +59,54 @@
 }
 
 .projects-container {
-    margin-top: -30px;
+    margin-top: 3rem;
     position: relative;
     z-index: 10;
+}
 
-    @media (min-width: 992px) {
-        margin-top: -60px;
+.esc-banner-top {
+    .banner-image-container {
+        height: 35vh;
+        min-height: 200px;
+        max-height: 600px;
+
+        @media (min-width: 768px) {
+            height: 50vh;
+            min-height: 300px;
+        }
+    }
+
+    .banner-overlay {
+        padding-bottom: 3rem;
+
+        @media (min-width: 768px) {
+            padding-bottom: 5rem;
+        }
+    }
+
+    .banner-text-box {
+        padding: 1rem 1.5rem;
+
+        @media (min-width: 768px) {
+            padding: 1.5rem 2.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+
+            @media (min-width: 768px) {
+                font-size: 5rem; // display-1 equivalent
+            }
+        }
+    }
+
+    .esc-subtitle {
+        letter-spacing: 0.3rem;
+        font-size: 0.7rem;
+
+        @media (min-width: 768px) {
+            letter-spacing: 0.5rem;
+            font-size: 0.9rem;
+        }
     }
 }
