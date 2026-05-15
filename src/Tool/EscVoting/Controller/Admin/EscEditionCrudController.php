@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,6 +35,8 @@ class EscEditionCrudController extends AbstractCrudController
         yield DateField::new('date', 'Datum');
         yield BooleanField::new('isActive', 'Aktiv');
         yield BooleanField::new('isClosed', 'Abgeschlossen');
+        yield TextField::new('bannerLink', 'Banner Ziel-Link (URL)');
+        yield TextField::new('bannerImage', 'Banner Bild URL');
     }
 
     public function configureActions(Actions $actions): Actions

@@ -1,0 +1,49 @@
+<div {{ attributes }}>
+    <h3>Test Component</h3>
+    <div class="mb-3">
+        <label for="name-input" class="form-label">Artist Name</label>
+        <input
+            type="text"
+            id="name-input"
+            class="form-control"
+            data-model="name"
+        >
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label d-block">Rating</label>
+        <div class="h3">
+            {% for i in 1..5 %}
+                <span
+                    class="bi {{ rating >= i ? 'bi-star-fill text-warning' : 'bi-star text-muted' }}"
+                    style="cursor: pointer; font-size: 2rem;"
+                    data-action="click->live#action"
+                    data-live-action-param="setRating"
+                    data-live-rating-param="{{ i }}"
+                ></span>
+            {% endfor %}
+        </div>
+        <div class="small text-muted">Current Rating: {{ rating }} stars</div>
+    </div>
+
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <div>
+            <strong>Current Name:</strong> {{ name }}
+        </div>
+        <button
+            class="btn btn-success btn-sm"
+            data-action="live#action"
+            data-live-action-param="save"
+        >
+            Save to DB
+        </button>
+    </div>
+
+    {% if status %}
+        <div class="alert alert-success mt-2">
+            {{ status }}
+        </div>
+    {% endif %}
+
+    <p class="text-muted small">Type in the box above. The name below should update instantly if Live Components are working.</p>
+</div>

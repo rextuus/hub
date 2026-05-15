@@ -23,6 +23,11 @@ class Country
     ) {
     }
 
+    public function getCode(): string
+    {
+        return $this->countryCode;
+    }
+
     public function getName(): string
     {
         return $this->name;

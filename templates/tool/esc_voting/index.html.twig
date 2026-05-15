@@ -3,12 +3,33 @@
 {% block title %}ESC Voting - Hub{% endblock %}
 
 {% block body %}
-<div class="hero-section text-center">
+{% if active_edition and active_edition.bannerImage %}
+    <div class="esc-banner-top mb-0">
+        {% if active_edition.bannerLink %}
+            <a href="{{ active_edition.bannerLink }}" target="_blank">
+        {% endif %}
+        <div class="banner-image-container position-relative" style="height: 50vh; min-height: 300px; max-height: 600px; overflow: hidden;">
+            <img src="{{ active_edition.bannerImage }}" alt="{{ active_edition.location }}" class="w-100 h-100" style="object-fit: cover;">
+            <div class="banner-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3rem;">
+                <div class="container text-white text-center">
+                    <h1 class="display-1 fw-extra-bold mb-0 tracking-tight text-shadow" style="text-shadow: 0 4px 12px rgba(0,0,0,0.5);">{{ active_edition.location }} {{ active_edition.year }}</h1>
+                </div>
+            </div>
+        </div>
+        {% if active_edition.bannerLink %}
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+
+<div class="hero-section text-center py-5">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <span class="badge badge-custom px-3 py-2 mb-3">Tool im Rampenlicht</span>
-                <h1 class="display-4 display-md-3 fw-extra-bold mb-4 tracking-tight">ESC Voting {% if active_edition %}{{ active_edition.year }}{% endif %}</h1>
+                {% if not active_edition or not active_edition.bannerImage %}
+                    <span class="badge badge-custom px-3 py-2 mb-3">Tool im Rampenlicht</span>
+                    <h1 class="display-4 display-md-3 fw-extra-bold mb-4 tracking-tight">ESC Voting {% if active_edition %}{{ active_edition.year }}{% endif %}</h1>
+                {% endif %}
                 <p class="lead mb-0 opacity-75 fs-6 fs-md-4">
                     {% if active_edition %}
                         Bewerte die Auftritte in {{ active_edition.location }} und erstelle dein eigenes Ranking.
@@ -23,86 +44,132 @@
 
 <div class="container projects-container pb-5">
     <div class="row g-4">
-        <div class="col-12 col-lg-8">
-            <div class="project-card p-4 p-md-5 h-100 shadow-lg border-primary border-opacity-25">
-                <h2 class="h3 fw-bold mb-4 text-center">Dein Voting</h2>
-
-                <div class="mt-4">
-                    {% if has_existing_ballot %}
-                        <div class="text-center mb-4">
-                            {% if is_editable %}
-                                <div class="alert alert-success d-inline-block px-4 py-3 rounded-4 border-0 shadow-sm mb-4">
-                                    <span class="d-flex align-items-center">
-                                        {{ ux_icon('lucide:check-circle', {class: 'me-2'}) }}
-                                        Du hast bereits abgestimmt!
-                                    </span>
-                                </div>
-                                <div class="d-grid gap-3 col-md-8 mx-auto">
-                                    <a href="{{ path('app_esc_voting_vote_edit') }}" class="btn btn-primary btn-lg py-3 shadow-sm fw-bold">
-                                        {{ ux_icon('lucide:edit-3', {class: 'me-2'}) }} Deine Wertung bearbeiten
-                                    </a>
-                                    {% if active_edition and (active_edition.isClosed or is_granted('ROLE_ADMIN')) %}
-                                        <a href="{{ path('app_esc_voting_overview') }}" class="btn btn-outline-secondary py-3">
-                                            Zur Rangliste {{ ux_icon('lucide:trophy', {class: 'ms-2'}) }}
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            {% else %}
-                                <div class="alert alert-info d-inline-block px-4 py-3 rounded-4 border-0 shadow-sm mb-4">
-                                    <span class="d-flex align-items-center">
-                                        {{ ux_icon('lucide:lock', {class: 'me-2'}) }}
-                                        Deine Stimmen wurden abgegeben.
-                                    </span>
-                                </div>
-                                <div class="d-grid gap-3 col-md-8 mx-auto">
-                                    <button class="btn btn-secondary btn-lg py-3 shadow-sm fw-bold cursor-not-allowed" disabled>
-                                        {{ ux_icon('lucide:lock', {class: 'me-2'}) }} Wertung gesperrt
-                                    </button>
-                                    {% if active_edition and (active_edition.isClosed or is_granted('ROLE_ADMIN')) %}
-                                        <a href="{{ path('app_esc_voting_overview') }}" class="btn btn-primary btn-lg py-3 shadow-sm fw-bold">
-                                            Zur Rangliste {{ ux_icon('lucide:trophy', {class: 'ms-2'}) }}
-                                        </a>
-                                    {% endif %}
-                                </div>
-                                <p class="small text-muted mt-3">Solltest du deine Stimmen doch noch ändern wollen, wende dich bitte an einen Admin.</p>
-                            {% endif %}
-                        </div>
-                    {% elseif user %}
-                        <div class="text-center">
-                            <div class="alert alert-info d-inline-block px-4 py-3 mb-4 rounded-4 border-0 shadow-sm">
-                                <span class="d-flex align-items-center">
-                                    {{ ux_icon('lucide:user', {class: 'me-2 text-primary'}) }}
-                                    Angemeldet als <strong>{{ user.userIdentifier }}</strong>
+            {% if not user and not voter_name %}
+                <div class="project-card p-4 p-md-5 h-100 shadow-lg border-primary border-opacity-25 text-center">
+                    <h2 class="h3 fw-bold mb-4">Willkommen beim ESC Voting!</h2>
+                    <p class="lead mb-4">Bevor wir starten: Wie dürfen wir dich nennen?</p>
+                    <form method="post" class="col-md-10 mx-auto mt-2">
+                        <div class="voter-name-input-wrapper mb-4">
+                            <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden border border-primary border-2">
+                                <span class="input-group-text bg-white border-0 ps-3 ps-md-4">
+                                    {{ ux_icon('lucide:user', {class: 'text-primary', style: 'font-size: 1.2em;'}) }}
                                 </span>
-                            </div>
-                            <div>
-                                <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary btn-lg px-5 py-3 shadow-sm fw-bold rounded-pill">
-                                    Jetzt Voting starten {{ ux_icon('lucide:play', {class: 'ms-2'}) }}
-                                </a>
+                                <input type="text" id="voter_name" name="voter_name" class="form-control border-0 py-3 py-md-4 fw-bold fs-6 fs-md-5" placeholder="Dein Name..." required autocomplete="off">
+                                <button type="submit" class="btn btn-primary px-3 px-md-5 fw-extra-bold text-uppercase tracking-wider">
+                                    Go! {{ ux_icon('lucide:zap', {class: 'ms-1'}) }}
+                                </button>
                             </div>
                         </div>
-                    {% else %}
-                        <form method="post" class="col-md-10 mx-auto mt-2">
-                            <div class="voter-name-input-wrapper mb-4">
-                                <label for="voter_name" class="form-label fw-bold text-muted mb-3 text-center d-block">Wie heißt du?</label>
-                                <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden border border-primary border-2">
-                                    <span class="input-group-text bg-white border-0 ps-3 ps-md-4">
-                                        {{ ux_icon('lucide:user', {class: 'text-primary', style: 'font-size: 1.2em;'}) }}
+                        <p class="small text-muted text-center mt-4">Deine Wertung wird für diesen Abend lokal gespeichert. <br>Oder <a href="{{ path('app_login') }}" class="text-primary fw-bold text-decoration-none border-bottom border-primary border-2">einloggen</a> für dauerhafte Speicherung.</p>
+                    </form>
+                </div>
+            {% elseif not has_existing_ballot %}
+                <div class="project-card p-4 p-md-5 mb-4 bg-primary bg-opacity-10 border-primary border-opacity-25 shadow-lg">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-25 p-3 rounded-4 me-4">
+                            {{ ux_icon('lucide:info', {class: 'text-primary', size: 32}) }}
+                        </div>
+                        <div>
+                            <h2 class="h3 fw-bold mb-1">Unser Tipp: Erst Notizen, dann Voting!</h2>
+                            <p class="text-muted mb-0">Huhu {% if user %}{{ user.userIdentifier }}{% else %}{{ voter_name }}{% endif %}!</p>
+                        </div>
+                    </div>
+                    <p class="mb-4">Die Show läuft? Perfekt! Nutze unseren <strong>intelligenten Notizblock</strong>, um während der Auftritte Punkte zu vergeben. So vergisst du keinen Favoriten und wir berechnen dir am Ende sogar einen Vorschlag für dein Voting!</p>
+                    <div class="d-grid col-md-8 mx-auto">
+                        <a href="{{ path('app_esc_voting_notes') }}" class="btn btn-primary btn-lg py-3 fw-bold rounded-pill shadow-sm mb-3">
+                            {{ ux_icon('lucide:edit-3', {class: 'me-2'}) }} Zum Notizblock
+                        </a>
+                        <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-outline-secondary btn-lg py-2 fw-bold rounded-pill shadow-sm">
+                            Direkt zum Voting {{ ux_icon('lucide:arrow-right', {class: 'ms-2'}) }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card p-4 p-md-5 h-100 shadow-sm border-light opacity-75">
+                    <h2 class="h4 fw-bold mb-3 text-center">Dein Voting</h2>
+                    <p class="text-center text-muted">Sobald du bereit bist, kannst du hier deine 1 bis 12 Punkte vergeben.</p>
+                </div>
+            {% else %}
+                <div class="project-card p-4 p-md-5 shadow-lg border-primary border-opacity-25">
+                    <h2 class="h3 fw-bold mb-4 text-center">Dein Voting</h2>
+
+                    <div class="mt-4">
+                        {% if has_existing_ballot %}
+                            <div class="text-center mb-4">
+                                {% if is_editable %}
+                                    <div class="alert alert-success d-inline-block px-4 py-3 rounded-4 border-0 shadow-sm mb-4">
+                                        <span class="d-flex align-items-center">
+                                            {{ ux_icon('lucide:check-circle', {class: 'me-2'}) }}
+                                            Du hast bereits abgestimmt!
+                                        </span>
+                                    </div>
+                                    <div class="d-grid gap-3 col-md-8 mx-auto">
+                                        <a href="{{ path('app_esc_voting_vote_edit') }}" class="btn btn-primary btn-lg py-3 shadow-sm fw-bold">
+                                            {{ ux_icon('lucide:edit-3', {class: 'me-2'}) }} Deine Wertung bearbeiten
+                                        </a>
+                                        {% if active_edition and (active_edition.isClosed or is_granted('ROLE_ADMIN')) %}
+                                            <a href="{{ path('app_esc_voting_overview') }}" class="btn btn-outline-secondary py-3">
+                                                Zur Rangliste {{ ux_icon('lucide:trophy', {class: 'ms-2'}) }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info d-inline-block px-4 py-3 rounded-4 border-0 shadow-sm mb-4">
+                                        <span class="d-flex align-items-center">
+                                            {{ ux_icon('lucide:lock', {class: 'me-2'}) }}
+                                            Deine Stimmen wurden abgegeben.
+                                        </span>
+                                    </div>
+                                    <div class="d-grid gap-3 col-md-8 mx-auto">
+                                        <button class="btn btn-secondary btn-lg py-3 shadow-sm fw-bold cursor-not-allowed" disabled>
+                                            {{ ux_icon('lucide:lock', {class: 'me-2'}) }} Wertung gesperrt
+                                        </button>
+                                        {% if active_edition and (active_edition.isClosed or is_granted('ROLE_ADMIN')) %}
+                                            <a href="{{ path('app_esc_voting_overview') }}" class="btn btn-primary btn-lg py-3 shadow-sm fw-bold">
+                                                Zur Rangliste {{ ux_icon('lucide:trophy', {class: 'ms-2'}) }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    <p class="small text-muted mt-3 text-center">Solltest du deine Stimmen doch noch ändern wollen, wende dich bitte an einen Admin.</p>
+                                {% endif %}
+                            </div>
+                        {% elseif user %}
+                            <div class="text-center">
+                                <div class="alert alert-info d-inline-block px-4 py-3 mb-4 rounded-4 border-0 shadow-sm">
+                                    <span class="d-flex align-items-center">
+                                        {{ ux_icon('lucide:user', {class: 'me-2 text-primary'}) }}
+                                        Angemeldet als <strong>{{ user.userIdentifier }}</strong>
                                     </span>
-                                    <input type="text" id="voter_name" name="voter_name" class="form-control border-0 py-3 py-md-4 fw-bold fs-6 fs-md-5" placeholder="Dein Name..." value="{{ voter_name }}" required autocomplete="off">
-                                    <button type="submit" class="btn btn-primary px-3 px-md-5 fw-extra-bold text-uppercase tracking-wider">
-                                        Go! {{ ux_icon('lucide:zap', {class: 'ms-1'}) }}
-                                    </button>
+                                </div>
+                                <div>
+                                    <a href="{{ path('app_esc_voting_vote') }}" class="btn btn-primary btn-lg px-5 py-3 shadow-sm fw-bold rounded-pill">
+                                        Jetzt Voting starten {{ ux_icon('lucide:play', {class: 'ms-2'}) }}
+                                    </a>
                                 </div>
                             </div>
-                            <p class="small text-muted text-center mt-4">Deine Wertung wird für diesen Abend gespeichert. <br>Oder <a href="{{ path('app_login') }}" class="text-primary fw-bold text-decoration-none border-bottom border-primary border-2">einloggen</a> für dauerhafte Speicherung.</p>
-                        </form>
-                    {% endif %}
+                        {% else %}
+                            <form method="post" class="col-md-10 mx-auto mt-2">
+                                <div class="voter-name-input-wrapper mb-4">
+                                    <label for="voter_name" class="form-label fw-bold text-muted mb-3 text-center d-block">Wie heißt du?</label>
+                                    <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden border border-primary border-2">
+                                        <span class="input-group-text bg-white border-0 ps-3 ps-md-4">
+                                            {{ ux_icon('lucide:user', {class: 'text-primary', style: 'font-size: 1.2em;'}) }}
+                                        </span>
+                                        <input type="text" id="voter_name" name="voter_name" class="form-control border-0 py-3 py-md-4 fw-bold fs-6 fs-md-5" placeholder="Dein Name..." value="{{ voter_name }}" required autocomplete="off">
+                                        <button type="submit" class="btn btn-primary px-3 px-md-5 fw-extra-bold text-uppercase tracking-wider">
+                                            Go! {{ ux_icon('lucide:zap', {class: 'ms-1'}) }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="small text-muted text-center mt-4">Deine Wertung wird für diesen Abend gespeichert. <br>Oder <a href="{{ path('app_login') }}" class="text-primary fw-bold text-decoration-none border-bottom border-primary border-2">einloggen</a> für dauerhafte Speicherung.</p>
+                            </form>
+                        {% endif %}
+                    </div>
                 </div>
+                {% endif %}
             </div>
-        </div>
 
-        <!-- Quick Links Sidebar -->
+            <!-- Quick Links Sidebar -->
         <div class="col-12 col-lg-4">
             <div class="row g-4 h-100">
                 <div class="col-12">
@@ -133,6 +200,22 @@
                                         <small class="text-muted">Live-Ergebnisse im Überblick</small>
                                     </div>
                                     {{ ux_icon('lucide:trophy') }}
+                                </a>
+                            {% endif %}
+                            <a href="{{ path('app_esc_voting_notes') }}" class="btn btn-outline-info d-flex align-items-center justify-content-between p-3 text-start">
+                                <div>
+                                    <div class="fw-bold">Notizblock</div>
+                                    <small class="text-muted">Mitschreiben während der Show</small>
+                                </div>
+                                {{ ux_icon('lucide:sticky-note') }}
+                            </a>
+                            {% if has_existing_ballot %}
+                                <a href="{{ path('app_esc_voting_vote_edit') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-between p-3 text-start">
+                                    <div>
+                                        <div class="fw-bold">Meine Wertung</div>
+                                        <small class="text-muted">Deine abgegebenen Stimmen</small>
+                                    </div>
+                                    {{ ux_icon('lucide:edit-3') }}
                                 </a>
                             {% endif %}
                             {% if is_granted('ROLE_ADMIN') %}

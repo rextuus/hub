@@ -46,7 +46,7 @@ class Ballot
 
     public function __construct(
         #[ORM\ManyToOne(targetEntity: Voter::class)]
-        #[ORM\JoinColumn(nullable: false)]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         public Voter $voter
     ) {
         $this->createdAt = new \DateTimeImmutable();

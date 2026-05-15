@@ -36,7 +36,7 @@ class EscVotingController extends AbstractController
             $name = $request->request->get('voter_name');
             if ($name) {
                 $session->set('esc_voter_name', $name);
-                $response = $this->redirectToRoute('app_esc_voting_vote');
+                $response = $this->redirectToRoute('app_esc_voting_index');
                 $response->headers->setCookie(new Cookie('esc_voter_name', $name, strtotime('+30 days')));
                 return $response;
             }
@@ -51,7 +51,23 @@ class EscVotingController extends AbstractController
             if (!$voter) {
                 // Try finding by name only if sessionId changed but we have a cookie
                 $voter = $voterRepository->findOneBy(['name' => $voterName], ['id' => 'DESC']);
+                if ($voter) {
+                    $voter->sessionId = $sessionId;
+                    $entityManager->flush();
+                }
             }
+        }
+
+        if (!$voter && ($user || $voterName)) {
+            // Create voter if it doesn't exist but we have a name/user
+            $voter = new Voter();
+            $voter->name = $user ? $user->getUserIdentifier() : $voterName;
+            $voter->sessionId = $sessionId;
+            if ($user instanceof User) {
+                $voter->user = $user;
+            }
+            $entityManager->persist($voter);
+            $entityManager->flush();
         }
 
         $hasExistingBallot = false;

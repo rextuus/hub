@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vorschlag basierend auf Notizen - ESC Voting{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Vorschlag basierend auf deinen Notizen</h1>
+        <a href="{{ path('app_esc_voting_notes') }}" class="btn btn-outline-secondary">Zurück zum Notizblock</a>
+    </div>
+
+    <div class="alert alert-info shadow-sm mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        Hier siehst du einen Vorschlag für deine Punktevergabe, basierend auf deinen Bewertungen im Notizblock.
+        Die Teilnehmer wurden nach deiner <strong>Gesamtbewertung</strong> und dem Durchschnitt der Einzelkategorien sortiert.
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-magic me-2"></i>Berechneter Stimmzettel</h5>
+                </div>
+                <div class="card-body p-0">
+                    <form action="{{ path('app_esc_voting_precalculation_apply') }}" method="post">
+                        <ul class="list-group list-group-flush">
+                            {% set points_list = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1] %}
+                            {% for points in points_list %}
+                                {% set participant = precalculated_votes[points] ?? null %}
+                                <li class="list-group-item d-flex align-items-center py-3">
+                                    <div class="me-4 text-center" style="width: 40px;">
+                                        <span class="badge bg-{{ points == 12 ? 'warning text-dark' : (points >= 8 ? 'success' : 'secondary') }} fs-5 rounded-pill">
+                                            {{ points }}
+                                        </span>
+                                    </div>
+                                    {% if participant %}
+                                        <input type="hidden" name="votes[{{ points }}]" value="{{ participant.id }}">
+                                        <div class="flex-grow-1">
+                                                <a href="{{ path('app_esc_voting_notes', {index: participant_to_index[participant.id] ?? 0}) }}" class="text-decoration-none text-dark d-flex align-items-center">
+                                                    <img src="https://purecatamphetamine.github.io/country-flag-icons/3x2/{{ participant.country.code }}.svg"
+                                                         alt="{{ participant.country.name }}" class="me-2 shadow-sm" style="width: 30px; height: 20px; object-fit: cover;">
+                                                    <h6 class="mb-0 fw-bold">{{ participant.country.name }}</h6>
+                                                    <i class="bi bi-journal-text ms-2 text-primary small"></i>
+                                                </a>
+                                            <small class="text-muted">{{ participant.artist }} - {{ participant.song }}</small>
+                                        </div>
+                                    {% else %}
+                                        <div class="flex-grow-1 text-muted italic">
+                                            <em>Keine Bewertung für diesen Platz gefunden</em>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="p-4 bg-light border-top text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow">
+                                <i class="bi bi-check-circle me-2"></i>Auf Stimmzettel übernehmen
+                            </button>
+                            <p class="text-muted mt-2 mb-0 small">
+                                Du kannst deine Auswahl danach noch einmal manuell anpassen, bevor du endgültig abschickst.
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-list-stars me-2"></i>Deine Top-Bewertungen</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Land</th>
+                                    <th class="text-center">Gesamt</th>
+                                    <th class="text-center">Ø Kategorien</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in notes|slice(0, 15) %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ path('app_esc_voting_notes', {index: participant_to_index[note.participant.id] ?? 0}) }}" class="text-decoration-none text-dark d-flex align-items-center">
+                                                <img src="https://purecatamphetamine.github.io/country-flag-icons/3x2/{{ note.participant.country.code }}.svg"
+                                                     alt="" class="me-2" style="width: 20px;">
+                                                <span class="small fw-bold">{{ note.participant.country.name }}</span>
+                                                <i class="bi bi-journal-text ms-1 text-primary" style="font-size: 0.75rem;"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info text-dark">{{ note.ratingOverall ?: 0 }}/10</span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% set avg = ((note.ratingSong ?: 0) + (note.ratingPerformance ?: 0) + (note.ratingVoice ?: 0) + (note.ratingOutfit ?: 0)) / 4 %}
+                                            <span class="text-muted small">{{ avg|number_format(1) }}</span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if notes|length > 15 %}
+                        <div class="p-2 text-center border-top">
+                            <small class="text-muted">... und {{ notes|length - 15 }} weitere</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

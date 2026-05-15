@@ -1,0 +1,86 @@
+<div {{ attributes }} class="participant-note-card">
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white border-bottom-0 pb-0 pt-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div data-loading="show" class="small text-muted">Lädt...</div>
+                <div class="small fw-bold {{ saveStatus == 'Gespeichert' ? 'text-success' : 'text-muted' }} ms-auto">
+                    {{ saveStatus }}
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <img src="https://flagcdn.com/w80/{{ participant.country.code|lower }}.png"
+                         alt="{{ participant.country.name }}" class="me-2 rounded shadow-sm" style="width: 40px;">
+                    <div>
+                        <h5 class="mb-0 fw-bold">{{ participant.country.name }}</h5>
+                        <small class="text-muted">Startplatz: {{ participant.startOrder }}</small>
+                    </div>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="missed-{{ participant.id }}"
+                           {% if isMissed %}checked{% endif %}
+                           data-action="change->live#action"
+                           data-live-action-param="updateIsMissed"
+                           data-live-value-param="{{ isMissed ? 0 : 1 }}">
+                    <label class="form-check-label small" for="missed-{{ participant.id }}">Verpasst</label>
+                </div>
+            </div>
+            <div class="mt-2 pb-2">
+                <div class="fw-bold">{{ participant.artist }}</div>
+                <div class="text-secondary small">{{ participant.song }}</div>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            <div class="rating-section mb-3">
+                <div class="row g-2 mb-3">
+                    {% for category in ['Song', 'Performance', 'Voice', 'Outfit'] %}
+                        {% set currentRating = 0 %}
+                        {% if category == 'Song' %}{% set currentRating = ratingSong %}
+                        {% elseif category == 'Performance' %}{% set currentRating = ratingPerformance %}
+                        {% elseif category == 'Voice' %}{% set currentRating = ratingVoice %}
+                        {% elseif category == 'Outfit' %}{% set currentRating = ratingOutfit %}
+                        {% endif %}
+                        <div class="col-6">
+                            <div class="p-2 border rounded bg-light text-center">
+                                <div class="small fw-bold mb-1">{{ category }}</div>
+                                <div class="star-rating d-flex justify-content-center">
+                                    {% for i in 1..5 %}
+                                        <i class="bi {{ i <= currentRating ? 'bi-star-fill text-warning' : 'bi-star text-muted' }} cursor-pointer fs-5 mx-1"
+                                           data-action="click->live#action"
+                                           data-live-action-param="setRating"
+                                           data-live-category-param="{{ category|lower }}"
+                                           data-live-rating-param="{{ i }}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="p-3 border rounded bg-white shadow-sm mb-3">
+                    <div class="fw-bold mb-2 text-center">Gesamteindruck</div>
+                    <div class="star-rating d-flex justify-content-center flex-wrap">
+                        {% for i in 1..10 %}
+                            <i class="bi {{ i <= ratingOverall ? 'bi-star-fill text-warning' : 'bi-star text-muted' }} cursor-pointer fs-3 mx-1 my-1"
+                               data-action="click->live#action"
+                               data-live-action-param="setRating"
+                               data-live-category-param="overall"
+                               data-live-rating-param="{{ i }}"></i>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="note-{{ participant.id }}" class="form-label small fw-bold mb-0">Notizen</label>
+                </div>
+                <textarea class="form-control" id="note-{{ participant.id }}" rows="4"
+                          placeholder="Was ist dir aufgefallen?..."
+                          data-model="on(blur)|note"
+                          data-action="live#action"
+                          data-live-action-param="updateNote"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

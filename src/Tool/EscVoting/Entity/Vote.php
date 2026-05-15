@@ -26,11 +26,11 @@ class Vote
         public int $points,
 
         #[ORM\ManyToOne(targetEntity: Voter::class)]
-        #[ORM\JoinColumn(nullable: true)]
+        #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
         public ?Voter $voter = null,
 
         #[ORM\ManyToOne(targetEntity: Ballot::class, inversedBy: 'votes')]
-        #[ORM\JoinColumn(nullable: true)]
+        #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
         public ?Ballot $ballot = null,
 
         #[ORM\Column(length: 255, nullable: true)]

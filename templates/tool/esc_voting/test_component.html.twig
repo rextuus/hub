@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Live Component{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Symfony UX Live Component Test</h1>
+    <hr>
+
+    <div class="row">
+        <div class="col-md-6">
+            {{ component('TestComponent') }}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('app_esc_voting_notes') }}" class="btn btn-secondary">Back to Notizblock</a>
+    </div>
+</div>
+{% endblock %}

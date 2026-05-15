@@ -28,6 +28,12 @@ class EscEdition
     #[ORM\Column]
     private bool $isClosed = false;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $bannerLink = null;
+
+    #[ORM\Column(length: 1024, nullable: true)]
+    private ?string $bannerImage = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +95,30 @@ class EscEdition
     public function setIsClosed(bool $isClosed): static
     {
         $this->isClosed = $isClosed;
+
+        return $this;
+    }
+
+    public function getBannerLink(): ?string
+    {
+        return $this->bannerLink;
+    }
+
+    public function setBannerLink(?string $bannerLink): static
+    {
+        $this->bannerLink = $bannerLink;
+
+        return $this;
+    }
+
+    public function getBannerImage(): ?string
+    {
+        return $this->bannerImage;
+    }
+
+    public function setBannerImage(?string $bannerImage): static
+    {
+        $this->bannerImage = $bannerImage;
 
         return $this;
     }

@@ -38,11 +38,11 @@
                                          data-esc-vote-target="country"
                                          data-country-id="{{ participant.id }}"
                                          data-country-name="{{ participant.country.name }}"
-                                         data-country-code="{{ participant.country.countryCode }}"
+                                         data-country-code="{{ participant.country.code }}"
                                          data-artist="{{ participant.artist }}"
                                          data-song="{{ participant.song }}">
                                         <div class="mb-1 mb-md-2" style="pointer-events: none;">
-                                            <span class="fi fi-{{ participant.country.countryCode|lower }} fs-4 fs-md-2 shadow-sm rounded-1"></span>
+                                            <span class="fi fi-{{ participant.country.code|lower }} fs-4 fs-md-2 shadow-sm rounded-1"></span>
                                         </div>
                                         <div class="x-small fw-bold text-truncate" style="pointer-events: none; font-size: 0.6rem; md-font-size: 0.7rem;">{{ participant.country.name }}</div>
                                         <div class="x-small text-muted text-truncate" style="pointer-events: none; font-size: 0.5rem; md-font-size: 0.6rem;">{{ participant.artist }}</div>

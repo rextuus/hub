@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notizblock - {{ active_edition.year }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-2 px-md-4 py-3"
+     data-controller="esc-nav"
+     data-esc-nav-participants-count-value="{{ participants|length }}">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-left"></i> Zurück
+        </a>
+        <h2 class="h4 mb-0">Notizblock {{ active_edition.year }}</h2>
+        <div class="small fw-bold" style="min-width: 80px; text-align: right;"></div>
+    </div>
+
+    <div class="sticky-top bg-white py-2 border-bottom shadow-sm mb-3 mx-n2 px-2" style="z-index: 1020;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <button class="btn btn-outline-primary btn-sm" data-action="click->esc-nav#previous">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <div class="flex-grow-1 mx-2 d-flex">
+                <select class="form-select form-select-sm" data-action="change->esc-nav#jump" data-esc-nav-target="selector">
+                    {% for p in participants %}
+                        <option value="{{ loop.index0 }}">
+                            {{ p.startOrder }}. {{ p.country.name }} ({{ p.artist }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <a href="{{ path('app_esc_voting_precalculation') }}" class="btn btn-outline-primary btn-sm ms-2 shadow-sm" title="Vorschlag basierend auf Notizen">
+                    <i class="bi bi-magic"></i>
+                </a>
+            </div>
+            <button class="btn btn-primary btn-sm" data-action="click->esc-nav#next">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+        <div class="text-center text-muted small">
+            <span data-esc-nav-target="currentCount"></span> / {{ participants|length }}
+        </div>
+    </div>
+
+    {% for p in participants %}
+        <div data-esc-nav-target="participant" class="d-none">
+            {{ component('ParticipantNoteComponent', { participant: p, voter: voter }) }}
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .star-rating-icon { transition: transform 0.1s; }
+    .star-rating-icon:active { transform: scale(1.2); }
+</style>
+{% endblock %}
