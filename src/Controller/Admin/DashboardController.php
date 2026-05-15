@@ -7,6 +7,7 @@ use App\Tool\EscVoting\Controller\Admin\VoteCrudController;
 use App\Tool\EscVoting\Controller\Admin\VoterCrudController;
 use App\Tool\EscVoting\Controller\Admin\BallotCrudController;
 use App\Tool\EscVoting\Controller\Admin\EscEditionCrudController;
+use App\Tool\EscVoting\Controller\Admin\ParticipantCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -44,6 +45,7 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::subMenu('Stammdaten', 'fas fa-database')->setSubItems([
             MenuItem::linkTo(CountryCrudController::class, 'Länder', 'fas fa-globe'),
+            MenuItem::linkTo(ParticipantCrudController::class, 'Teilnehmer', 'fas fa-music'),
             MenuItem::linkTo(VoterCrudController::class, 'Voter', 'fas fa-users'),
         ]);
     }

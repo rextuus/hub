@@ -155,11 +155,13 @@ export default class extends Controller {
 
                     const name = countryEl.dataset.countryName;
                     const code = countryEl.dataset.countryCode;
+                    const artist = countryEl.dataset.artist;
 
                     content.innerHTML = `
                         <div class="d-flex align-items-center justify-content-center h-100 flex-column">
-                            <span class="fi fi-${code.toLowerCase()} ${isLarge ? 'fs-1' : 'fs-4'} mb-1 shadow-sm rounded-1"></span>
-                            <span class="fw-semibold ${isLarge ? 'fs-5' : 'x-small'} text-truncate w-100 px-1">${name}</span>
+                            <span class="fi fi-${code.toLowerCase()} ${isLarge ? 'fs-2' : 'fs-5'} mb-1 shadow-sm rounded-1"></span>
+                            <span class="fw-semibold ${isLarge ? 'fs-6' : 'x-small'} text-truncate w-100 px-1" style="font-size: 0.7rem;">${name}</span>
+                            ${isLarge ? `<span class="text-muted text-truncate w-100 px-1" style="font-size: 0.6rem;">${artist}</span>` : ''}
                         </div>
                     `;
                     input.value = countryId;

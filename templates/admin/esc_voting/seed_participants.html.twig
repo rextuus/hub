@@ -1,0 +1,34 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block content_title %}
+    Teilnehmer importieren für {{ edition.year }} ({{ edition.location }})
+{% endblock %}
+
+{% block main %}
+    <div class="content-panel">
+        <div class="content-panel-body">
+            <p>Geben Sie die Teilnehmerliste im folgenden Format ein (eine Zeile pro Teilnehmer):</p>
+            <code>CountryCode;Künstler;Song;Startnummer</code>
+            <p class="mt-2">Beispiel:<br>
+                <code>DE;Isaak;Always on the Run;3</code><br>
+                <code>CH;Nemo;The Code;21</code>
+            </p>
+
+            <form method="POST" class="mt-4">
+                <div class="form-group">
+                    <label for="participant_list">Teilnehmerliste</label>
+                    <textarea id="participant_list" name="participant_list" class="form-control" rows="15" placeholder="SE;Marcus & Martinus;Unforgettable;1"></textarea>
+                </div>
+
+                <div class="form-actions mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Importieren
+                    </button>
+                    <a href="{{ ea_url().setController('App\\Tool\\EscVoting\\Controller\\Admin\\EscEditionCrudController').setAction('index') }}" class="btn btn-link">
+                        Abbrechen
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -20,7 +20,7 @@ class Vote
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false)]
-        public Country $country,
+        public Participant $participant,
 
         #[ORM\Column]
         public int $points,

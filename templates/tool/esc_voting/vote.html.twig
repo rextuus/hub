@@ -30,19 +30,22 @@
                     </h5>
                     <div class="country-pool p-1 p-md-3 rounded-4 bg-light border shadow-inner">
                         <div class="row g-1 g-md-2 mx-0" style="scrollbar-width: thin;">
-                            {% for country in countries %}
+                            {% for participant in participants %}
                                 <div class="col-4 col-sm-3 col-lg-4">
                                     <div class="country-item p-1 p-md-2 rounded-3 border bg-white text-center shadow-sm draggable"
                                          draggable="true"
                                          data-action="dragstart->esc-vote#dragStart click->esc-vote#toggleCountry"
                                          data-esc-vote-target="country"
-                                         data-country-id="{{ country.id }}"
-                                         data-country-name="{{ country.name }}"
-                                         data-country-code="{{ country.countryCode }}">
+                                         data-country-id="{{ participant.id }}"
+                                         data-country-name="{{ participant.country.name }}"
+                                         data-country-code="{{ participant.country.countryCode }}"
+                                         data-artist="{{ participant.artist }}"
+                                         data-song="{{ participant.song }}">
                                         <div class="mb-1 mb-md-2" style="pointer-events: none;">
-                                            <span class="fi fi-{{ country.countryCode|lower }} fs-4 fs-md-2 shadow-sm rounded-1"></span>
+                                            <span class="fi fi-{{ participant.country.countryCode|lower }} fs-4 fs-md-2 shadow-sm rounded-1"></span>
                                         </div>
-                                        <div class="x-small fw-medium text-truncate" style="pointer-events: none; font-size: 0.6rem; md-font-size: 0.7rem;">{{ country.name }}</div>
+                                        <div class="x-small fw-bold text-truncate" style="pointer-events: none; font-size: 0.6rem; md-font-size: 0.7rem;">{{ participant.country.name }}</div>
+                                        <div class="x-small text-muted text-truncate" style="pointer-events: none; font-size: 0.5rem; md-font-size: 0.6rem;">{{ participant.artist }}</div>
                                     </div>
                                 </div>
                             {% endfor %}

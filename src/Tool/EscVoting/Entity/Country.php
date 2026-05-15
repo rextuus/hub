@@ -16,14 +16,35 @@ class Country
 
     public function __construct(
         #[ORM\Column(length: 255)]
-        public string $name,
+        private string $name,
 
         #[ORM\Column(length: 10)]
-        public string $countryCode,
-
-        #[ORM\Column]
-        public int $startOrder,
+        private string $countryCode,
     ) {
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getCountryCode(): string
+    {
+        return $this->countryCode;
+    }
+
+    public function setCountryCode(string $countryCode): self
+    {
+        $this->countryCode = $countryCode;
+
+        return $this;
     }
 
     public function __toString(): string

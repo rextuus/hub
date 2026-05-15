@@ -2,6 +2,8 @@
 
 namespace App\Tool\EscVoting\Controller;
 
+use App\Tool\EscVoting\Repository\ParticipantRepository;
+use App\Tool\EscVoting\Entity\Participant;
 use App\Tool\EscVoting\Repository\CountryRepository;
 use App\Tool\EscVoting\Entity\Voter;
 use App\Tool\EscVoting\Entity\Vote;
@@ -136,12 +138,12 @@ class EscVotingController extends AbstractController
                 }
 
                 $ballotId = $ballotData['id'];
-                $sql = 'SELECT v.country_id, v.points FROM esc_voting_vote v WHERE v.ballot_id = :ballotId';
+                $sql = 'SELECT v.participant_id, v.points FROM esc_voting_vote v WHERE v.ballot_id = :ballotId';
                 $votes = $conn->fetchAllAssociative($sql, ['ballotId' => $ballotId]);
 
                 $choices = [];
                 foreach ($votes as $vote) {
-                    $choices[$vote['points']] = (string)$vote['country_id'];
+                    $choices[$vote['points']] = (string)$vote['participant_id'];
                 }
 
                 $request->getSession()->set('esc_voting_choices', $choices);
@@ -155,7 +157,7 @@ class EscVotingController extends AbstractController
     }
 
     #[Route('/esc-voting/vote', name: 'app_esc_voting_vote')]
-    public function vote(Request $request, CountryRepository $countryRepository, EscEditionRepository $escEditionRepository): Response
+    public function vote(Request $request, ParticipantRepository $participantRepository, EscEditionRepository $escEditionRepository): Response
     {
         $activeEdition = $escEditionRepository->findActive();
         $initialChoices = $request->getSession()->get('esc_voting_choices', []);
@@ -163,9 +165,14 @@ class EscVotingController extends AbstractController
             $initialChoices = (object)[];
         }
 
+        $participants = [];
+        if ($activeEdition) {
+            $participants = $participantRepository->findBy(['edition' => $activeEdition], ['startOrder' => 'ASC']);
+        }
+
         $voterName = $request->getSession()->get('esc_voter_name') ?: $request->cookies->get('esc_voter_name');
         return $this->render('tool/esc_voting/vote.html.twig', [
-            'countries' => $countryRepository->findBy([], ['startOrder' => 'ASC']),
+            'participants' => $participants,
             'allowed_points' => [1, 2, 3, 4, 5, 6, 7, 8, 10, 12],
             'initial_choices' => $initialChoices,
             'voter_name' => $voterName,
@@ -185,7 +192,7 @@ class EscVotingController extends AbstractController
     #[Route('/esc-voting/vote/submit', name: 'app_esc_voting_vote_submit', methods: ['POST'])]
     public function submit(
         Request $request,
-        CountryRepository $countryRepository,
+        ParticipantRepository $participantRepository,
         EntityManagerInterface $entityManager,
         VoterRepository $voterRepository,
         EscEditionRepository $escEditionRepository,
@@ -241,13 +248,13 @@ class EscVotingController extends AbstractController
             $entityManager->persist($ballot);
         }
 
-        foreach ($votesData as $points => $countryId) {
-            if (!$countryId) continue;
+        foreach ($votesData as $points => $participantId) {
+            if (!$participantId) continue;
 
-            $country = $countryRepository->find($countryId);
-            if ($country) {
+            $participant = $participantRepository->find($participantId);
+            if ($participant) {
                 $vote = new Vote(
-                    country: $country,
+                    participant: $participant,
                     points: (int)$points,
                     voter: $voter,
                     ballot: $ballot,
@@ -271,7 +278,7 @@ class EscVotingController extends AbstractController
     }
 
     #[Route('/esc-voting/overview', name: 'app_esc_voting_overview')]
-    public function overview(EntityManagerInterface $entityManager, CountryRepository $countryRepository, EscEditionRepository $escEditionRepository): Response
+    public function overview(EntityManagerInterface $entityManager, ParticipantRepository $participantRepository, EscEditionRepository $escEditionRepository): Response
     {
         $activeEdition = $escEditionRepository->findActive();
 
@@ -282,9 +289,18 @@ class EscVotingController extends AbstractController
 
         $conn = $entityManager->getConnection();
 
-        // 1. Get all countries
-        $countriesSql = 'SELECT c.id, c.name, c.country_code as countryCode, c.start_order as startOrder FROM esc_voting_country c ORDER BY c.start_order ASC';
-        $countries = $conn->fetchAllAssociative($countriesSql);
+        // 1. Get all participants for active edition
+        $participants = [];
+        if ($activeEdition) {
+            $participantsSql = '
+                SELECT p.id, p.artist, p.song, p.start_order as startOrder, c.name as countryName, c.country_code as countryCode
+                FROM esc_voting_participant p
+                JOIN esc_voting_country c ON p.country_id = c.id
+                WHERE p.edition_id = :editionId
+                ORDER BY p.start_order ASC
+            ';
+            $participants = $conn->fetchAllAssociative($participantsSql, ['editionId' => $activeEdition->getId()]);
+        }
 
         // 2. Get all ballots with their votes
         $ballotsSql = '
@@ -303,7 +319,7 @@ class EscVotingController extends AbstractController
 
         $ballots = [];
         foreach ($ballotsData as $bData) {
-            $votesSql = 'SELECT v.country_id as countryId, v.points FROM esc_voting_vote v WHERE v.ballot_id = :ballotId';
+            $votesSql = 'SELECT v.participant_id as participantId, v.points FROM esc_voting_vote v WHERE v.ballot_id = :ballotId';
             $votes = $conn->fetchAllAssociative($votesSql, ['ballotId' => $bData['ballotId']]);
 
             $identifier = $bData['userEmail'] ?: ($bData['voterName'] ?: 'Anonym');
@@ -327,7 +343,7 @@ class EscVotingController extends AbstractController
         $voteCount = $conn->fetchOne($voteCountSql, $voteCountParams);
 
         return $this->render('tool/esc_voting/overview.html.twig', [
-            'countries' => $countries,
+            'participants' => $participants,
             'ballots' => $ballots,
             'ballot_count' => $voterCount,
             'vote_count' => $voteCount,

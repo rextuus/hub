@@ -2,6 +2,8 @@
 
 namespace App\Tool\EscVoting\Command;
 
+use App\Tool\EscVoting\Entity\Participant;
+use App\Tool\EscVoting\Entity\EscEdition;
 use App\Entity\Project;
 use App\Tool\EscVoting\Entity\Country;
 use App\Tool\EscVoting\Entity\Vote;
@@ -49,57 +51,117 @@ class InitEscCommand extends Command
             $io->note('Project entity for ESC Voting already exists.');
         }
 
-        // 2. Clear existing ESC data (optional but recommended for "init")
-        if ($io->confirm('Do you want to clear existing ESC data (votes, ballots, voters, countries) before seeding?', true)) {
+        if ($io->confirm('Do you want to clear existing ESC data (votes, ballots, voters, countries, participants, editions) before seeding?', false)) {
             $io->note('Clearing existing ESC data...');
             $this->entityManager->createQuery('DELETE FROM ' . Vote::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . Ballot::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . Voter::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . Participant::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . Country::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . EscEdition::class)->execute();
             $this->entityManager->flush();
         }
 
-        // 3. Seed Countries
-        $io->note('Seeding countries...');
-        $countriesData = [
-            ['name' => 'Schweden', 'code' => 'SE', 'order' => 1],
-            ['name' => 'Ukraine', 'code' => 'UA', 'order' => 2],
-            ['name' => 'Deutschland', 'code' => 'DE', 'order' => 3],
-            ['name' => 'Luxemburg', 'code' => 'LU', 'order' => 4],
-            ['name' => 'Niederlande', 'code' => 'NL', 'order' => 5],
-            ['name' => 'Israel', 'code' => 'IL', 'order' => 6],
-            ['name' => 'Litauen', 'code' => 'LT', 'order' => 7],
-            ['name' => 'Spanien', 'code' => 'ES', 'order' => 8],
-            ['name' => 'Estland', 'code' => 'EE', 'order' => 9],
-            ['name' => 'Irland', 'code' => 'IE', 'order' => 10],
-            ['name' => 'Lettland', 'code' => 'LV', 'order' => 11],
-            ['name' => 'Griechenland', 'code' => 'GR', 'order' => 12],
-            ['name' => 'Großbritannien', 'code' => 'GB', 'order' => 13],
-            ['name' => 'Norwegen', 'code' => 'NO', 'order' => 14],
-            ['name' => 'Italien', 'code' => 'IT', 'order' => 15],
-            ['name' => 'Serbien', 'code' => 'RS', 'order' => 16],
-            ['name' => 'Finnland', 'code' => 'FI', 'order' => 17],
-            ['name' => 'Portugal', 'code' => 'PT', 'order' => 18],
-            ['name' => 'Armenien', 'code' => 'AM', 'order' => 19],
-            ['name' => 'Zypern', 'code' => 'CY', 'order' => 20],
-            ['name' => 'Schweiz', 'code' => 'CH', 'order' => 21],
-            ['name' => 'Slowenien', 'code' => 'SI', 'order' => 22],
-            ['name' => 'Kroatien', 'code' => 'HR', 'order' => 23],
-            ['name' => 'Georgien', 'code' => 'GE', 'order' => 24],
-            ['name' => 'Frankreich', 'code' => 'FR', 'order' => 25],
-            ['name' => 'Österreich', 'code' => 'AT', 'order' => 26],
-        ];
-
-        foreach ($countriesData as $data) {
-            $country = new Country(
-                name: $data['name'],
-                countryCode: $data['code'],
-                startOrder: $data['order']
-            );
-            $this->entityManager->persist($country);
+        // 2.5 Ensure an active edition exists
+        $edition = $this->entityManager->getRepository(EscEdition::class)->findOneBy(['isActive' => true]);
+        if (!$edition) {
+            $io->note('Creating an active ESC Edition (2025)...');
+            $edition = new EscEdition();
+            $edition->setYear('2025');
+            $edition->setLocation('Basel');
+            $edition->setIsActive(true);
+            $this->entityManager->persist($edition);
+            $this->entityManager->flush();
         }
 
-        $this->entityManager->flush();
+        // 3. Seed Countries (Upsert logic)
+        $countryCount = $this->entityManager->getRepository(Country::class)->count([]);
+        if ($countryCount === 0 || $io->confirm('Countries already exist. Do you want to update/re-seed them?', false)) {
+            $io->note('Seeding countries...');
+            $countriesData = [
+                ['name' => 'Albania', 'code' => 'AL'],
+                ['name' => 'Andorra', 'code' => 'AD'],
+                ['name' => 'Armenia', 'code' => 'AM'],
+                ['name' => 'Australia', 'code' => 'AU'],
+                ['name' => 'Austria', 'code' => 'AT'],
+                ['name' => 'Azerbaijan', 'code' => 'AZ'],
+                ['name' => 'Belarus', 'code' => 'BY'],
+                ['name' => 'Belgium', 'code' => 'BE'],
+                ['name' => 'Bosnia and Herzegovina', 'code' => 'BA'],
+                ['name' => 'Bulgaria', 'code' => 'BG'],
+                ['name' => 'Croatia', 'code' => 'HR'],
+                ['name' => 'Cyprus', 'code' => 'CY'],
+                ['name' => 'Czechia', 'code' => 'CZ'],
+                ['name' => 'Denmark', 'code' => 'DK'],
+                ['name' => 'Estonia', 'code' => 'EE'],
+                ['name' => 'Finland', 'code' => 'FI'],
+                ['name' => 'France', 'code' => 'FR'],
+                ['name' => 'Georgia', 'code' => 'GE'],
+                ['name' => 'Germany', 'code' => 'DE'],
+                ['name' => 'Greece', 'code' => 'GR'],
+                ['name' => 'Hungary', 'code' => 'HU'],
+                ['name' => 'Iceland', 'code' => 'IS'],
+                ['name' => 'Ireland', 'code' => 'IE'],
+                ['name' => 'Israel', 'code' => 'IL'],
+                ['name' => 'Italy', 'code' => 'IT'],
+                ['name' => 'Latvia', 'code' => 'LV'],
+                ['name' => 'Lithuania', 'code' => 'LT'],
+                ['name' => 'Luxembourg', 'code' => 'LU'],
+                ['name' => 'Malta', 'code' => 'MT'],
+                ['name' => 'Moldova', 'code' => 'MD'],
+                ['name' => 'Monaco', 'code' => 'MC'],
+                ['name' => 'Montenegro', 'code' => 'ME'],
+                ['name' => 'Morocco', 'code' => 'MA'],
+                ['name' => 'Netherlands', 'code' => 'NL'],
+                ['name' => 'North Macedonia', 'code' => 'MK'],
+                ['name' => 'Norway', 'code' => 'NO'],
+                ['name' => 'Poland', 'code' => 'PL'],
+                ['name' => 'Portugal', 'code' => 'PT'],
+                ['name' => 'Romania', 'code' => 'RO'],
+                ['name' => 'Russia', 'code' => 'RU'],
+                ['name' => 'San Marino', 'code' => 'SM'],
+                ['name' => 'Serbia', 'code' => 'RS'],
+                ['name' => 'Slovakia', 'code' => 'SK'],
+                ['name' => 'Slovenia', 'code' => 'SI'],
+                ['name' => 'Spain', 'code' => 'ES'],
+                ['name' => 'Sweden', 'code' => 'SE'],
+                ['name' => 'Switzerland', 'code' => 'CH'],
+                ['name' => 'Turkey', 'code' => 'TR'],
+                ['name' => 'Ukraine', 'code' => 'UA'],
+                ['name' => 'United Kingdom', 'code' => 'GB'],
+            ];
+
+            $order = 1;
+            foreach ($countriesData as $data) {
+                $country = $this->entityManager->getRepository(Country::class)->findOneBy(['countryCode' => $data['code']]);
+                if (!$country) {
+                    $country = new Country(
+                        name: $data['name'],
+                        countryCode: $data['code']
+                    );
+                    $this->entityManager->persist($country);
+                } else {
+                    $country->setName($data['name']);
+                }
+
+                // If no participants exist for this edition, seed dummy ones
+                $participant = $this->entityManager->getRepository(Participant::class)->findOneBy([
+                    'country' => $country,
+                    'edition' => $edition
+                ]);
+
+                if (!$participant) {
+                    $participant = new Participant();
+                    $participant->setCountry($country);
+                    $participant->setEdition($edition);
+                    $participant->setArtist('Artist for ' . $data['name']);
+                    $participant->setSong('Song for ' . $data['name']);
+                    $participant->setStartOrder($order++);
+                    $this->entityManager->persist($participant);
+                }
+            }
+            $this->entityManager->flush();
+        }
 
         $io->success('ESC Project initialized successfully.');
 

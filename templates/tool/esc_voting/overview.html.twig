@@ -7,10 +7,10 @@
 {% block body %}
     <div class="container-fluid px-1 px-md-3 py-2 py-md-4 esc-voting-container overflow-x-hidden"
          data-controller="esc-results"
-         data-esc-results-countries-value="{{ countries|json_encode }}"
+         data-esc-results-countries-value="{{ participants|json_encode }}"
          data-esc-results-ballots-value="{{ ballots|json_encode }}"
          data-esc-results-session-key-value="esc_results_revelation"
-         data-esc-results-show-points-value="false">
+         data-esc-results-show-points-value="true">
 
         <div class="row mb-3">
             <div class="col-12 px-2 px-md-3 d-flex align-items-center justify-content-between">
@@ -24,7 +24,7 @@
                         {{ ux_icon('lucide:rotate-ccw', {class: 'me-1 d-none d-md-inline'}) }} Reset
                     </button>
                     <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark px-2 border-0" data-action="click->esc-results#toggleDisplayMode" title="Anzeige umschalten">
-                        {{ ux_icon('lucide:replace', {class: 'me-1 d-none d-md-inline'}) }} <span data-esc-results-target="displayModeLabel">Punkte</span>
+                        {{ ux_icon('lucide:replace', {class: 'me-1 d-none d-md-inline'}) }} <span data-esc-results-target="displayModeLabel">Nur Initialen</span>
                     </button>
                     <div class="ms-1 ms-md-2 d-flex gap-1 gap-md-2">
                         <button class="btn btn-link btn-sm text-white-50 text-decoration-none px-2" data-action="click->esc-results#revealAll">
@@ -97,8 +97,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for country in countries %}
-                                <tr class="ranking-row" data-esc-results-target="row" data-country-id="{{ country.id }}">
+                                {% for participant in participants %}
+                                <tr class="ranking-row" data-esc-results-target="row" data-country-id="{{ participant.id }}">
                                     <td class="ps-2 ps-md-4">
                                         <div class="rank-badge rank-{{ loop.index }}">
                                             {{ loop.index }}
@@ -107,10 +107,11 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="me-2 me-md-3 country-flag-wrapper shadow-sm">
-                                                <span class="fi fi-{{ country.countryCode|lower }}"></span>
+                                                <span class="fi fi-{{ participant.countryCode|lower }}"></span>
                                             </div>
                                             <div>
-                                                <div class="fw-bold country-name small fs-md-6">{{ country.name }}</div>
+                                                <div class="fw-bold country-name small fs-md-6">{{ participant.countryName }}</div>
+                                                <div class="artist-name x-small text-muted">{{ participant.artist }} - {{ participant.song }}</div>
                                                 <div class="voter-avatars mt-1 d-md-none voter-avatars-container">
                                                     {# Dynamically filled #}
                                                 </div>

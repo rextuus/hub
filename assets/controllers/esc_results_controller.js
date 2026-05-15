@@ -16,19 +16,27 @@ export default class extends Controller {
             votes: []
         }));
 
+        const savedShowPoints = sessionStorage.getItem(this.sessionKey + '_show_points');
+        if (savedShowPoints !== null) {
+            this.showPointsValue = savedShowPoints === 'true';
+            this.displayModeLabelTarget.innerText = this.showPointsValue ? 'Nur Initialen' : 'Beides anzeigen';
+        }
+
         this.currentBallotIndex = parseInt(sessionStorage.getItem(this.sessionKey + '_index') || '0');
         this.currentStep = parseInt(sessionStorage.getItem(this.sessionKey + '_step') || '0'); // 0: load user, 1: 1-7 points, 2: 8,10,12 points
 
         // Restore state if we were already in progress
         for (let i = 0; i < this.currentBallotIndex; i++) {
-            this.applyBallot(this.ballotsValue[i], true);
+            if (this.ballotsValue[i]) {
+                this.applyBallot(this.ballotsValue[i], true);
+            }
         }
 
         let ballotBeingRevealed = null;
         let revealedPointsSubset = [];
 
         // If we were in the middle of a ballot, we need to handle that.
-        if (this.currentStep > 0) {
+        if (this.currentStep > 0 && this.ballotsValue[this.currentBallotIndex]) {
             ballotBeingRevealed = this.ballotsValue[this.currentBallotIndex];
             if (this.currentStep === 1) {
                 revealedPointsSubset = [1, 2, 3, 4, 5, 6, 7];
@@ -37,7 +45,13 @@ export default class extends Controller {
                 this.applyBallot(ballotBeingRevealed, true);
                 this.currentBallotIndex++;
                 this.currentStep = 0;
+                sessionStorage.setItem(this.sessionKey + '_index', this.currentBallotIndex);
+                sessionStorage.setItem(this.sessionKey + '_step', this.currentStep);
             }
+        } else if (this.currentStep > 0) {
+            // Index out of bounds, reset step
+            this.currentStep = 0;
+            sessionStorage.setItem(this.sessionKey + '_step', this.currentStep);
         }
 
         this.sortResults();
@@ -112,7 +126,8 @@ export default class extends Controller {
 
     toggleDisplayMode() {
         this.showPointsValue = !this.showPointsValue;
-        this.displayModeLabelTarget.innerText = this.showPointsValue ? 'Initialen anzeigen' : 'Punkte anzeigen';
+        this.displayModeLabelTarget.innerText = this.showPointsValue ? 'Nur Initialen' : 'Beides anzeigen';
+        sessionStorage.setItem(this.sessionKey + '_show_points', this.showPointsValue);
         this.render(false, false);
     }
 
@@ -126,7 +141,7 @@ export default class extends Controller {
             this.rowTargets.forEach(row => {
                 const badges = row.querySelectorAll(`.voter-badge[data-voter-id="${ballot.id}"]`);
                 badges.forEach(badge => {
-                    const points = parseInt(badge.querySelector('.badge-back').innerText);
+                    const points = parseInt(badge.dataset.points);
                     if (pointsSubset.includes(points)) {
                         badge.classList.remove('not-flipped');
                         badge.classList.add('is-flipped');
@@ -143,14 +158,18 @@ export default class extends Controller {
     }
 
     applyBallot(ballot, silent, pointsSubset = null) {
+        if (!ballot || !ballot.votes) {
+            console.warn('Attempted to apply an invalid ballot:', ballot);
+            return;
+        }
         ballot.votes.forEach(vote => {
             const pointsValue = parseInt(vote.points);
             if (pointsSubset && !pointsSubset.includes(pointsValue)) return;
 
-            const country = this.results.find(c => c.id === parseInt(vote.countryId));
+            const country = this.results.find(c => parseInt(c.id) === parseInt(vote.participantId));
             if (country) {
                 // Check if this specific vote was already applied to avoid duplicates on refresh/restore
-                const voteExists = country.votes.find(v => v.ballotId === ballot.id && v.points === pointsValue);
+                const voteExists = country.votes.find(v => parseInt(v.ballotId) === parseInt(ballot.id) && parseInt(v.points) === pointsValue);
                 if (voteExists) return;
 
                 country.totalPoints += pointsValue;
@@ -166,10 +185,10 @@ export default class extends Controller {
 
     sortResults() {
         this.results.sort((a, b) => {
-            if (b.totalPoints !== a.totalPoints) {
-                return b.totalPoints - a.totalPoints;
+            if (parseInt(b.totalPoints) !== parseInt(a.totalPoints)) {
+                return parseInt(b.totalPoints) - parseInt(a.totalPoints);
             }
-            return a.name.localeCompare(b.name);
+            return a.countryName.localeCompare(b.countryName);
         });
     }
 
@@ -261,7 +280,7 @@ export default class extends Controller {
         const pointsEl = target.querySelector('.podium-points-value');
         const flagEl = target.querySelector('.fi');
 
-        nameEl.innerText = result.name;
+        nameEl.innerHTML = `<div>${result.countryName}</div><div class="x-small text-muted" style="font-size: 0.6em;">${result.artist}</div>`;
         flagEl.className = `fi fi-${result.countryCode.toLowerCase()}`;
 
         const oldPointsText = pointsEl.innerText || '0';
@@ -279,21 +298,25 @@ export default class extends Controller {
         if (!container) return;
 
         container.innerHTML = votes.map(v => {
-            let isFlipped = this.showPointsValue;
+            if (this.showPointsValue) {
+                return `
+                    <div class="voter-badge both-sides" title="${v.voterName}: ${v.points} Pkt" data-voter-id="${v.ballotId}" data-points="${v.points}">
+                        <div class="side-front">${v.voterInitial}</div>
+                        <div class="side-back">${v.points}</div>
+                    </div>
+                `;
+            }
 
-            // If we are NOT in global "show points" mode, we still want to flip the badges
-            // that are currently being revealed or were already revealed in the current session
-            // BUT the user wants a switch, so if showPointsValue is FALSE, it should probably
-            // show initials UNLESS we are in the middle of a reveal animation.
+            let isFlipped = false;
 
-            if (!this.showPointsValue && ballotBeingRevealed && v.ballotId === ballotBeingRevealed.id) {
-                if (revealedPointsSubset.includes(v.points)) {
+            if (ballotBeingRevealed && parseInt(v.ballotId) === parseInt(ballotBeingRevealed.id)) {
+                if (revealedPointsSubset.includes(parseInt(v.points))) {
                     isFlipped = true;
                 }
             }
 
             return `
-                <div class="voter-badge ${isFlipped ? 'is-flipped' : 'not-flipped'}" title="${v.voterName}: ${v.points} Pkt" data-voter-id="${v.ballotId}">
+                <div class="voter-badge ${isFlipped ? 'is-flipped' : 'not-flipped'}" title="${v.voterName}: ${v.points} Pkt" data-voter-id="${v.ballotId}" data-points="${v.points}">
                     <div class="badge-front">${v.voterInitial}</div>
                     <div class="badge-back">${v.points}</div>
                 </div>

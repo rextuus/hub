@@ -24,7 +24,7 @@ class VoteCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             AssociationField::new('ballot', 'Stimmzettel'),
-            AssociationField::new('country', 'Land'),
+            AssociationField::new('participant', 'Teilnehmer'),
             IntegerField::new('points', 'Punkte'),
             AssociationField::new('voter', 'Voter'),
             TextField::new('sessionId')->onlyOnDetail(),
@@ -36,7 +36,7 @@ class VoteCrudController extends AbstractCrudController
     {
         return $filters
             ->add(EntityFilter::new('ballot'))
-            ->add(EntityFilter::new('country'))
+            ->add(EntityFilter::new('participant'))
             ->add(EntityFilter::new('voter'));
     }
 }

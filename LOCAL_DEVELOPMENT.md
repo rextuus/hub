@@ -64,6 +64,16 @@ docker compose exec php bin/console make:migration
   docker compose exec php vendor/bin/phpunit
   ```
 
+- **Compile Assets:**
+  ```bash
+  docker compose exec php bin/console asset-map:compile
+  ```
+
+- **Database Schema Validation:**
+  ```bash
+  docker compose exec php bin/console doctrine:schema:validate
+  ```
+
 - **Access Container Shell:**
   ```bash
   docker compose exec php bash
@@ -79,19 +89,13 @@ These commands are custom-built for this application.
   ```
 
 - **Initialize ESC Project:**
-  (Ensures project entity exists and seeds initial countries)
+  (Ensures project entity exists, active edition exists, and seeds countries if missing)
   ```bash
   docker compose exec php bin/console app:esc:init
   ```
 
-- **Import ESC Countries:**
-  (Imports a hardcoded list of countries)
-  ```bash
-  docker compose exec php bin/console app:esc:import-countries
-  ```
-
 - **Seed ESC Countries:**
-  (Alternative seeding for ESC countries)
+  (Updates/Seeds the master list of countries)
   ```bash
   docker compose exec php bin/console app:esc:seed-countries
   ```
@@ -101,6 +105,15 @@ These commands are custom-built for this application.
   ```bash
   docker compose exec php bin/console app:projects:seed
   ```
+
+## Admin Features
+
+### ESC Participant Import
+Administrators can import participants for an ESC Edition via the Admin Dashboard.
+1. Navigate to **ESC Voting** -> **Editionen**.
+2. Click the **Teilnehmer importieren** (Import Participants) icon for the desired edition.
+3. Paste a list of participants in the format: `CountryCode;Artist;Song;StartOrder` (one per line).
+   - Example: `DE;Isaak;Always on the Run;3`
 
 ## Database Access
 
