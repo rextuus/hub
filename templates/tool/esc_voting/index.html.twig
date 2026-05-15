@@ -19,7 +19,7 @@
                     <div class="banner-text-box d-inline-block rounded-4" style="backdrop-filter: blur(8px); background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                         <span class="d-block text-uppercase tracking-widest fw-light mb-1 esc-subtitle" style="opacity: 0.9;">Eurovision Song Contest</span>
                         <h1 class="fw-black mb-0 tracking-tighter" style="font-weight: 900; line-height: 0.9;">
-                            <span class="text-primary-emphasis" style="color: #ff0055;">{{ active_edition.location }}</span>
+                            <span class="text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);">{{ active_edition.location }}</span>
                             <span class="d-block d-md-inline ms-md-2" style="font-weight: 300; opacity: 0.8;">{{ active_edition.year }}</span>
                         </h1>
                     </div>
@@ -77,11 +77,6 @@
                             Direkt zum Voting {{ ux_icon('lucide:arrow-right', {class: 'ms-2'}) }}
                         </a>
                     </div>
-                </div>
-
-                <div class="project-card p-4 p-md-5 h-100 shadow-sm border-light opacity-75">
-                    <h2 class="h4 fw-bold mb-3 text-center">Dein Voting</h2>
-                    <p class="text-center text-muted">Sobald du bereit bist, kannst du hier deine 1 bis 12 Punkte vergeben.</p>
                 </div>
             {% else %}
                 <div class="project-card p-4 p-md-5 shadow-lg border-primary border-opacity-25">
@@ -203,6 +198,22 @@
                                 </div>
                                 {{ ux_icon('lucide:sticky-note') }}
                             </a>
+                            <a href="{{ path('app_esc_voting_stats') }}" class="btn btn-outline-danger d-flex align-items-center justify-content-between p-3 text-start">
+                                <div>
+                                    <div class="fw-bold text-danger">Meta-Statistiken</div>
+                                    <small class="text-muted">Hot or Not & Besonderheiten</small>
+                                </div>
+                                {{ ux_icon('lucide:bar-chart-3') }}
+                            </a>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('app_esc_voting_stats') }}" class="btn btn-danger d-flex align-items-center justify-content-between p-3 text-start">
+                                    <div>
+                                        <div class="fw-bold">Admin: Statistiken</div>
+                                        <small class="text-white-50">Immer verfügbar für Admins</small>
+                                    </div>
+                                    {{ ux_icon('lucide:shield-check') }}
+                                </a>
+                            {% endif %}
                             {% if has_existing_ballot %}
                                 <a href="{{ path('app_esc_voting_vote_edit') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-between p-3 text-start">
                                     <div>

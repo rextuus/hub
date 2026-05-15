@@ -19,6 +19,9 @@
                 </a>
                 <h1 class="h5 fw-bold mb-0 text-white d-none d-md-block">ESC Voting - Ergebnisse</h1>
                 <div class="d-flex align-items-center gap-1 gap-md-2 flex-wrap justify-content-end">
+                    <a href="{{ path('app_esc_voting_stats') }}" class="btn btn-outline-danger btn-sm fw-bold shadow-sm px-2 border-0 me-md-2" title="Meta-Statistiken">
+                        {{ ux_icon('lucide:bar-chart-3', {class: 'me-1 d-none d-md-inline'}) }} Stats
+                    </a>
                     <span class="text-white small d-none d-sm-inline me-md-2" data-esc-results-target="voterStatus">Warte auf Start...</span>
                     <button class="btn btn-outline-light btn-sm fw-bold shadow-sm text-dark px-2 border-0" data-action="click->esc-results#reset" title="Reset">
                         {{ ux_icon('lucide:rotate-ccw', {class: 'me-1 d-none d-md-inline'}) }} Reset

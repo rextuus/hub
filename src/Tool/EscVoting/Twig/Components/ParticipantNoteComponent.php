@@ -39,10 +39,22 @@ class ParticipantNoteComponent
     public ?int $ratingOverall = 0;
 
     #[LiveProp(writable: true)]
+    public ?int $ratingHotOrNot = 0;
+
+    #[LiveProp(writable: true)]
     public ?string $note = '';
 
     #[LiveProp(writable: true)]
     public bool $isMissed = false;
+
+    #[LiveProp(writable: true)]
+    public bool $hasFireworks = false;
+
+    #[LiveProp(writable: true)]
+    public bool $hasGadgets = false;
+
+    #[LiveProp(writable: true)]
+    public bool $hasExtraDancers = false;
 
     #[LiveProp]
     public ?string $saveStatus = '';
@@ -67,8 +79,12 @@ class ParticipantNoteComponent
             $this->ratingVoice = $note->getRatingVoice() ?? 0;
             $this->ratingOutfit = $note->getRatingOutfit() ?? 0;
             $this->ratingOverall = $note->getRatingOverall() ?? 0;
+            $this->ratingHotOrNot = $note->getRatingHotOrNot() ?? 0;
             $this->note = $note->getNote() ?? '';
             $this->isMissed = $note->isMissed();
+            $this->hasFireworks = $note->hasFireworks();
+            $this->hasGadgets = $note->hasGadgets();
+            $this->hasExtraDancers = $note->hasExtraDancers();
         }
     }
 
@@ -94,8 +110,12 @@ class ParticipantNoteComponent
         $note->setRatingVoice($this->ratingVoice);
         $note->setRatingOutfit($this->ratingOutfit);
         $note->setRatingOverall($this->ratingOverall);
+        $note->setRatingHotOrNot($this->ratingHotOrNot);
         $note->setNote($this->note);
         $note->setIsMissed($this->isMissed);
+        $note->setHasFireworks($this->hasFireworks);
+        $note->setHasGadgets($this->hasGadgets);
+        $note->setHasExtraDancers($this->hasExtraDancers);
 
         $this->entityManager->flush();
 
@@ -123,6 +143,15 @@ class ParticipantNoteComponent
     {
         $this->isMissed = $value;
         $this->save();
+    }
+
+    #[LiveAction]
+    public function updateCheckbox(#[LiveArg] string $prop, #[LiveArg] bool $value): void
+    {
+        if (property_exists($this, $prop)) {
+            $this->$prop = $value;
+            $this->save();
+        }
     }
 
     #[LiveAction]

@@ -12,6 +12,10 @@
                     {{ ux_icon('lucide:arrow-left', {class: 'me-1'}) }} <span class="d-none d-md-inline">Zurück</span>
                 </a>
                 <div class="d-flex align-items-center bg-white px-2 px-md-3 py-1 rounded-pill border shadow-sm">
+                    <a href="{{ path('app_esc_voting_stats') }}" class="btn btn-link btn-sm p-0 text-danger me-2 me-md-3 d-flex align-items-center text-decoration-none" title="Statistiken">
+                        {{ ux_icon('lucide:bar-chart-3', {style: 'font-size: 0.9em;'}) }}
+                        <span class="ms-1 x-small fw-bold d-none d-md-inline">Stats</span>
+                    </a>
                     {{ ux_icon('lucide:user', {class: 'me-1 me-md-2 text-primary', style: 'font-size: 0.8em;'}) }}
                     <span class="x-small fw-bold">{{ voter_name ?: (app.user ? app.user.userIdentifier : 'Gast') }}</span>
                 </div>

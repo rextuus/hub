@@ -42,6 +42,18 @@ class ParticipantNote
     #[ORM\Column]
     private bool $isMissed = false;
 
+    #[ORM\Column]
+    private bool $hasFireworks = false;
+
+    #[ORM\Column]
+    private bool $hasGadgets = false;
+
+    #[ORM\Column]
+    private bool $hasExtraDancers = false;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $ratingHotOrNot = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -143,6 +155,50 @@ class ParticipantNote
     public function setIsMissed(bool $isMissed): self
     {
         $this->isMissed = $isMissed;
+        return $this;
+    }
+
+    public function hasFireworks(): bool
+    {
+        return $this->hasFireworks;
+    }
+
+    public function setHasFireworks(bool $hasFireworks): self
+    {
+        $this->hasFireworks = $hasFireworks;
+        return $this;
+    }
+
+    public function hasGadgets(): bool
+    {
+        return $this->hasGadgets;
+    }
+
+    public function setHasGadgets(bool $hasGadgets): self
+    {
+        $this->hasGadgets = $hasGadgets;
+        return $this;
+    }
+
+    public function hasExtraDancers(): bool
+    {
+        return $this->hasExtraDancers;
+    }
+
+    public function setHasExtraDancers(bool $hasExtraDancers): self
+    {
+        $this->hasExtraDancers = $hasExtraDancers;
+        return $this;
+    }
+
+    public function getRatingHotOrNot(): ?int
+    {
+        return $this->ratingHotOrNot;
+    }
+
+    public function setRatingHotOrNot(?int $ratingHotOrNot): self
+    {
+        $this->ratingHotOrNot = $ratingHotOrNot;
         return $this;
     }
 }

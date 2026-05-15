@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ESC Meta-Statistiken - {{ activeEdition ? activeEdition.year ~ ' ' ~ activeEdition.location : 'Keine aktive Edition' }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_esc_voting_index') }}">ESC Home</a></li>
+                    <li class="breadcrumb-item active">Meta-Statistiken</li>
+                </ol>
+            </nav>
+            <h1 class="h2 fw-bold mb-0">ESC Meta-Statistiken</h1>
+            <p class="text-muted">{{ activeEdition.location }} {{ activeEdition.year }}</p>
+        </div>
+        <a href="{{ path('app_esc_voting_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Zurück
+        </a>
+    </div>
+
+    {% if not activeEdition %}
+        <div class="alert alert-warning">
+            Keine aktive ESC-Edition gefunden.
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {# Hot or Not Ranking #}
+            <div class="col-12 col-xl-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-danger text-white py-3 border-0">
+                        <h4 class="mb-0"><i class="bi bi-fire me-2"></i>Hot or Not Ranking</h4>
+                        <small class="opacity-75">Wer ist die süßeste Maus oder der Magic Mike?</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 60px;">Platz</th>
+                                        <th>Land / Artist</th>
+                                        <th class="text-center">Score</th>
+                                        <th class="text-center">Stimmen</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in hotOrNotRanking %}
+                                        <tr>
+                                            <td class="text-center">
+                                                {% if loop.index == 1 %}
+                                                    <span class="badge bg-warning text-dark rounded-circle p-2 fs-6">🥇</span>
+                                                {% elseif loop.index == 2 %}
+                                                    <span class="badge bg-light text-dark border rounded-circle p-2 fs-6">🥈</span>
+                                                {% elseif loop.index == 3 %}
+                                                    <span class="badge bg-light text-dark border rounded-circle p-2 fs-6">🥉</span>
+                                                {% else %}
+                                                    <span class="fw-bold">{{ loop.index }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://flagcdn.com/w40/{{ item.participant.country.code|lower }}.png"
+                                                         alt="{{ item.participant.country.name }}" class="me-2 rounded shadow-sm" style="width: 30px;">
+                                                    <div>
+                                                        <div class="fw-bold">{{ item.participant.country.name }}</div>
+                                                        <small class="text-muted d-block">{{ item.participant.artist }}</small>
+                                                        <div class="mt-1">
+                                                            {% for voter in item.voters %}
+                                                                <span class="badge bg-light text-dark border-0 small fw-normal p-1 me-1" title="Rating: {{ voter.ratingHotOrNot }}">
+                                                                    {{ voter.name }} ({{ voter.ratingHotOrNot }})
+                                                                </span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="fw-bold fs-5 text-danger">{{ item.avg }}</span>
+                                                    <i class="bi bi-fire text-danger ms-1"></i>
+                                                </div>
+                                            </td>
+                                            <td class="text-center small text-muted">{{ item.count }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted">Noch keine Bewertungen vorhanden.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Besonderheiten Rankings #}
+            <div class="col-12 col-xl-6">
+                <div class="row g-4">
+                    {# Feuerwerk #}
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-dark text-white py-3 border-0">
+                                <h5 class="mb-0">🧨 Feuerwerk-Champions</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% for item in fireworksRanking %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://flagcdn.com/w40/{{ item.participant.country.code|lower }}.png"
+                                                 class="me-3 rounded shadow-sm" style="width: 30px;">
+                                            <div>
+                                                <div class="fw-bold">{{ item.participant.country.name }}</div>
+                                                <small class="text-muted d-block">{{ item.participant.artist }}</small>
+                                                <div class="small text-muted mt-1">
+                                                    {{ item.voters|join(', ') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">{{ item.count }}x gemerkt</span>
+                                    </li>
+                                {% else %}
+                                    <li class="list-group-item text-center py-3 text-muted">Keine Daten.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {# Gadgets #}
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-info text-white py-3 border-0">
+                                <h5 class="mb-0">🎸 Coolste Gadgets</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% for item in gadgetsRanking %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://flagcdn.com/w40/{{ item.participant.country.code|lower }}.png"
+                                                 class="me-3 rounded shadow-sm" style="width: 30px;">
+                                            <div>
+                                                <div class="fw-bold">{{ item.participant.country.name }}</div>
+                                                <small class="text-muted d-block">{{ item.participant.artist }}</small>
+                                                <div class="small text-muted mt-1">
+                                                    {{ item.voters|join(', ') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-info rounded-pill">{{ item.count }}x gemerkt</span>
+                                    </li>
+                                {% else %}
+                                    <li class="list-group-item text-center py-3 text-muted">Keine Daten.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {# Tänzer #}
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-success text-white py-3 border-0">
+                                <h5 class="mb-0">💃 Beste Extra Tänzer</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% for item in dancersRanking %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://flagcdn.com/w40/{{ item.participant.country.code|lower }}.png"
+                                                 class="me-3 rounded shadow-sm" style="width: 30px;">
+                                            <div>
+                                                <div class="fw-bold">{{ item.participant.country.name }}</div>
+                                                <small class="text-muted d-block">{{ item.participant.artist }}</small>
+                                                <div class="small text-muted mt-1">
+                                                    {{ item.voters|join(', ') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success rounded-pill">{{ item.count }}x gemerkt</span>
+                                    </li>
+                                {% else %}
+                                    <li class="list-group-item text-center py-3 text-muted">Keine Daten.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
