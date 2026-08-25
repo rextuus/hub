@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Tool\BetAI\Service;
+
+use Gemini;
+use Gemini\Client;
+use Gemini\Data\Content;
+use Gemini\Data\Tool;
+use Gemini\Data\GoogleSearch;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+class GeminiService
+{
+    private Client $client;
+
+    public function __construct(
+        #[Autowire(env: 'GEMINI_API_KEY')]
+        string $apiKey
+    ) {
+        $this->client = Gemini::client($apiKey);
+    }
+
+    public function generateContentWithSystemInstruction(string $prompt, string $systemPrompt, bool $useSearch = false): string
+    {
+        $model = $this->client->generativeModel('gemini-3.5-flash')
+            ->withSystemInstruction(Content::parse($systemPrompt));
+
+        if ($useSearch) {
+            $model = $model->withTool(new Tool(googleSearch: new GoogleSearch()));
+        }
+
+        $response = $model->generateContent($prompt);
+        $text = $response->text();
+
+        if (null === $text) {
+            throw new \RuntimeException('Gemini API did not return any text.');
+        }
+
+        return $text;
+    }
+
+    public function generateBetPredictions(string $startDate, string $endDate): string
+    {
+        $systemPrompt = <<<EOT
+Du bist ein erfahrener, datengetriebener Sportwetten-Analyst und ein hochentwickeltes KI-System. Deine Aufgabe ist es, für die anstehenden Spieltage im europäischen Spitzenfussball fundierte Wett-Empfehlungen zu generieren.
+
+## 1. Relevanter Scope (Ligen & Pokale)
+Berücksichtige Spiele aus den **Top-5-Ligen inklusive ihrer nationalen Pokalwettbewerbe**:
+- **Deutschland:** Bundesliga, 2. Bundesliga, DFB-Pokal
+- **England:** Premier League, EFL Championship, FA Cup, EFL Cup
+- **Spanien:** La Liga, Copa del Rey
+- **Italien:** Serie A, Coppa Italia
+- **Frankreich:** Ligue 1, Coupe de France
+
+## 2. Deine Arbeitsweise & Recherche
+- Nutze deine integrierte Websuche, um die **exakten und aktuell gültigen Spielpläne sowie Pokalrunden** für den Zeitraum von {$startDate} bis {$endDate} zu recherchieren.
+- Erfinde keine Spiele. Alle vorgeschlagenen Wetten müssen auf realen Begegnungen basieren, die in diesem Zeitraum stattfinden.
+- Verwende bei den Teamnamen stets die **offiziellen, gängigen Vereinsnamen** (z.B. "FC Bayern München" statt nur "Bayern"), damit mein automatisches Datenbanksystem sie per Text-Matching zuordnen kann.
+
+## 3. Wett-Regeln & Kriterien
+- Schlage eine gesunde Mischung aus **Einzelwetten (SINGLE)** und **Kombiwetten (COMBI)** vor (insgesamt maximal 6-8 Vorschläge).
+- Begrenze Kombiwetten auf maximal 3 Spiele pro Kombi, um das Risiko zu kontrollieren.
+- Bewerte jede Wette mit einem `confidence_score` von **1 bis 10** (1 = sehr unsicher/hohes Risiko, 10 = extrem hohe analytische Sicherheit).
+- Begründe jede Wette kurz und präzise im Feld `ai_reasoning`.
+
+## 4. Strenges Ausgabeformat (JSON-Schema)
+Antworte **ausschließlich** mit einem validen JSON-Objekt. Verwende keinen Markdown-Codeblock (kein ```json ... ```) um das JSON herum, keinen einleitenden Text und keine erklärenden Sätze. Das JSON muss exakt folgender Struktur entsprechen:
+
+{
+  "gameweek_info": {
+    "name": "String",
+    "start_date": "YYYY-MM-DD",
+    "end_date": "YYYY-MM-DD"
+  },
+  "suggested_bets": [
+    {
+      "type": "SINGLE",
+      "market": "String",
+      "prediction": "String",
+      "total_odds": float,
+      "confidence_score": int,
+      "ai_reasoning": "String",
+      "matches": [
+        {
+          "home_team": "String",
+          "away_team": "String",
+          "match_date": "YYYY-MM-DD HH:MM"
+        }
+      ]
+    },
+    {
+      "type": "COMBI",
+      "market": "String",
+      "prediction": "String",
+      "total_odds": float,
+      "confidence_score": int,
+      "ai_reasoning": "String",
+      "matches": [
+        {
+          "home_team": "String",
+          "away_team": "String",
+          "match_date": "YYYY-MM-DD HH:MM"
+        },
+        {
+          "home_team": "String",
+          "away_team": "String",
+          "match_date": "YYYY-MM-DD HH:MM"
+        }
+      ]
+    }
+  ]
+}
+EOT;
+
+        $userPrompt = "Analysiere das kommende Fussball-Wochenende vom {$startDate} bis zum {$endDate}. Recherchiere die Spielpläne der Top-5-Ligen und Pokale und generiere mir deine besten Wett-Vorschläge als reines JSON.";
+
+        return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);
+    }
+}

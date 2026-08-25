@@ -1,0 +1,28 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Bankroll</div>
+                <div class="card-body">
+                    {% if this.bankroll %}
+                        <h5 class="card-title">{{ this.bankroll.totalBalance }} {{ this.bankroll.currency }}</h5>
+                    {% else %}
+                        <p>Keine Bankroll konfiguriert.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Spielwochen</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for gw in this.gameWeeks %}
+                            <li class="list-group-item">{{ gw.name }} ({{ gw.startDate|date('d.m.Y') }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

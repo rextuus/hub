@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1>Match-Matching korrigieren</h1>
+        <div class="card p-3">
+            <h3>Match korrigieren</h3>
+            <div class="row mb-3">
+                <div class="col">
+                    <strong>Heim:</strong> {{ match.homeTeam ? match.homeTeam.name : match.rawHomeTeamName }}
+                </div>
+                <div class="col text-center">vs</div>
+                <div class="col">
+                    <strong>Gast:</strong> {{ match.awayTeam ? match.awayTeam.name : match.rawAwayTeamName }}
+                </div>
+            </div>
+
+            {{ form_start(form) }}
+                {{ form_widget(form.team) }}
+
+                <div class="mt-2">
+                    {{ form_widget(form.assignHome) }}
+                    {{ form_widget(form.assignAway) }}
+                </div>
+            {{ form_end(form) }}
+        </div>
+        <div class="mt-3">
+            <a href="{{ path('app_bet_ai_gameweek_show', {id: match.gameWeek.id}) }}" class="btn btn-secondary">Zurück zur Spielwoche</a>
+        </div>
+    </div>
+{% endblock %}

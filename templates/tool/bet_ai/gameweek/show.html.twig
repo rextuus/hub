@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Spielwoche {{ gameWeek.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Spielwoche: {{ gameWeek.name }}</h1>
+        <p>Zeitraum: {{ gameWeek.startDate|date('d.m.Y') }} - {{ gameWeek.endDate|date('d.m.Y') }}</p>
+
+        <a href="{{ path('app_bet_ai_index') }}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
+
+        <div class="mt-4">
+            <h3>Wett-Vorschläge</h3>
+            {% if suggestions is empty %}
+                <div class="card p-3">
+                    <p>Keine Vorschläge gefunden. Möchtest du neue generieren?</p>
+                    <form method="post" action="{{ path('app_bet_ai_gameweek_generate', {id: gameWeek.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">Startdatum</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" value="{{ defaultDates.startDate }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">Enddatum</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" value="{{ defaultDates.endDate }}" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Jetzt generieren</button>
+                    </form>
+                    <div class="mt-2">
+                        <a href="{{ path('app_bet_ai_gameweek_test_raw_input', {id: gameWeek.id}) }}" class="btn btn-secondary">Raw Test</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="mb-3">
+                    <form method="post" action="{{ path('app_bet_ai_gameweek_calculate', {id: gameWeek.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                        <button type="submit" class="btn btn-success">Einsätze berechnen</button>
+                    </form>
+                </div>
+                <div class="row">
+                    {% for suggestion in suggestions %}
+                        <div class="col-md-6">
+                            <twig:bet_suggestion :suggestion="suggestion" />
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-4">
+            <h3>KI-Antwort Historie</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in aiResponses %}
+                        <tr>
+                            <td>{{ response.createdAt|date('d.m.Y H:i') }}</td>
+                            <td>{{ response.hasValidData ? '<span class="badge bg-success">Valid</span>' : '<span class="badge bg-warning">Ungültig</span>' }}</td>
+                            <td>
+                                <form method="post" action="{{ path('app_bet_ai_gameweek_validate', {id: gameWeek.id, responseId: response.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Check</button>
+                                </form>
+                                <form method="post" action="{{ path('app_bet_ai_gameweek_evaluate', {id: gameWeek.id, responseId: response.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">Vorschläge erstellen</button>
+                                </form>
+                                <a href="{{ path('app_bet_ai_gameweek_view_raw', {id: gameWeek.id, responseId: response.id}) }}" class="btn btn-sm btn-info">Roh-Daten</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

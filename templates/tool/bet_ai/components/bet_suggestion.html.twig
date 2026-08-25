@@ -1,0 +1,92 @@
+<div class="card mb-3 {{ suggestion.betType == 'COMBI' ? 'border-primary' : 'border-secondary' }}">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="badge {{ suggestion.betType == 'COMBI' ? 'bg-primary' : 'bg-secondary' }}">{{ suggestion.betType }}</span>
+        <span>Quote: <strong>{{ suggestion.totalOdds }}</strong></span>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title text-primary">{{ suggestion.market }}</h5>
+        <h6 class="card-subtitle mb-3 text-muted">{{ suggestion.prediction }}</h6>
+        <p class="card-text small text-secondary">{{ suggestion.aiReasoning }}</p>
+
+        <div class="mt-3">
+            <h6 class="text-uppercase text-muted small border-bottom pb-1">Spiele:</h6>
+            <ul class="list-group list-group-flush">
+                {% for item in this.matchItems %}
+                    {% if item.match %}
+                        <li class="list-group-item d-flex align-items-center px-0">
+                            {% if item.match.homeTeam %}
+                                {% if item.match.homeTeam.profileImgUrl %}
+                                    <img src="{{ asset(item.match.homeTeam.profileImgUrl) }}" alt="{{ item.match.homeTeam.name }}" style="width: 30px; height: 30px; object-fit: contain;" class="me-2 rounded-circle border">
+                                {% endif %}
+                                <span class="fw-bold text-dark">{{ item.match.homeTeam.name }}</span>
+                            {% else %}
+                                <span class="fw-bold text-dark">{{ item.match.rawHomeTeamName }}</span>
+                            {% endif %}
+
+                            <span class="mx-2 text-muted">vs</span>
+
+                            {% if item.match.awayTeam %}
+                                <span class="fw-bold text-dark">{{ item.match.awayTeam.name }}</span>
+                                {% if item.match.awayTeam.profileImgUrl %}
+                                    <img src="{{ asset(item.match.awayTeam.profileImgUrl) }}" alt="{{ item.match.awayTeam.name }}" style="width: 30px; height: 30px; object-fit: contain;" class="ms-2 rounded-circle border">
+                                {% endif %}
+                            {% else %}
+                                <span class="fw-bold text-dark">{{ item.match.rawAwayTeamName }}</span>
+                            {% endif %}
+
+                            <small class="text-muted ms-auto small">({{ item.match.matchDate|date('d.m. H:i') }})</small>
+                            {% if item.match.homeTeam is null or item.match.awayTeam is null %}
+                                <a href="{{ path('app_bet_ai_match_fix', {id: item.match.id}) }}" class="btn btn-sm btn-warning ms-2" title="Teams zuordnen">
+                                    <i class="bi bi-magic"></i>
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="list-group-item px-0 text-muted small">Keine Spiele zugeordnet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <div class="d-flex justify-content-between mb-2">
+            <span>Einsatz: {{ suggestion.suggestedStake|number_format(2) }} €</span>
+            <span>Confidence: {{ suggestion.confidenceScore }}/10</span>
+        </div>
+        {% set placedBet = this.getPlacedBet() %}
+        {% if not suggestion.isPlaced %}
+            <form method="post" action="{{ path('app_bet_ai_gameweek_place_suggestion', {id: suggestion.gameWeek.id, suggestionId: suggestion.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                <div class="input-group mb-2">
+                    <input type="number" step="0.01" name="actualOdds" class="form-control form-control-sm" placeholder="Reale Quote" value="{{ suggestion.actualOdds }}">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">Wette platzieren</button>
+            </form>
+            <form method="post" action="{{ path('app_bet_ai_gameweek_update_actual_odds', {id: suggestion.gameWeek.id, suggestionId: suggestion.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                <div class="input-group mb-2">
+                    <input type="number" step="0.01" name="actualOdds" class="form-control form-control-sm" placeholder="Reale Quote" value="{{ suggestion.actualOdds }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Quote speichern</button>
+                </div>
+            </form>
+        {% else %}
+            {% if placedBet %}
+                <div class="small mt-2 pt-2 border-top">
+                    <div>Status: <strong>{{ placedBet.status }}</strong></div>
+                    <div>Quote: <strong>{{ placedBet.actualOdds }}</strong></div>
+                    {% if placedBet.status == 'OPEN' %}
+                        <form method="post" action="{{ path('app_bet_ai_gameweek_finalize_bet', {id: suggestion.gameWeek.id, placedBetId: placedBet.id}) }}" class="mt-2">
+                            <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                            <div class="input-group input-group-sm">
+                                <input type="number" step="0.01" name="payout" class="form-control" placeholder="Auszahlung" required>
+                                <button type="submit" class="btn btn-success">Eintragen</button>
+                            </div>
+                        </form>
+                    {% else %}
+                         <div>Auszahlung: {{ placedBet.actualPayout|number_format(2) }} €</div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>

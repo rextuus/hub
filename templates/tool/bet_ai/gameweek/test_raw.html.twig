@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gemini Raw Response{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Gemini Raw Response</h1>
+        <a href="{{ path('app_bet_ai_gameweek_show', {id: gameWeek.id}) }}" class="btn btn-secondary mb-3">Zurück zur Spielwoche</a>
+
+        <div class="card p-3 border border-primary">
+            <h5>Raw Response:</h5>
+            <pre>{{ rawResponse | default('Die Antwort ist tatsächlich leer.') }}</pre>
+        </div>
+    </div>
+{% endblock %}

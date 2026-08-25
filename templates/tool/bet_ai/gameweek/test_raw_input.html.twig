@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Raw Test für {{ gameWeek.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Raw Test: {{ gameWeek.name }}</h1>
+        <p>Hier kannst du die KI-API direkt testen. Die Antwort wird im Rohformat angezeigt.</p>
+
+        <a href="{{ path('app_bet_ai_gameweek_show', {id: gameWeek.id}) }}" class="btn btn-secondary mb-3">Zurück zur Spielwoche</a>
+
+        <div class="card p-3">
+            <form method="post" action="{{ path('app_bet_ai_gameweek_test_raw', {id: gameWeek.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="startDate" class="form-label">Startdatum</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate" value="{{ defaultDates.startDate }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="endDate" class="form-label">Enddatum</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" value="{{ defaultDates.endDate }}" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning">Gemini API Roh-Test starten</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

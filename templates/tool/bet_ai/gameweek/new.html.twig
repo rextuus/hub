@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Neue Spielwoche erstellen{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Neue Spielwoche erstellen</h1>
+        <form method="post" class="card p-3">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name der Spielwoche</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="startDate" class="form-label">Startdatum</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate" value="{{ startDate }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="endDate" class="form-label">Enddatum</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate" value="{{ endDate }}" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Speichern</button>
+            <a href="{{ path('app_bet_ai_index') }}" class="btn btn-secondary">Abbrechen</a>
+        </form>
+    </div>
+{% endblock %}
