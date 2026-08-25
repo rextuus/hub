@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BetAI - Dashboard{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>BetAI Dashboard</h1>
+            <a href="{{ path('app_bet_ai_gameweek_new') }}" class="btn btn-primary">Neue Spielwoche</a>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted"><i class="bi bi-wallet2 me-2"></i>Bankroll</h6>
+                        <p class="card-text fs-3 fw-bold">{{ bankroll ? bankroll.totalBalance|number_format(2) ~ ' ' ~ bankroll.currency : 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted"><i class="bi bi-lightbulb me-2"></i>Vorschläge</h6>
+                        <p class="card-text fs-3 fw-bold"><span class="badge bg-primary">{{ stats.totalSuggestions }}</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted"><i class="bi bi-graph-up-arrow me-2"></i>Wetten</h6>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-secondary" title="Gesamt">{{ stats.totalPlaced }}</span>
+                            <span class="badge bg-success" title="Gewonnen">{{ stats.won }}</span>
+                            <span class="badge bg-danger" title="Verloren">{{ stats.lost }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-3">Spielwochen</h2>
+        <div class="row">
+            {% for gwData in gameWeeksData %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title"><a href="{{ path('app_bet_ai_gameweek_show', {id: gwData.entity.id}) }}" class="text-decoration-none">{{ gwData.entity.name }}</a></h5>
+                            <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-calendar-event me-2"></i>{{ gwData.entity.startDate|date('d.m.Y') }} - {{ gwData.entity.endDate|date('d.m.Y') }}</h6>
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col">
+                                    <small class="text-muted d-block">Vorschläge</small>
+                                    <span class="badge bg-light text-dark">{{ gwData.suggestionCount }}</span>
+                                </div>
+                                <div class="col">
+                                    <small class="text-muted d-block">Wetten</small>
+                                    <span class="badge bg-light text-dark">{{ gwData.placedBetsCount }}</span>
+                                </div>
+                                <div class="col">
+                                    <small class="text-muted d-block">Bilanz</small>
+                                    <span class="badge bg-success">{{ gwData.won }}</span> / <span class="badge bg-danger">{{ gwData.lost }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

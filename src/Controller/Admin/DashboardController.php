@@ -8,6 +8,10 @@ use App\Tool\EscVoting\Controller\Admin\VoterCrudController;
 use App\Tool\EscVoting\Controller\Admin\BallotCrudController;
 use App\Tool\EscVoting\Controller\Admin\EscEditionCrudController;
 use App\Tool\EscVoting\Controller\Admin\ParticipantCrudController;
+use App\Controller\Admin\BetSuggestionCrudController;
+use App\Controller\Admin\TeamCrudController;
+use App\Controller\Admin\BankrollCrudController;
+use App\Controller\Admin\TransactionCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -48,5 +52,11 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkTo(ParticipantCrudController::class, 'Teilnehmer', 'fas fa-music'),
             MenuItem::linkTo(VoterCrudController::class, 'Voter', 'fas fa-users'),
         ]);
+
+        yield MenuItem::section('BetAI');
+        yield MenuItem::linkTo(BetSuggestionCrudController::class, 'Wettvorschläge', 'fas fa-futbol');
+        yield MenuItem::linkTo(TeamCrudController::class, 'Teams', 'fas fa-shield-alt');
+        yield MenuItem::linkTo(BankrollCrudController::class, 'Bankroll', 'fas fa-money-bill-wave');
+        yield MenuItem::linkTo(TransactionCrudController::class, 'Transaktionen', 'fas fa-exchange-alt');
     }
 }

@@ -35,6 +35,13 @@ class SeedProjectsCommand extends Command
                 'route' => 'app_esc_voting_index',
             ],
             [
+                'name' => 'BetAI',
+                'description' => 'AI-gestützte Sportwetten-Analyse und Verwaltung.',
+                'icon' => 'lucide:bot',
+                'image' => 'https://picsum.photos/seed/betai/400/250',
+                'route' => 'app_bet_ai_index',
+            ],
+            [
                 'name' => 'Passwort-Manager',
                 'description' => 'Ein einfaches Tool, um deine Passwörter sicher zu speichern und zu verwalten.',
                 'icon' => 'lucide:key',
