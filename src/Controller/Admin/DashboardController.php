@@ -12,6 +12,9 @@ use App\Controller\Admin\BetSuggestionCrudController;
 use App\Controller\Admin\TeamCrudController;
 use App\Controller\Admin\BankrollCrudController;
 use App\Controller\Admin\TransactionCrudController;
+use App\Controller\Admin\GameWeekCrudController;
+use App\Controller\Admin\AiResponseCrudController;
+use App\Controller\Admin\BetAISettingCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -54,9 +57,12 @@ class DashboardController extends AbstractDashboardController
         ]);
 
         yield MenuItem::section('BetAI');
+        yield MenuItem::linkTo(GameWeekCrudController::class, 'Spielwochen', 'fas fa-calendar-week');
         yield MenuItem::linkTo(BetSuggestionCrudController::class, 'Wettvorschläge', 'fas fa-futbol');
+        yield MenuItem::linkTo(AiResponseCrudController::class, 'KI-Antworten', 'fas fa-robot');
         yield MenuItem::linkTo(TeamCrudController::class, 'Teams', 'fas fa-shield-alt');
         yield MenuItem::linkTo(BankrollCrudController::class, 'Bankroll', 'fas fa-money-bill-wave');
         yield MenuItem::linkTo(TransactionCrudController::class, 'Transaktionen', 'fas fa-exchange-alt');
+        yield MenuItem::linkTo(BetAISettingCrudController::class, 'Einstellungen', 'fas fa-cog');
     }
 }

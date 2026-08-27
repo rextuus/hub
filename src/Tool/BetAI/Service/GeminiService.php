@@ -7,6 +7,8 @@ use Gemini\Client;
 use Gemini\Data\Content;
 use Gemini\Data\Tool;
 use Gemini\Data\GoogleSearch;
+use App\Tool\BetAI\Entity\BetAISetting;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class GeminiService
@@ -15,14 +17,44 @@ class GeminiService
 
     public function __construct(
         #[Autowire(env: 'GEMINI_API_KEY')]
-        string $apiKey
+        string $apiKey,
+        private EntityManagerInterface $entityManager
     ) {
         $this->client = Gemini::client($apiKey);
     }
 
+    public function listModels(): array
+    {
+        try {
+            $models = $this->client->models()->list();
+            $result = [];
+            foreach ($models->models as $model) {
+                // Nur Modelle mit generateContent Unterstützung
+                if (in_array('generateContent', $model->supportedGenerationMethods)) {
+                    $result[] = [
+                        'name' => $model->name,
+                        'displayName' => $model->displayName ?? $model->name,
+                        'description' => $model->description ?? '',
+                    ];
+                }
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public function getSelectedModel(): string
+    {
+        $setting = $this->entityManager->getRepository(BetAISetting::class)->findOneBy(['key' => 'gemini_model']);
+        return $setting?->value ?? 'models/gemini-3.5-flash';
+    }
+
     public function generateContentWithSystemInstruction(string $prompt, string $systemPrompt, bool $useSearch = false): string
     {
-        $model = $this->client->generativeModel('gemini-3.5-flash')
+        $modelName = $this->getSelectedModel();
+
+        $model = $this->client->generativeModel($modelName)
             ->withSystemInstruction(Content::parse($systemPrompt));
 
         if ($useSearch) {
