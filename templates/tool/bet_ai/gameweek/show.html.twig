@@ -7,7 +7,9 @@
         <h1>Spielwoche: {{ gameWeek.name }}</h1>
         <p>Zeitraum: {{ gameWeek.startDate|date('d.m.Y') }} - {{ gameWeek.endDate|date('d.m.Y') }}</p>
 
-        <a href="{{ path('app_bet_ai_index') }}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
+        <div class="mb-3">
+            <a href="{{ path('app_bet_ai_index') }}" class="btn btn-secondary">Zurück zum Dashboard</a>
+        </div>
 
         <div class="mt-4">
             <h3>Wett-Vorschläge</h3>

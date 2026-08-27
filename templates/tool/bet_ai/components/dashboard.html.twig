@@ -1,28 +1,231 @@
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">Bankroll</div>
-                <div class="card-body">
+<div class="betai-wrapper">
+    <main class="flex-grow w-full max-w-7xl mx-auto px-lg md:px-xl py-lg md:py-xl flex flex-col gap-xl">
+        <!-- Header Section -->
+        <section class="flex flex-col gap-base md:flex-row md:justify-between md:items-end">
+            <div>
+                <h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-1">BetAI Dashboard</h1>
+                <p class="text-secondary font-body-md text-body-md">Übersicht deiner Wett-Analysen und aktuellen Spielwochen.</p>
+            </div>
+            <div class="flex items-center gap-md mt-4 md:mt-0">
+                <a href="{{ path('admin') }}" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center no-underline">
+                    <span class="material-symbols-outlined text-[20px] mr-2">admin_panel_settings</span>Admin
+                </a>
+                <a href="{{ path('app_bet_ai_gameweek_new') }}" class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center no-underline">
+                    <span class="material-symbols-outlined text-[20px] mr-2">add_circle</span>Neue Spielwoche
+                </a>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
+        <!-- Bankroll Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-primary transition-colors cursor-default">
+            <div class="bg-secondary-container p-sm rounded-lg flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Bankroll</span>
+                <span class="text-title-md font-title-md text-on-surface">
                     {% if this.bankroll %}
-                        <h5 class="card-title">{{ this.bankroll.totalBalance }} {{ this.bankroll.currency }}</h5>
+                        {{ this.bankroll.totalBalance|number_format(2) }} <span class="text-secondary text-body-sm">{{ this.bankroll.currency }}</span>
                     {% else %}
-                        <p>Keine Bankroll konfiguriert.</p>
+                        0.00 <span class="text-secondary text-body-sm">EUR</span>
                     {% endif %}
-                </div>
+                </span>
             </div>
         </div>
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">Spielwochen</div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for gw in this.gameWeeks %}
-                            <li class="list-group-item">{{ gw.name }} ({{ gw.startDate|date('d.m.Y') }})</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+
+        <!-- Open Bets Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-warning transition-colors cursor-default">
+            <div class="bg-warning/10 p-sm rounded-lg flex items-center justify-center text-warning">
+                <span class="material-symbols-outlined">pending_actions</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Offene Wetten</span>
+                <span class="text-title-md font-title-md text-on-surface">
+                    {{ this.openBetsValue|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Profit/Loss Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-info transition-colors cursor-default">
+            <div class="bg-info/10 p-sm rounded-lg flex items-center justify-center text-info">
+                <span class="material-symbols-outlined">trending_up</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Gesamtgewinn</span>
+                {% set totalProfit = 0 %}
+                {% for profit in this.gameWeekStats %}
+                    {% set totalProfit = totalProfit + profit %}
+                {% endfor %}
+                <span class="text-title-md font-title-md {{ totalProfit >= 0 ? 'text-success' : 'text-error' }}">
+                    {{ totalProfit|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
+                </span>
             </div>
         </div>
     </div>
+
+    <!-- Average Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-lg mb-xl">
+        <!-- Average Stake Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-primary transition-colors cursor-default">
+            <div class="bg-primary/10 p-sm rounded-lg flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">payments</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Ø Einsatz</span>
+                <span class="text-title-md font-title-md text-on-surface">
+                    {{ this.averageStake|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Average Profit Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-tertiary transition-colors cursor-default">
+            <div class="bg-tertiary/10 p-sm rounded-lg flex items-center justify-center text-tertiary">
+                <span class="material-symbols-outlined">show_chart</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Ø Gewinn / Wette</span>
+                <span class="text-title-md font-title-md {{ this.averageProfit >= 0 ? 'text-success' : 'text-error' }}">
+                    {{ this.averageProfit|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <section class="mb-xl">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
+            <h2 class="text-title-md font-title-md text-on-surface mb-lg">Bankroll Entwicklung</h2>
+            <div class="h-[300px] w-full">
+                <canvas id="bankrollChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl mb-xl">
+        <!-- Game Weeks List -->
+        <section class="flex flex-col gap-md">
+            <h2 class="text-title-md font-title-md text-on-surface border-b border-outline-variant pb-sm">Spielwochen</h2>
+            <div class="flex flex-col gap-md">
+                {% for gw in this.gameWeeks %}
+                    <a href="{{ path('app_bet_ai_gameweek_show', {id: gw.id}) }}" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-md hover:bg-surface-container-low transition-colors cursor-pointer group no-underline">
+                        <div class="flex flex-col gap-xs">
+                            <div class="flex items-center gap-sm">
+                                <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">event_note</span>
+                                <span class="text-body-md font-body-md font-bold text-on-surface">{{ gw.name }}</span>
+                            </div>
+                            <span class="text-body-sm font-body-sm text-secondary pl-[28px]">
+                                {{ gw.startDate|date('d.m.Y') }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-lg pl-[28px] md:pl-0">
+                            {% set gwProfit = this.gameWeekStats[gw.id] ?? 0 %}
+                            <div class="flex flex-col gap-xs items-end">
+                                <span class="text-label-caps font-label-caps text-secondary">Bilanz</span>
+                                <div class="bg-surface-container-high px-sm py-xs rounded-full flex items-center gap-xs">
+                                    <span class="text-numeric-data font-numeric-data {{ gwProfit >= 0 ? 'text-success' : 'text-error' }}">
+                                        {{ gwProfit >= 0 ? '+' : '' }}{{ gwProfit|number_format(2) }} EUR
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-secondary hidden md:block group-hover:text-primary transition-colors">chevron_right</span>
+                        </div>
+                    </a>
+                {% else %}
+                    <p class="text-secondary italic">Keine Spielwochen vorhanden.</p>
+                {% endfor %}
+            </div>
+            <div class="mt-4">
+                <a href="{{ path('app_bet_ai_gameweek_new') }}" class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-opacity inline-flex items-center no-underline">
+                    <span class="material-symbols-outlined text-[20px] mr-2">add_circle</span>Neue Spielwoche
+                </a>
+            </div>
+        </section>
+
+        <!-- Recent Transactions -->
+        <section class="flex flex-col gap-md">
+            <h2 class="text-title-md font-title-md text-on-surface border-b border-outline-variant pb-sm">Letzte Transaktionen</h2>
+            <div class="flex flex-col gap-sm">
+                {% for tx in this.transactions %}
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex items-center justify-between hover:bg-surface-container-low transition-colors">
+                        <div class="flex items-center gap-md">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center {{ tx.type.value == 'CREDIT' ? 'bg-success/10 text-success' : 'bg-error/10 text-error' }}">
+                                <span class="material-symbols-outlined">{{ tx.type.value == 'CREDIT' ? 'add' : 'remove' }}</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-body-md font-medium text-on-surface">{{ tx.description }}</span>
+                                <span class="text-body-xs text-secondary">{{ tx.createdAt|date('d.m.Y H:i') }}</span>
+                            </div>
+                        </div>
+                        <span class="text-body-md font-bold {{ tx.type.value == 'CREDIT' ? 'text-success' : 'text-error' }}">
+                            {{ tx.type.value == 'CREDIT' ? '+' : '-' }}{{ tx.amount|number_format(2) }}
+                        </span>
+                    </div>
+                {% else %}
+                    <p class="text-secondary italic">Keine Transaktionen vorhanden.</p>
+                {% endfor %}
+            </div>
+            <div class="mt-4">
+                <a href="{{ path('app_bet_ai_gameweek_new') }}" class="border-2 border-dashed border-outline-variant rounded-xl p-lg flex items-center justify-center gap-sm text-secondary hover:text-primary hover:border-primary transition-colors bg-surface-bright no-underline">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span class="font-body-sm text-body-sm font-bold">Neue Spielwoche hinzufügen</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function() {
+            const ctx = document.getElementById('bankrollChart');
+            if (!ctx) return;
+
+            const history = {{ this.bankrollHistory|json_encode|raw }};
+            const labels = history.map(item => item.date);
+            const data = history.map(item => item.balance);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Bankroll',
+                        data: data,
+                        borderColor: '#005fb8',
+                        backgroundColor: 'rgba(0, 95, 184, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#005fb8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+    </main>
 </div>
