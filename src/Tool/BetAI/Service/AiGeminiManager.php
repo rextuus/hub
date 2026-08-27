@@ -34,6 +34,9 @@ class AiGeminiManager
         $isValid = $this->betSuggestionFactory->createSuggestionsFromJson($rawResponse, $gameWeek->id);
 
         $aiResponse = new AiResponse($gameWeek, $rawResponse, $isValid);
+        if ($isValid) {
+            $aiResponse->isProcessed = true;
+        }
 
         $this->entityManager->persist($aiResponse);
         $this->entityManager->flush();

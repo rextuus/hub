@@ -70,6 +70,8 @@ Achte darauf:
 1. Schlage KEINE der Wetten vor, die bereits in der vorherigen Antwort enthalten waren.
 2. Der neue Vorschlag muss den gleichen Qualitätskriterien entsprechen.
 3. Antworte wieder EXAKT im gleichen JSON-Format wie zuvor, aber das `suggested_bets` Array soll NUR diesen EINEN neuen Ersatz-Vorschlag enthalten.
+4. **WICHTIG:** Der neue Vorschlag MUSS den gleichen Wett-Typ (`type`) wie die problematische Wette haben (z.B. wenn es eine COMBI war, muss der Ersatz auch eine COMBI sein).
+5. Falls es eine Kombiwette (COMBI) war, soll der neue Vorschlag idealerweise auch die gleiche Anzahl an Spielen (`matches_count`) enthalten wie das Original.
 EOT;
 
         return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);

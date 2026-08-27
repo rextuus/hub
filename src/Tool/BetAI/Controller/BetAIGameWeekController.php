@@ -84,10 +84,21 @@ class BetAIGameWeekController extends AbstractController
     ): Response {
         $aiResponse = $aiResponseRepository->find($responseId);
 
+        if (!$aiResponse) {
+            $this->addFlash('error', 'KI-Antwort nicht gefunden.');
+            return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
+        }
+
+        if ($aiResponse->isProcessed) {
+            $this->addFlash('warning', 'Diese Antwort wurde bereits verarbeitet.');
+            return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
+        }
+
         if ($aiResponse) {
             $isValid = $betSuggestionFactory->createSuggestionsFromJson($aiResponse->rawResponse, $gameWeek->id);
             if ($isValid) {
                 $aiResponse->hasValidData = true;
+                $aiResponse->isProcessed = true;
                 $entityManager->flush();
                 $this->addFlash('success', 'Wettvorschläge erfolgreich generiert.');
             } else {
@@ -191,6 +202,7 @@ class BetAIGameWeekController extends AbstractController
         AiResponseRepository $aiResponseRepository,
         AiGeminiManager $aiGeminiManager,
         BetSuggestionFactory $betSuggestionFactory,
+        EntityManagerInterface $entityManager,
         Request $request
     ): Response {
         $suggestion = $suggestionRepository->find($suggestionId);
@@ -213,12 +225,24 @@ class BetAIGameWeekController extends AbstractController
         }
 
         // Problematic Bet JSON erstellen
+        $matches = [];
+        foreach ($suggestion->getSuggestionMatchItems() as $matchItem) {
+            $match = $matchItem->getMatch();
+            $matches[] = [
+                'home_team' => $match->getHomeTeam() ? $match->getHomeTeam()->getName() : $match->getRawHomeTeamName(),
+                'away_team' => $match->getAwayTeam() ? $match->getAwayTeam()->getName() : $match->getRawAwayTeamName(),
+                'match_date' => $match->getMatchDate()->format('Y-m-d H:i'),
+            ];
+        }
+
         $problematicBetJson = json_encode([
             'type' => $suggestion->getBetType()->value,
             'market' => $suggestion->getMarket(),
             'prediction' => $suggestion->getPrediction(),
             'total_odds' => $suggestion->getTotalOdds(),
             'actual_odds' => $suggestion->getActualOdds(),
+            'matches_count' => count($matches),
+            'matches' => $matches,
         ]);
 
         try {
@@ -230,6 +254,9 @@ class BetAIGameWeekController extends AbstractController
             );
 
             if ($betSuggestionFactory->replaceSuggestionFromJson($newAiResponse->rawResponse, $suggestion)) {
+                $newAiResponse->hasValidData = true;
+                $newAiResponse->isProcessed = true;
+                $entityManager->flush();
                 $this->addFlash('success', 'Wett-Vorschlag wurde erfolgreich ausgetauscht.');
             } else {
                 $this->addFlash('error', 'Der neue Vorschlag konnte nicht verarbeitet werden.');

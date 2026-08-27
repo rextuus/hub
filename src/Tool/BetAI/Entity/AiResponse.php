@@ -27,6 +27,9 @@ class AiResponse
     #[ORM\Column(type: 'datetime')]
     public \DateTime $createdAt;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    public bool $isProcessed = false;
+
     public function __construct(GameWeek $gameWeek, string $rawResponse, bool $hasValidData = false)
     {
         $this->gameWeek = $gameWeek;

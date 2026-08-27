@@ -304,12 +304,18 @@
                                                 <span class="material-symbols-outlined">done_all</span>
                                             </button>
                                         </form>
-                                        <form method="post" action="{{ path('app_bet_ai_gameweek_evaluate', {id: gameWeek.id, responseId: response.id}) }}" class="inline">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
-                                            <button type="submit" class="p-xs rounded-lg hover:bg-primary/10 text-primary transition-colors border-none bg-transparent cursor-pointer" title="Vorschläge erstellen">
-                                                <span class="material-symbols-outlined">auto_fix_high</span>
+                                        {% if response.isProcessed %}
+                                            <button type="button" class="p-xs rounded-lg text-outline-variant transition-colors border-none bg-transparent cursor-not-allowed" title="Bereits erstellt" disabled>
+                                                <span class="material-symbols-outlined">check_circle</span>
                                             </button>
-                                        </form>
+                                        {% else %}
+                                            <form method="post" action="{{ path('app_bet_ai_gameweek_evaluate', {id: gameWeek.id, responseId: response.id}) }}" class="inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                                                <button type="submit" class="p-xs rounded-lg hover:bg-primary/10 text-primary transition-colors border-none bg-transparent cursor-pointer" title="Vorschläge erstellen">
+                                                    <span class="material-symbols-outlined">auto_fix_high</span>
+                                                </button>
+                                            </form>
+                                        {% endif %}
                                         <a href="{{ path('app_bet_ai_gameweek_view_raw', {id: gameWeek.id, responseId: response.id}) }}" class="p-xs rounded-lg hover:bg-info/10 text-info transition-colors no-underline inline-block" title="Roh-Daten">
                                             <span class="material-symbols-outlined">code</span>
                                         </a>
