@@ -2,6 +2,7 @@
 
 namespace App\Tool\BetAI\Entity;
 
+use App\Tool\BetAI\Enum\BetMarketType;
 use App\Tool\BetAI\Enum\BetType;
 use App\Tool\BetAI\Repository\BetSuggestionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -30,6 +31,9 @@ class BetSuggestion
 
         #[ORM\Column(length: 255)]
         private string $market = '',
+
+        #[ORM\Column(type: 'string', length: 255, enumType: BetMarketType::class)]
+        private BetMarketType $marketType = BetMarketType::UNKNOWN,
 
         #[ORM\Column(length: 255)]
         private string $prediction = '',
@@ -106,6 +110,18 @@ class BetSuggestion
     public function setMarket(string $market): self
     {
         $this->market = $market;
+        $this->marketType = BetMarketType::fromMarketName($market);
+        return $this;
+    }
+
+    public function getMarketType(): BetMarketType
+    {
+        return $this->marketType;
+    }
+
+    public function setMarketType(BetMarketType $marketType): self
+    {
+        $this->marketType = $marketType;
         return $this;
     }
 

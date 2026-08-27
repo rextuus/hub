@@ -24,7 +24,13 @@
     </div>
 
     <div class="p-lg flex-grow">
-        <h5 class="text-title-md font-title-md text-primary mb-xs">{{ suggestion.market }}</h5>
+        <div class="flex items-start justify-between gap-md mb-xs">
+            <h5 class="text-title-md font-title-md text-primary">{{ suggestion.market }}</h5>
+            <div class="flex items-center gap-xs {{ suggestion.marketType.getBadgeClass() }} px-sm py-1 rounded-lg shrink-0">
+                <span class="material-symbols-outlined text-[14px]">{{ suggestion.marketType.getIcon() }}</span>
+                <span class="text-[9px] font-bold uppercase tracking-wider">{{ suggestion.marketType.getLabel() }}</span>
+            </div>
+        </div>
         <h6 class="text-body-md font-medium text-on-surface mb-md">{{ suggestion.prediction }}</h6>
         <p class="text-body-sm text-secondary hover:text-on-surface transition-all cursor-help" title="{{ suggestion.aiReasoning }}">{{ suggestion.aiReasoning }}</p>
 
