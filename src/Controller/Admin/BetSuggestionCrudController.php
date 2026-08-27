@@ -3,9 +3,12 @@
 namespace App\Controller\Admin;
 
 use App\Tool\BetAI\Entity\BetSuggestion;
+use App\Tool\BetAI\Enum\BetMarketType;
+use App\Tool\BetAI\Enum\BetType;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -22,8 +25,9 @@ class BetSuggestionCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             AssociationField::new('gameWeek'),
-            TextField::new('betType'),
+            ChoiceField::new('betType')->setChoices(BetType::cases()),
             TextField::new('market'),
+            ChoiceField::new('marketType')->setChoices(BetMarketType::cases()),
             TextField::new('prediction'),
             NumberField::new('totalOdds'),
             NumberField::new('suggestedStake'),
