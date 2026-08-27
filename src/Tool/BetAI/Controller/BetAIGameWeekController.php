@@ -106,9 +106,21 @@ class BetAIGameWeekController extends AbstractController
     ): Response {
         $suggestions = $suggestionRepository->findBy(['gameWeek' => $gameWeek]);
 
+        $missingActualOdds = false;
+        foreach ($suggestions as $suggestion) {
+            if ($suggestion->getConfidenceScore() >= 6 && $suggestion->getActualOdds() === null) {
+                $missingActualOdds = true;
+                break;
+            }
+        }
+
         $betStakeCalculator->calculateAndSaveStakes($suggestions);
 
-        $this->addFlash('success', 'Einsätze wurden berechnet.');
+        if ($missingActualOdds) {
+            $this->addFlash('info', 'Einsätze wurden berechnet, teilweise basierend auf AI-Quoten (da keine reale Quote eingetragen war).');
+        } else {
+            $this->addFlash('success', 'Einsätze wurden basierend auf den realen Quoten berechnet.');
+        }
 
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }

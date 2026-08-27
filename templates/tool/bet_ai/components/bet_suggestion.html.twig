@@ -1,7 +1,12 @@
 <div class="card mb-3 {{ suggestion.betType == 'COMBI' ? 'border-primary' : 'border-secondary' }}">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span class="badge {{ suggestion.betType == 'COMBI' ? 'bg-primary' : 'bg-secondary' }}">{{ suggestion.betType }}</span>
-        <span>Quote: <strong>{{ suggestion.totalOdds }}</strong></span>
+        <div class="d-flex gap-3">
+            <span class="small text-muted">AI-Quote: <strong>{{ suggestion.totalOdds|number_format(2) }}</strong></span>
+            {% if suggestion.actualOdds %}
+                <span class="small text-success">Reale Quote: <strong>{{ suggestion.actualOdds|number_format(2) }}</strong></span>
+            {% endif %}
+        </div>
     </div>
     <div class="card-body">
         <h5 class="card-title text-primary">{{ suggestion.market }}</h5>
@@ -76,8 +81,8 @@
             <form method="post" action="{{ path('app_bet_ai_gameweek_update_actual_odds', {id: suggestion.gameWeek.id, suggestionId: suggestion.id}) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
                 <div class="input-group mb-2">
-                    <input type="number" step="0.01" name="actualOdds" class="form-control form-control-sm" placeholder="Reale Quote" value="{{ suggestion.actualOdds }}">
-                    <button type="submit" class="btn btn-outline-secondary btn-sm">Quote speichern</button>
+                    <input type="number" step="0.01" name="actualOdds" class="form-control form-control-sm" placeholder="Korrigierte Quote" value="{{ suggestion.actualOdds }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Speichern</button>
                 </div>
             </form>
         {% else %}

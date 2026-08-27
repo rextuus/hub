@@ -42,7 +42,13 @@ class BetStakeCalculator
         // 4. Berechne die Summe aller Gewichte (Scores)
         $totalWeight = 0.0;
         foreach ($validSuggestions as $bet) {
+            $odds = $bet->getActualOdds() ?: $bet->getTotalOdds();
+            if ($odds <= 1.0) continue;
+
             $score = $bet->getConfidenceScore();
+            // Gewichtung basiert auf Confidence und Quote (Value-Ansatz)
+            // Je höher der Score, desto mehr Einsatz.
+            // Optional: Quoten-Einfluss? Hier bleiben wir bei Confidence-Quadrat
             $totalWeight += ($score * $score);
         }
 
@@ -52,6 +58,12 @@ class BetStakeCalculator
 
         // 5. Berechne den Einsatz für jede einzelne Wette
         foreach ($validSuggestions as $bet) {
+            $odds = $bet->getActualOdds() ?: $bet->getTotalOdds();
+            if ($odds <= 1.0) {
+                $bet->setSuggestedStake(0.0);
+                continue;
+            }
+
             $score = $bet->getConfidenceScore();
             $betWeight = ($score * $score);
             $share = $betWeight / $totalWeight;
