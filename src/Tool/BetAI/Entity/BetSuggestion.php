@@ -18,6 +18,11 @@ class BetSuggestion
     #[ORM\Column]
     public ?int $id = null;
 
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
     #[ORM\OneToMany(mappedBy: 'betSuggestion', targetEntity: SuggestionMatchItem::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $suggestionMatchItems;
 
