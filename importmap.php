@@ -38,15 +38,6 @@ return [
         'version' => '5.3.8',
         'type' => 'css',
     ],
-    'tom-select' => [
-        'version' => '2.6.2',
-    ],
-    '@orchidjs/sifter' => [
-        'version' => '1.1.0',
-    ],
-    '@orchidjs/unicode-variants' => [
-        'version' => '1.1.2',
-    ],
     'tom-select/dist/css/tom-select.default.min.css' => [
         'version' => '2.6.2',
         'type' => 'css',
@@ -63,10 +54,16 @@ return [
         'version' => '2.6.2',
         'type' => 'css',
     ],
-    '@symfony/ux-autocomplete' => [
-        'version' => '2.36.2',
-    ],
     'swiper' => [
         'version' => '14.2.0',
+    ],
+    'tom-select' => [
+        'version' => '2.6.2',
+    ],
+    '@orchidjs/sifter' => [
+        'version' => '1.1.0',
+    ],
+    '@orchidjs/unicode-variants' => [
+        'version' => '1.1.2',
     ],
 ];
