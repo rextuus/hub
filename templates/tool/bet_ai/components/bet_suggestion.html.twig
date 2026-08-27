@@ -1,81 +1,81 @@
 <div class="bg-surface-container-lowest border {{ suggestion.betType.value == 'COMBI' ? 'border-primary' : 'border-outline-variant' }} rounded-2xl overflow-hidden shadow-md h-full flex flex-col">
-    <div class="bg-surface-container-low px-lg py-md flex justify-between items-center border-b border-outline-variant">
-        <div class="flex items-center gap-sm">
+    <div class="bg-surface-container-low px-md sm:px-lg py-sm sm:py-md flex justify-between items-center border-b border-outline-variant">
+        <div class="flex items-center gap-xs sm:gap-sm">
             {% if index %}
-                <span class="bg-secondary/10 text-secondary w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-bold">#{{ index }}</span>
+                <span class="bg-secondary/10 text-secondary w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-[9px] sm:text-[10px] font-bold">#{{ index }}</span>
             {% endif %}
-            <div class="flex items-center gap-xs bg-primary/10 text-primary px-sm py-xs rounded-full">
-                <span class="material-symbols-outlined text-[16px]">{{ suggestion.betType.getIcon() }}</span>
-                <span class="text-[10px] font-label-caps font-bold tracking-wider uppercase">{{ suggestion.betType.getLabel() }}</span>
+            <div class="flex items-center gap-xs bg-primary/10 text-primary px-xs sm:px-sm py-0.5 sm:py-xs rounded-full">
+                <span class="material-symbols-outlined text-[14px] sm:text-[16px]">{{ suggestion.betType.getIcon() }}</span>
+                <span class="text-[9px] sm:text-[10px] font-label-caps font-bold tracking-wider uppercase">{{ suggestion.betType.getLabel() }}</span>
             </div>
         </div>
-        <div class="flex gap-lg">
+        <div class="flex gap-sm sm:gap-lg">
             <div class="flex flex-col items-end">
-                <span class="text-[10px] text-secondary uppercase font-label-caps">AI-Quote</span>
-                <span class="text-body-sm font-bold text-on-surface">{{ suggestion.totalOdds|number_format(2) }}</span>
+                <span class="text-[9px] sm:text-[10px] text-secondary uppercase font-label-caps">AI-Quote</span>
+                <span class="text-[12px] sm:text-body-sm font-bold text-on-surface">{{ suggestion.totalOdds|number_format(2) }}</span>
             </div>
             {% if suggestion.actualOdds %}
                 <div class="flex flex-col items-end">
-                    <span class="text-[10px] text-success uppercase font-label-caps">Reale Quote</span>
-                    <span class="text-body-sm font-bold text-success">{{ suggestion.actualOdds|number_format(2) }}</span>
+                    <span class="text-[9px] sm:text-[10px] text-success uppercase font-label-caps">Reale Quote</span>
+                    <span class="text-[12px] sm:text-body-sm font-bold text-success">{{ suggestion.actualOdds|number_format(2) }}</span>
                 </div>
             {% endif %}
         </div>
     </div>
 
-    <div class="p-lg flex-grow">
+    <div class="p-md sm:p-lg flex-grow">
         <div class="flex items-start justify-between gap-md mb-xs">
-            <h5 class="text-title-md font-title-md text-primary">{{ suggestion.market }}</h5>
+            <h5 class="text-[18px] sm:text-title-md font-title-md text-primary leading-tight">{{ suggestion.market }}</h5>
             <div class="flex items-center gap-xs {{ suggestion.marketType.value == 'THREE_WAY' ? 'bg-info/10 text-info' :
                 (suggestion.marketType.value == 'THREE_WAY_COMBINED' ? 'bg-tertiary/10 text-tertiary' :
                 (suggestion.marketType.value == 'HANDICAP' ? 'bg-warning/10 text-warning' :
                 (suggestion.marketType.value == 'WIN_OVER_UNDER' ? 'bg-success/10 text-success' :
                 (suggestion.marketType.value == 'BOTH_TEAMS_SCORE_COMBI' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary')))) }} px-sm py-1 rounded-lg shrink-0">
-                <span class="material-symbols-outlined text-[14px]">{{ suggestion.marketType.getIcon() }}</span>
-                <span class="text-[9px] font-bold uppercase tracking-wider">{{ suggestion.marketType.getLabel() }}</span>
+                <span class="material-symbols-outlined text-[12px] sm:text-[14px]">{{ suggestion.marketType.getIcon() }}</span>
+                <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider">{{ suggestion.marketType.getLabel() }}</span>
             </div>
         </div>
-        <h6 class="text-body-md font-medium text-on-surface mb-md">{{ suggestion.prediction }}</h6>
-        <p class="text-body-sm text-secondary hover:text-on-surface transition-all cursor-help" title="{{ suggestion.aiReasoning }}">{{ suggestion.aiReasoning }}</p>
+        <h6 class="text-[14px] sm:text-body-md font-medium text-on-surface mb-md">{{ suggestion.prediction }}</h6>
+        <p class="text-[12px] sm:text-body-sm text-secondary hover:text-on-surface transition-all cursor-help" title="{{ suggestion.aiReasoning }}">{{ suggestion.aiReasoning }}</p>
 
-        <div class="mt-lg">
-            <h6 class="text-label-caps font-label-caps text-secondary uppercase tracking-widest border-b border-outline-variant pb-xs mb-md">Spiele</h6>
+        <div class="mt-md sm:mt-lg">
+            <h6 class="text-[10px] sm:text-label-caps font-label-caps text-secondary uppercase tracking-widest border-b border-outline-variant pb-xs mb-md">Spiele</h6>
             <div class="flex flex-col gap-md">
                 {% for item in this.matchItems %}
                     {% if item.match %}
                         <div class="flex flex-col gap-xs">
                             <div class="flex items-center justify-between gap-sm">
                                 <!-- Home Team -->
-                                <div class="flex items-center gap-sm flex-1 justify-end">
+                                <div class="flex items-center gap-xs sm:gap-sm flex-1 justify-end overflow-hidden">
                                     {% if item.match.homeTeam %}
-                                        <span class="text-body-sm font-bold text-on-surface text-right truncate">{{ item.match.homeTeam.name }}</span>
+                                        <span class="text-[12px] sm:text-body-sm font-bold text-on-surface text-right truncate">{{ item.match.homeTeam.name }}</span>
                                         {% if item.match.homeTeam.profileImgUrl %}
-                                            <img src="{{ item.match.homeTeam.profileImgUrl }}" alt="{{ item.match.homeTeam.name }}" class="w-6 h-6 rounded-full object-cover border border-outline-variant">
+                                            <img src="{{ item.match.homeTeam.profileImgUrl }}" alt="{{ item.match.homeTeam.name }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-outline-variant shrink-0">
                                         {% endif %}
                                     {% else %}
-                                        <span class="text-body-sm font-bold text-on-surface text-right truncate">{{ item.match.rawHomeTeamName }}</span>
+                                        <span class="text-[12px] sm:text-body-sm font-bold text-on-surface text-right truncate">{{ item.match.rawHomeTeamName }}</span>
                                     {% endif %}
                                 </div>
 
-                                <span class="text-label-sm font-light text-secondary">vs</span>
+                                <span class="text-[10px] sm:text-label-sm font-light text-secondary">vs</span>
 
                                 <!-- Away Team -->
-                                <div class="flex items-center gap-sm flex-1">
+                                <div class="flex items-center gap-xs sm:gap-sm flex-1 overflow-hidden">
                                     {% if item.match.awayTeam %}
                                         {% if item.match.awayTeam.profileImgUrl %}
-                                            <img src="{{ item.match.awayTeam.profileImgUrl }}" alt="{{ item.match.awayTeam.name }}" class="w-6 h-6 rounded-full object-cover border border-outline-variant">
+                                            <img src="{{ item.match.awayTeam.profileImgUrl }}" alt="{{ item.match.awayTeam.name }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-outline-variant shrink-0">
                                         {% endif %}
-                                        <span class="text-body-sm font-bold text-on-surface truncate">{{ item.match.awayTeam.name }}</span>
+                                        <span class="text-[12px] sm:text-body-sm font-bold text-on-surface truncate">{{ item.match.awayTeam.name }}</span>
                                     {% else %}
-                                        <span class="text-body-sm font-bold text-on-surface truncate">{{ item.match.rawAwayTeamName }}</span>
+                                        <span class="text-[12px] sm:text-body-sm font-bold text-on-surface truncate">{{ item.match.rawAwayTeamName }}</span>
                                     {% endif %}
                                 </div>
                             </div>
                             <div class="flex justify-center items-center gap-sm">
-                                <span class="text-[10px] text-secondary font-medium">{{ item.match.matchDate|date('d.m. H:i') }}</span>
+                                <span class="text-[9px] sm:text-[10px] text-secondary font-medium">{{ item.match.matchDate|date('d.m. H:i') }}</span>
                                 {% if item.match.homeTeam is null or item.match.awayTeam is null %}
                                     <a href="{{ path('app_bet_ai_match_fix', {id: item.match.id}) }}" class="text-warning hover:text-primary transition-colors" title="Teams zuordnen">
-                                        <span class="material-symbols-outlined text-[16px]">magic_button</span>
+                                        <span class="material-symbols-outlined text-[14px] sm:text-[16px]">magic_button</span>
                                     </a>
                                 {% endif %}
                             </div>
@@ -88,17 +88,17 @@
         </div>
     </div>
 
-    <div class="bg-surface-container-low p-lg border-t border-outline-variant mt-auto">
-        <div class="flex justify-between items-center mb-lg">
+    <div class="bg-surface-container-low p-md sm:p-lg border-t border-outline-variant mt-auto">
+        <div class="flex justify-between items-center mb-md sm:mb-lg">
             <div class="flex flex-col">
-                <span class="text-[10px] text-secondary uppercase font-label-caps">Einsatz</span>
-                <span class="text-title-sm font-title-sm text-on-surface">{{ suggestion.suggestedStake|number_format(2) }} €</span>
+                <span class="text-[9px] sm:text-[10px] text-secondary uppercase font-label-caps">Einsatz</span>
+                <span class="text-[16px] sm:text-title-sm font-title-sm text-on-surface">{{ suggestion.suggestedStake|number_format(2) }} €</span>
             </div>
             <div class="flex flex-col items-end">
-                <span class="text-[10px] text-secondary uppercase font-label-caps">Confidence</span>
+                <span class="text-[9px] sm:text-[10px] text-secondary uppercase font-label-caps">Confidence</span>
                 <div class="flex items-center gap-xs">
-                    <span class="text-title-sm font-title-sm text-on-surface">{{ suggestion.confidenceScore }}</span>
-                    <span class="text-body-sm text-secondary">/10</span>
+                    <span class="text-[16px] sm:text-title-sm font-title-sm text-on-surface">{{ suggestion.confidenceScore }}</span>
+                    <span class="text-[12px] sm:text-body-sm text-secondary">/10</span>
                 </div>
             </div>
         </div>
