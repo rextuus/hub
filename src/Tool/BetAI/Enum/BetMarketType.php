@@ -8,6 +8,7 @@ enum BetMarketType: string
     case THREE_WAY_COMBINED = 'THREE_WAY_COMBINED';
     case HANDICAP = 'HANDICAP';
     case WIN_OVER_UNDER = 'WIN_OVER_UNDER';
+    case BOTH_TEAMS_SCORE_COMBI = 'BOTH_TEAMS_SCORE_COMBI';
     case UNKNOWN = 'UNKNOWN';
 
     public function getLabel(): string
@@ -17,6 +18,7 @@ enum BetMarketType: string
             self::THREE_WAY_COMBINED => '3-Weg-Wette (Kombiniert)',
             self::HANDICAP => 'Handicap',
             self::WIN_OVER_UNDER => 'Sieg & Über/Unter',
+            self::BOTH_TEAMS_SCORE_COMBI => 'Beide Teams treffen (Kombi)',
             self::UNKNOWN => 'Unbekannt',
         };
     }
@@ -28,6 +30,7 @@ enum BetMarketType: string
             self::THREE_WAY_COMBINED => 'layers',
             self::HANDICAP => 'exposure_plus_1',
             self::WIN_OVER_UNDER => 'add_task',
+            self::BOTH_TEAMS_SCORE_COMBI => 'join_inner',
             self::UNKNOWN => 'help_outline',
         };
     }
@@ -35,11 +38,12 @@ enum BetMarketType: string
     public function getBadgeClass(): string
     {
         return match($this) {
-            self::THREE_WAY => 'bg-info/10 text-info',
-            self::THREE_WAY_COMBINED => 'bg-tertiary/10 text-tertiary',
-            self::HANDICAP => 'bg-warning/10 text-warning',
-            self::WIN_OVER_UNDER => 'bg-success/10 text-success',
-            self::UNKNOWN => 'bg-secondary/10 text-secondary',
+            self::THREE_WAY => 'bg-info-subtle text-info',
+            self::THREE_WAY_COMBINED => 'bg-primary-subtle text-primary',
+            self::HANDICAP => 'bg-warning-subtle text-warning',
+            self::WIN_OVER_UNDER => 'bg-success-subtle text-success',
+            self::BOTH_TEAMS_SCORE_COMBI => 'bg-info-subtle text-info',
+            self::UNKNOWN => 'bg-secondary-subtle text-secondary',
         };
     }
 
@@ -51,6 +55,7 @@ enum BetMarketType: string
             str_contains($marketName, '3-weg-wette') => self::THREE_WAY,
             str_contains($marketName, 'handicap') => self::HANDICAP,
             str_contains($marketName, 'sieg &') => self::WIN_OVER_UNDER,
+            str_contains($marketName, 'beide teams treffen (kombi)') => self::BOTH_TEAMS_SCORE_COMBI,
             default => self::UNKNOWN,
         };
     }

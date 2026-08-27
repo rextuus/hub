@@ -1,0 +1,9 @@
+{% if field.value is iterable %}
+    {# Fallback for potential array issues #}
+    {{ field.formattedValue }}
+{% else %}
+    {% set icon = field.value.getIcon() %}
+    {% set label = field.value.getLabel() %}
+    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">{{ icon }}</span>
+    {{ label }}
+{% endif %}

@@ -1,0 +1,11 @@
+{% if field.value is iterable %}
+    {{ field.formattedValue }}
+{% else %}
+    {% set icon = field.value.getIcon() %}
+    {% set label = field.value.getLabel() %}
+    {% set badgeClass = field.value.getBadgeClass() %}
+    <span class="badge {{ badgeClass }}">
+        <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">{{ icon }}</span>
+        {{ label }}
+    </span>
+{% endif %}

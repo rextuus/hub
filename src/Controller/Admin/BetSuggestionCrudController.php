@@ -25,9 +25,13 @@ class BetSuggestionCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             AssociationField::new('gameWeek'),
-            ChoiceField::new('betType')->setChoices(BetType::cases()),
+            ChoiceField::new('betType')
+                ->setChoices(BetType::cases())
+                ->setTemplatePath('admin/fields/enum_with_icon.html.twig'),
             TextField::new('market'),
-            ChoiceField::new('marketType')->setChoices(BetMarketType::cases()),
+            ChoiceField::new('marketType')
+                ->setChoices(BetMarketType::cases())
+                ->setTemplatePath('admin/fields/market_type_badge.html.twig'),
             TextField::new('prediction'),
             NumberField::new('totalOdds'),
             NumberField::new('suggestedStake'),
