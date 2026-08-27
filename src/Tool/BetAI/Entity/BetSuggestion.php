@@ -206,4 +206,15 @@ class BetSuggestion
         $this->actualOdds = $actualOdds;
         return $this;
     }
+    public function getEarliestMatchDate(): ?\DateTimeInterface
+    {
+        $earliest = null;
+        foreach ($this->suggestionMatchItems as $item) {
+            $date = $item->getMatch()->getMatchDate();
+            if ($earliest === null || $date < $earliest) {
+                $earliest = $date;
+            }
+        }
+        return $earliest;
+    }
 }

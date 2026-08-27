@@ -29,9 +29,31 @@ class BetAIGameWeekController extends AbstractController
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
     public function show(GameWeek $gameWeek, BetSuggestionRepository $suggestionRepository, AiResponseRepository $aiResponseRepository): Response
     {
+        $suggestions = $suggestionRepository->findBy(['gameWeek' => $gameWeek]);
+
+        // Sort suggestions by earliest match date
+        usort($suggestions, function (BetSuggestion $a, BetSuggestion $b) {
+            $dateA = $a->getEarliestMatchDate();
+            $dateB = $b->getEarliestMatchDate();
+
+            if ($dateA === $dateB) {
+                return 0;
+            }
+
+            if ($dateA === null) {
+                return 1;
+            }
+
+            if ($dateB === null) {
+                return -1;
+            }
+
+            return $dateA <=> $dateB;
+        });
+
         return $this->render('tool/bet_ai/gameweek/show.html.twig', [
             'gameWeek' => $gameWeek,
-            'suggestions' => $suggestionRepository->findBy(['gameWeek' => $gameWeek]),
+            'suggestions' => $suggestions,
             'aiResponses' => $aiResponseRepository->findBy(['gameWeek' => $gameWeek], ['createdAt' => 'DESC']),
             'defaultDates' => DateUtils::getNextWeekendRange(),
         ]);
