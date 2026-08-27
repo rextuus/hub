@@ -210,7 +210,7 @@ class BetAIGameWeekController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $lastAiResponse = $aiResponseRepository->findOneBy(['gameWeek' => $gameWeek], ['createdAt' => 'DESC']);
+        $lastAiResponse = $aiResponseRepository->findOneBy(['gameWeek' => $gameWeek], ['createdAt' => 'ASC']);
         if (!$lastAiResponse) {
             $this->addFlash('error', 'Keine AI-Historie gefunden.');
             return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
@@ -245,12 +245,37 @@ class BetAIGameWeekController extends AbstractController
             'matches' => $matches,
         ]);
 
+        // Bestehende andere Vorschläge sammeln
+        $existingSuggestionsDescriptions = [];
+        $otherSuggestions = $suggestionRepository->findBy(['gameWeek' => $gameWeek]);
+        foreach ($otherSuggestions as $other) {
+            if ($other->getId() === $suggestion->getId()) {
+                continue;
+            }
+
+            $otherMatches = [];
+            foreach ($other->getSuggestionMatchItems() as $mItem) {
+                $m = $mItem->getMatch();
+                $otherMatches[] = ($m->getHomeTeam() ? $m->getHomeTeam()->getName() : $m->getRawHomeTeamName()) . " vs " .
+                                ($m->getAwayTeam() ? $m->getAwayTeam()->getName() : $m->getRawAwayTeamName());
+            }
+
+            $existingSuggestionsDescriptions[] = sprintf(
+                "Typ: %s, Markt: %s, Vorhersage: %s, Spiele: %s",
+                $other->getBetType()->value,
+                $other->getMarket(),
+                $other->getPrediction(),
+                implode(", ", $otherMatches)
+            );
+        }
+
         try {
             $newAiResponse = $aiGeminiManager->replaceSuggestionAndPersist(
                 $gameWeek,
                 $problematicBetJson,
                 $lastAiResponse,
-                $reason
+                $reason,
+                $existingSuggestionsDescriptions
             );
 
             if ($betSuggestionFactory->replaceSuggestionFromJson($newAiResponse->rawResponse, $suggestion)) {

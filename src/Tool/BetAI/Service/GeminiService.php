@@ -79,9 +79,17 @@ class GeminiService
         return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);
     }
 
-    public function replaceBetSuggestion(string $startDate, string $endDate, string $problematicBetJson, string $previousResponseJson, string $reason): string
+    public function replaceBetSuggestion(string $startDate, string $endDate, string $problematicBetJson, string $previousResponseJson, string $reason, array $existingSuggestions = []): string
     {
         $systemPrompt = $this->getSystemPrompt($startDate, $endDate);
+
+        $existingBetsText = "";
+        if (!empty($existingSuggestions)) {
+            $existingBetsText = "\n**Bereits vorhandene Wetten (bitte NICHT erneut vorschlagen):**\n";
+            foreach ($existingSuggestions as $idx => $suggestion) {
+                $existingBetsText .= ($idx + 1) . ". " . $suggestion . "\n";
+            }
+        }
 
         $userPrompt = <<<EOT
 Ich benötige einen Ersatz für eine meiner aktuellen Wett-Vorschläge für den Zeitraum {$startDate} bis {$endDate}.
@@ -92,6 +100,7 @@ Die folgende Wette weicht zu stark von den realen Marktquoten ab:
 
 **Grund für den Austausch:**
 {$reason}
+{$existingBetsText}
 
 **Wichtige Anweisung:**
 Hier ist meine bisherige vollständige Antwort von dir:
@@ -100,10 +109,11 @@ Hier ist meine bisherige vollständige Antwort von dir:
 Bitte generiere EINEN NEUEN Wett-Vorschlag, der die oben genannte problematische Wette ersetzt.
 Achte darauf:
 1. Schlage KEINE der Wetten vor, die bereits in der vorherigen Antwort enthalten waren.
-2. Der neue Vorschlag muss den gleichen Qualitätskriterien entsprechen.
-3. Antworte wieder EXAKT im gleichen JSON-Format wie zuvor, aber das `suggested_bets` Array soll NUR diesen EINEN neuen Ersatz-Vorschlag enthalten.
-4. **WICHTIG:** Der neue Vorschlag MUSS den gleichen Wett-Typ (`type`) wie die problematische Wette haben (z.B. wenn es eine COMBI war, muss der Ersatz auch eine COMBI sein).
-5. Falls es eine Kombiwette (COMBI) war, soll der neue Vorschlag idealerweise auch die gleiche Anzahl an Spielen (`matches_count`) enthalten wie das Original.
+2. Schlage KEINE Wetten vor, die den oben aufgelisteten bereits vorhandenen Wetten entsprechen oder diesen sehr ähnlich sind.
+3. Der neue Vorschlag muss den gleichen Qualitätskriterien entsprechen.
+4. Antworte wieder EXAKT im gleichen JSON-Format wie zuvor, aber das `suggested_bets` Array soll NUR diesen EINEN neuen Ersatz-Vorschlag enthalten.
+5. **WICHTIG:** Der neue Vorschlag MUSS den gleichen Wett-Typ (`type`) wie die problematische Wette haben (z.B. wenn es eine COMBI war, muss der Ersatz auch eine COMBI sein).
+6. Falls es eine Kombiwette (COMBI) war, soll der neue Vorschlag idealerweise auch die gleiche Anzahl an Spielen (`matches_count`) enthalten wie das Original.
 EOT;
 
         return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);

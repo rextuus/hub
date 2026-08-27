@@ -56,7 +56,7 @@ class AiGeminiManager
         return $aiResponse;
     }
 
-    public function replaceSuggestionAndPersist(GameWeek $gameWeek, string $problematicBetJson, AiResponse $lastAiResponse, string $reason): AiResponse
+    public function replaceSuggestionAndPersist(GameWeek $gameWeek, string $problematicBetJson, AiResponse $lastAiResponse, string $reason, array $existingSuggestions = []): AiResponse
     {
         $startDate = $gameWeek->getStartDate()->format('Y-m-d');
         $endDate = $gameWeek->getEndDate()->format('Y-m-d');
@@ -66,7 +66,8 @@ class AiGeminiManager
             $endDate,
             $problematicBetJson,
             $lastAiResponse->rawResponse,
-            $reason
+            $reason,
+            $existingSuggestions
         );
 
         // Wir setzen hasValidData initial auf false, die Factory wird es validieren
