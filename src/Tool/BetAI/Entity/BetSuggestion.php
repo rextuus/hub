@@ -2,6 +2,7 @@
 
 namespace App\Tool\BetAI\Entity;
 
+use App\Tool\BetAI\Enum\BetType;
 use App\Tool\BetAI\Repository\BetSuggestionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -24,8 +25,8 @@ class BetSuggestion
         #[ORM\JoinColumn(nullable: false)]
         private GameWeek $gameWeek,
 
-        #[ORM\Column(length: 10)]
-        private string $betType = 'SINGLE',
+        #[ORM\Column(type: 'string', length: 10, enumType: BetType::class)]
+        private BetType $betType = BetType::SINGLE,
 
         #[ORM\Column(length: 255)]
         private string $market = '',
@@ -86,12 +87,12 @@ class BetSuggestion
         return $this;
     }
 
-    public function getBetType(): string
+    public function getBetType(): BetType
     {
         return $this->betType;
     }
 
-    public function setBetType(string $betType): self
+    public function setBetType(BetType $betType): self
     {
         $this->betType = $betType;
         return $this;

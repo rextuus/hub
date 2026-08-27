@@ -12,6 +12,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 class BetSuggestionComponent
 {
     public BetSuggestion $suggestion;
+    public ?int $index = null;
 
     public function __construct(
         private SuggestionMatchItemRepository $matchItemRepository,

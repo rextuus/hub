@@ -1,6 +1,14 @@
-<div class="bg-surface-container-lowest border {{ suggestion.betType == 'COMBI' ? 'border-primary' : 'border-outline-variant' }} rounded-2xl overflow-hidden shadow-md h-full flex flex-col">
+<div class="bg-surface-container-lowest border {{ suggestion.betType.value == 'COMBI' ? 'border-primary' : 'border-outline-variant' }} rounded-2xl overflow-hidden shadow-md h-full flex flex-col">
     <div class="bg-surface-container-low px-lg py-md flex justify-between items-center border-b border-outline-variant">
-        <span class="bg-primary/10 text-primary px-sm py-xs rounded-full text-label-caps font-label-caps tracking-wider">{{ suggestion.betType }}</span>
+        <div class="flex items-center gap-sm">
+            {% if index %}
+                <span class="bg-secondary/10 text-secondary w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-bold">#{{ index }}</span>
+            {% endif %}
+            <div class="flex items-center gap-xs bg-primary/10 text-primary px-sm py-xs rounded-full">
+                <span class="material-symbols-outlined text-[16px]">{{ suggestion.betType.getIcon() }}</span>
+                <span class="text-[10px] font-label-caps font-bold tracking-wider uppercase">{{ suggestion.betType.getLabel() }}</span>
+            </div>
+        </div>
         <div class="flex gap-lg">
             <div class="flex flex-col items-end">
                 <span class="text-[10px] text-secondary uppercase font-label-caps">AI-Quote</span>

@@ -257,7 +257,7 @@
                         <div class="swiper-wrapper">
                             {% for suggestion in suggestions %}
                                 <div class="swiper-slide">
-                                    {{ component('bet_suggestion', { suggestion: suggestion }) }}
+                                    {{ component('bet_suggestion', { suggestion: suggestion, index: loop.index }) }}
                                 </div>
                             {% endfor %}
                         </div>
