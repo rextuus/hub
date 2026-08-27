@@ -66,4 +66,7 @@ return [
     '@symfony/ux-autocomplete' => [
         'version' => '3.4.0',
     ],
+    'swiper' => [
+        'version' => '14.2.0',
+    ],
 ];

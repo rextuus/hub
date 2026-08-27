@@ -2,85 +2,354 @@
 
 {% block title %}Spielwoche {{ gameWeek.name }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            },
+            blocklist: ["navbar", "nav-item", "nav-link", "dropdown", "dropdown-toggle", "dropdown-menu", "btn", "container", "collapse", "navbar-collapse", "navbar-brand", "navbar-toggler", "sticky-top", "fixed-top", "shadow-sm"],
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f7f9fb",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "primary-container": "#0066ff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary": "#505f76",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#006645",
+                        "outline": "#727687",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-primary-fixed-variant": "#003fa4",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "tertiary-container": "#008259",
+                        "outline-variant": "#c2c6d8",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "primary-fixed": "#dae1ff",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-container": "#e1ffec",
+                        "primary": "#0050cb",
+                        "secondary-container": "#d0e1fb",
+                        "inverse-primary": "#b3c5ff",
+                        "on-surface-variant": "#424656",
+                        "surface-container": "#eceef0",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-primary-fixed": "#001849",
+                        "on-secondary-container": "#54647a",
+                        "surface-variant": "#e0e3e5",
+                        "on-surface": "#191c1e",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#2d3133",
+                        "surface-container-high": "#e6e8ea",
+                        "surface-tint": "#0054d6",
+                        "on-primary-container": "#f8f7ff",
+                        "surface-dim": "#d8dadc",
+                        "warning": "#e6a23c",
+                        "info": "#409eff",
+                        "success": "#67c23a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "gutter": "24px",
+                        "xl": "40px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "margin": "32px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "numeric-data": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "numeric-data": ["14px", {"lineHeight": "20px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        .betai-wrapper img,
+        .betai-wrapper svg,
+        .betai-wrapper video,
+        .betai-wrapper canvas,
+        .betai-wrapper audio,
+        .betai-wrapper iframe,
+        .betai-wrapper embed,
+        .betai-wrapper object {
+            display: block;
+            vertical-align: middle;
+        }
+        .betai-wrapper img,
+        .betai-wrapper video {
+            max-width: 100%;
+            height: auto;
+        }
+        .betai-wrapper {
+            background-color: #f7f9fb;
+            color: #191c1e;
+        }
+        .betai-wrapper * {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #c2c6d8; /* outline-variant */
+        }
+        /* Reset for header elements to ensure they don't inherit the wrapper's border reset */
+        .navbar * {
+            border-width: initial;
+            border-style: initial;
+            border-color: initial;
+        }
+
+        .swiper {
+            width: 100%;
+            padding-top: 50px;
+            padding-bottom: 80px;
+        }
+
+        .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            width: 450px;
+            height: auto;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.3;
+            transform: scale(0.8) translateY(20px);
+            filter: blur(2px);
+        }
+
+        .swiper-slide-active {
+            opacity: 1;
+            transform: scale(1.05) translateY(0);
+            z-index: 10;
+            filter: blur(0);
+        }
+
+        .swiper-slide-prev, .swiper-slide-next {
+            opacity: 0.6;
+            transform: scale(0.9) translateY(10px);
+            filter: blur(1px);
+        }
+
+        .swiper-button-next, .swiper-button-prev {
+            color: #0050cb; /* primary */
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .swiper-button-next:after, .swiper-button-prev:after {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-    <div class="container mt-4">
-        <h1>Spielwoche: {{ gameWeek.name }}</h1>
-        <p>Zeitraum: {{ gameWeek.startDate|date('d.m.Y') }} - {{ gameWeek.endDate|date('d.m.Y') }}</p>
-
-        <div class="mb-3">
-            <a href="{{ path('app_bet_ai_index') }}" class="btn btn-secondary">Zurück zum Dashboard</a>
-        </div>
-
-        <div class="mt-4">
-            <h3>Wett-Vorschläge</h3>
-            {% if suggestions is empty %}
-                <div class="card p-3">
-                    <p>Keine Vorschläge gefunden. Möchtest du neue generieren?</p>
-                    <form method="post" action="{{ path('app_bet_ai_gameweek_generate', {id: gameWeek.id}) }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="startDate" class="form-label">Startdatum</label>
-                                <input type="date" class="form-control" id="startDate" name="startDate" value="{{ defaultDates.startDate }}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="endDate" class="form-label">Enddatum</label>
-                                <input type="date" class="form-control" id="endDate" name="endDate" value="{{ defaultDates.endDate }}" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Jetzt generieren</button>
-                    </form>
-                    <div class="mt-2">
-                        <a href="{{ path('app_bet_ai_gameweek_test_raw_input', {id: gameWeek.id}) }}" class="btn btn-secondary">Raw Test</a>
+    <div class="betai-wrapper min-h-screen pb-xl">
+        <div class="max-w-[1400px] mx-auto px-lg pt-xl">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-lg mb-xl">
+                <div class="flex flex-col gap-xs">
+                    <div class="flex items-center gap-sm">
+                        <a href="{{ path('app_bet_ai_index') }}" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary transition-all group no-underline">
+                            <span class="material-symbols-outlined group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                        </a>
+                        <h1 class="text-display-sm font-display-sm text-on-surface m-0">Spielwoche: {{ gameWeek.name }}</h1>
+                    </div>
+                    <div class="flex items-center gap-md text-secondary ml-[48px]">
+                        <span class="flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                            <span class="text-body-sm">{{ gameWeek.startDate|date('d.m.Y') }} - {{ gameWeek.endDate|date('d.m.Y') }}</span>
+                        </span>
                     </div>
                 </div>
-            {% else %}
-                <div class="mb-3">
-                    <form method="post" action="{{ path('app_bet_ai_gameweek_calculate', {id: gameWeek.id}) }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
-                        <button type="submit" class="btn btn-success">Einsätze berechnen</button>
-                    </form>
-                </div>
-                <div class="row">
-                    {% for suggestion in suggestions %}
-                        <div class="col-md-6">
-                            <twig:bet_suggestion :suggestion="suggestion" />
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
 
-        <div class="mt-4">
-            <h3>KI-Antwort Historie</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Datum</th>
-                        <th>Status</th>
-                        <th>Aktionen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for response in aiResponses %}
-                        <tr>
-                            <td>{{ response.createdAt|date('d.m.Y H:i') }}</td>
-                            <td>{{ response.hasValidData ? '<span class="badge bg-success">Valid</span>' : '<span class="badge bg-warning">Ungültig</span>' }}</td>
-                            <td>
-                                <form method="post" action="{{ path('app_bet_ai_gameweek_validate', {id: gameWeek.id, responseId: response.id}) }}" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Check</button>
-                                </form>
-                                <form method="post" action="{{ path('app_bet_ai_gameweek_evaluate', {id: gameWeek.id, responseId: response.id}) }}" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
-                                    <button type="submit" class="btn btn-sm btn-warning">Vorschläge erstellen</button>
-                                </form>
-                                <a href="{{ path('app_bet_ai_gameweek_view_raw', {id: gameWeek.id, responseId: response.id}) }}" class="btn btn-sm btn-info">Roh-Daten</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                <div class="flex items-center gap-md">
+                    {% if suggestions is not empty %}
+                        <form method="post" action="{{ path('app_bet_ai_gameweek_calculate', {id: gameWeek.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                            <button type="submit" class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center gap-sm border-none cursor-pointer">
+                                <span class="material-symbols-outlined text-[20px]">calculate</span>
+                                Einsätze berechnen
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Main Content: Slider -->
+            <div class="mb-2xl overflow-hidden">
+                <h3 class="text-title-lg font-title-lg text-on-surface mb-lg flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-primary">analytics</span>
+                    Wett-Vorschläge
+                </h3>
+
+                {% if suggestions is empty %}
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-xl shadow-sm max-w-2xl">
+                        <p class="text-body-md text-secondary mb-xl">Keine Vorschläge gefunden. Möchtest du neue generieren?</p>
+                        <form method="post" action="{{ path('app_bet_ai_gameweek_generate', {id: gameWeek.id}) }}" class="flex flex-col gap-lg">
+                            <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                                <div class="flex flex-col gap-xs">
+                                    <label for="startDate" class="text-label-md font-label-md text-on-surface-variant">Startdatum</label>
+                                    <input type="date" class="bg-surface-container border border-outline-variant rounded-lg px-md py-sm text-on-surface focus:outline-primary" id="startDate" name="startDate" value="{{ defaultDates.startDate }}" required>
+                                </div>
+                                <div class="flex flex-col gap-xs">
+                                    <label for="endDate" class="text-label-md font-label-md text-on-surface-variant">Enddatum</label>
+                                    <input type="date" class="bg-surface-container border border-outline-variant rounded-lg px-md py-sm text-on-surface focus:outline-primary" id="endDate" name="endDate" value="{{ defaultDates.endDate }}" required>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-md">
+                                <button type="submit" class="bg-primary text-on-primary px-xl py-md rounded-xl font-title-sm text-title-sm hover:opacity-90 transition-all border-none cursor-pointer">
+                                    Jetzt generieren
+                                </button>
+                                <a href="{{ path('app_bet_ai_gameweek_test_raw_input', {id: gameWeek.id}) }}" class="text-secondary hover:text-primary transition-colors no-underline font-label-caps text-label-caps">Raw Test</a>
+                            </div>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="swiper mySwiper !overflow-visible">
+                        <div class="swiper-wrapper">
+                            {% for suggestion in suggestions %}
+                                <div class="swiper-slide">
+                                    {{ component('bet_suggestion', { suggestion: suggestion }) }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Add Pagination -->
+                        <div class="swiper-pagination"></div>
+                        <!-- Add Navigation -->
+                        <div class="swiper-button-next text-primary"></div>
+                        <div class="swiper-button-prev text-primary"></div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- AI History Section -->
+            <div class="mt-2xl">
+                <h3 class="text-title-lg font-title-lg text-on-surface mb-lg flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-secondary">history</span>
+                    KI-Antwort Historie
+                </h3>
+
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low text-left">
+                                <th class="px-lg py-md text-label-caps font-label-caps text-secondary">Datum</th>
+                                <th class="px-lg py-md text-label-caps font-label-caps text-secondary">Status</th>
+                                <th class="px-lg py-md text-label-caps font-label-caps text-secondary text-right">Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant">
+                            {% for response in aiResponses %}
+                                <tr class="hover:bg-surface-container-high transition-colors">
+                                    <td class="px-lg py-md text-body-md text-on-surface">{{ response.createdAt|date('d.m.Y H:i') }}</td>
+                                    <td class="px-lg py-md">
+                                        {% if response.hasValidData %}
+                                            <span class="bg-success/10 text-success px-sm py-xs rounded-full text-label-sm font-label-sm">Valid</span>
+                                        {% else %}
+                                            <span class="bg-warning/10 text-warning px-sm py-xs rounded-full text-label-sm font-label-sm">Ungültig</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-lg py-md text-right flex items-center justify-end gap-sm">
+                                        <form method="post" action="{{ path('app_bet_ai_gameweek_validate', {id: gameWeek.id, responseId: response.id}) }}" class="inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                                            <button type="submit" class="p-xs rounded-lg hover:bg-surface-container-highest text-secondary transition-colors border-none bg-transparent cursor-pointer" title="Check">
+                                                <span class="material-symbols-outlined">done_all</span>
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{{ path('app_bet_ai_gameweek_evaluate', {id: gameWeek.id, responseId: response.id}) }}" class="inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                                            <button type="submit" class="p-xs rounded-lg hover:bg-primary/10 text-primary transition-colors border-none bg-transparent cursor-pointer" title="Vorschläge erstellen">
+                                                <span class="material-symbols-outlined">auto_fix_high</span>
+                                            </button>
+                                        </form>
+                                        <a href="{{ path('app_bet_ai_gameweek_view_raw', {id: gameWeek.id, responseId: response.id}) }}" class="p-xs rounded-lg hover:bg-info/10 text-info transition-colors no-underline inline-block" title="Roh-Daten">
+                                            <span class="material-symbols-outlined">code</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('turbo:load', function() {
+            const swiper = new Swiper(".mySwiper", {
+                effect: "coverflow",
+                grabCursor: true,
+                centeredSlides: true,
+                slidesPerView: "auto",
+                 coverflowEffect: {
+                    rotate: 5,
+                    stretch: 0,
+                    depth: 100,
+                    modifier: 2.5,
+                    slideShadows: false,
+                },
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+            });
+        });
+    </script>
 {% endblock %}
