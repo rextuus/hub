@@ -26,7 +26,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 class BetAIGameWeekController extends AbstractController
 {
-    #[Route('/{id}', name: 'show')]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
     public function show(GameWeek $gameWeek, BetSuggestionRepository $suggestionRepository, AiResponseRepository $aiResponseRepository): Response
     {
         return $this->render('tool/bet_ai/gameweek/show.html.twig', [
@@ -37,7 +37,7 @@ class BetAIGameWeekController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/generate', name: 'generate', methods: ['POST'])]
+    #[Route('/{id}/generate', name: 'generate', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function generate(
         GameWeek $gameWeek,
         Request $request,
@@ -53,7 +53,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/validate/{responseId}', name: 'validate', methods: ['POST'])]
+    #[Route('/{id}/validate/{responseId}', name: 'validate', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function validateResponse(
         GameWeek $gameWeek,
         int $responseId,
@@ -74,7 +74,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/evaluate/{responseId}', name: 'evaluate', methods: ['POST'])]
+    #[Route('/{id}/evaluate/{responseId}', name: 'evaluate', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function evaluate(
         GameWeek $gameWeek,
         int $responseId,
@@ -98,7 +98,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/calculate', name: 'calculate', methods: ['POST'])]
+    #[Route('/{id}/calculate', name: 'calculate', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function calculate(
         GameWeek $gameWeek,
         BetSuggestionRepository $suggestionRepository,
@@ -113,7 +113,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/suggestion/{suggestionId}/place', name: 'place_suggestion', methods: ['POST'])]
+    #[Route('/{id}/suggestion/{suggestionId}/place', name: 'place_suggestion', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function placeSuggestion(
         GameWeek $gameWeek,
         int $suggestionId,
@@ -148,7 +148,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/suggestion/{suggestionId}/update-odds', name: 'update_actual_odds', methods: ['POST'])]
+    #[Route('/{id}/suggestion/{suggestionId}/update-odds', name: 'update_actual_odds', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function updateActualOdds(
         GameWeek $gameWeek,
         int $suggestionId,
@@ -171,7 +171,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/placed-bet/{placedBetId}/finalize', name: 'finalize_bet', methods: ['POST'])]
+    #[Route('/{id}/placed-bet/{placedBetId}/finalize', name: 'finalize_bet', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function finalizeBet(
         GameWeek $gameWeek,
         int $placedBetId,
@@ -190,7 +190,7 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
-    #[Route('/{id}/test-raw', name: 'test_raw', methods: ['POST'])]
+    #[Route('/{id}/test-raw', name: 'test_raw', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function testRaw(
         GameWeek $gameWeek,
         Request $request,
@@ -207,7 +207,7 @@ class BetAIGameWeekController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/view-raw/{responseId}', name: 'view_raw', methods: ['GET'])]
+    #[Route('/{id}/view-raw/{responseId}', name: 'view_raw', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewRaw(
         GameWeek $gameWeek,
         int $responseId,
@@ -223,7 +223,7 @@ class BetAIGameWeekController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/test-raw-input', name: 'test_raw_input', methods: ['GET'])]
+    #[Route('/{id}/test-raw-input', name: 'test_raw_input', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function testRawInput(GameWeek $gameWeek): Response
     {
         return $this->render('tool/bet_ai/gameweek/test_raw_input.html.twig', [
@@ -251,7 +251,7 @@ class BetAIGameWeekController extends AbstractController
                 $entityManager->persist($gameWeek);
                 $entityManager->flush();
 
-                return $this->redirectToRoute('app_bet_ai_gameweek_index');
+                return $this->redirectToRoute('app_bet_ai_index');
             }
         }
 

@@ -7,12 +7,6 @@
                 <p class="text-secondary font-body-md text-body-md">Übersicht deiner Wett-Analysen und aktuellen Spielwochen.</p>
             </div>
             <div class="flex items-center gap-md mt-4 md:mt-0">
-                <a href="{{ path('admin') }}" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center no-underline">
-                    <span class="material-symbols-outlined text-[20px] mr-2">admin_panel_settings</span>Admin
-                </a>
-                <a href="{{ path('app_bet_ai_gameweek_new') }}" class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center no-underline">
-                    <span class="material-symbols-outlined text-[20px] mr-2">add_circle</span>Neue Spielwoche
-                </a>
             </div>
         </section>
 
@@ -55,8 +49,8 @@
             <div class="flex flex-col gap-xs">
                 <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Gesamtgewinn</span>
                 {% set totalProfit = 0 %}
-                {% for profit in this.gameWeekStats %}
-                    {% set totalProfit = totalProfit + profit %}
+                {% for stats in this.gameWeekStats %}
+                    {% set totalProfit = totalProfit + stats.profit %}
                 {% endfor %}
                 <span class="text-title-md font-title-md {{ totalProfit >= 0 ? 'text-success' : 'text-error' }}">
                     {{ totalProfit|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
@@ -65,8 +59,8 @@
         </div>
     </div>
 
-    <!-- Average Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-lg mb-xl">
+    <!-- Average & Counter Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-lg mb-xl">
         <!-- Average Stake Card -->
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-primary transition-colors cursor-default">
             <div class="bg-primary/10 p-sm rounded-lg flex items-center justify-center text-primary">
@@ -76,6 +70,19 @@
                 <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Ø Einsatz</span>
                 <span class="text-title-md font-title-md text-on-surface">
                     {{ this.averageStake|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Average Odds Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-secondary transition-colors cursor-default">
+            <div class="bg-secondary/10 p-sm rounded-lg flex items-center justify-center text-secondary">
+                <span class="material-symbols-outlined">analytics</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Ø Quote</span>
+                <span class="text-title-md font-title-md text-on-surface">
+                    {{ this.averageOdds|number_format(2) }}
                 </span>
             </div>
         </div>
@@ -90,6 +97,22 @@
                 <span class="text-title-md font-title-md {{ this.averageProfit >= 0 ? 'text-success' : 'text-error' }}">
                     {{ this.averageProfit|number_format(2) }} <span class="text-secondary text-body-sm">EUR</span>
                 </span>
+            </div>
+        </div>
+
+        <!-- Bet Counter Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md hover:border-outline transition-colors cursor-default">
+            <div class="bg-outline/10 p-sm rounded-lg flex items-center justify-center text-outline">
+                <span class="material-symbols-outlined">numbers</span>
+            </div>
+            <div class="flex flex-col gap-xs">
+                <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Wetten (G/V/S)</span>
+                <div class="flex items-baseline gap-xs">
+                    <span class="text-title-md font-title-md text-on-surface">{{ this.betCounts.total }}</span>
+                    <span class="text-body-sm text-secondary">
+                        (<span class="text-success">{{ this.betCounts.won }}</span>/<span class="text-error">{{ this.betCounts.lost }}</span>/<span class="text-warning">{{ this.betCounts.open }}</span>)
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -121,12 +144,18 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-lg pl-[28px] md:pl-0">
-                            {% set gwProfit = this.gameWeekStats[gw.id] ?? 0 %}
+                            {% set gwStats = this.gameWeekStats[gw.id] ?? {'profit': 0, 'avgOdds': 0} %}
+                            <div class="flex flex-col gap-xs items-end">
+                                <span class="text-label-caps font-label-caps text-secondary">Ø Quote</span>
+                                <span class="text-numeric-data font-numeric-data text-on-surface">
+                                    {{ gwStats.avgOdds|number_format(2) }}
+                                </span>
+                            </div>
                             <div class="flex flex-col gap-xs items-end">
                                 <span class="text-label-caps font-label-caps text-secondary">Bilanz</span>
                                 <div class="bg-surface-container-high px-sm py-xs rounded-full flex items-center gap-xs">
-                                    <span class="text-numeric-data font-numeric-data {{ gwProfit >= 0 ? 'text-success' : 'text-error' }}">
-                                        {{ gwProfit >= 0 ? '+' : '' }}{{ gwProfit|number_format(2) }} EUR
+                                    <span class="text-numeric-data font-numeric-data {{ gwStats.profit >= 0 ? 'text-success' : 'text-error' }}">
+                                        {{ gwStats.profit >= 0 ? '+' : '' }}{{ gwStats.profit|number_format(2) }} EUR
                                     </span>
                                 </div>
                             </div>
@@ -137,11 +166,6 @@
                     <p class="text-secondary italic">Keine Spielwochen vorhanden.</p>
                 {% endfor %}
             </div>
-            <div class="mt-4">
-                <a href="{{ path('app_bet_ai_gameweek_new') }}" class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-opacity inline-flex items-center no-underline">
-                    <span class="material-symbols-outlined text-[20px] mr-2">add_circle</span>Neue Spielwoche
-                </a>
-            </div>
         </section>
 
         <!-- Recent Transactions -->
@@ -151,8 +175,26 @@
                 {% for tx in this.transactions %}
                     <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex items-center justify-between hover:bg-surface-container-low transition-colors">
                         <div class="flex items-center gap-md">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center {{ tx.type.value == 'CREDIT' ? 'bg-success/10 text-success' : 'bg-error/10 text-error' }}">
-                                <span class="material-symbols-outlined">{{ tx.type.value == 'CREDIT' ? 'add' : 'remove' }}</span>
+                            <div class="flex -space-x-2 mr-2">
+                                {% if tx.placedBet and tx.placedBet.suggestion %}
+                                    {% set seenTeams = [] %}
+                                    {% for item in tx.placedBet.suggestion.suggestionMatchItems %}
+                                        {% if item.match.homeTeam and item.match.homeTeam.profileImgUrl and item.match.homeTeam.id not in seenTeams %}
+                                            <img src="{{ item.match.homeTeam.profileImgUrl }}" alt="{{ item.match.homeTeam.name }}" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" title="{{ item.match.homeTeam.name }}">
+                                            {% set seenTeams = seenTeams|merge([item.match.homeTeam.id]) %}
+                                        {% endif %}
+                                        {% if item.match.awayTeam and item.match.awayTeam.profileImgUrl and item.match.awayTeam.id not in seenTeams %}
+                                            <img src="{{ item.match.awayTeam.profileImgUrl }}" alt="{{ item.match.awayTeam.name }}" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" title="{{ item.match.awayTeam.name }}">
+                                            {% set seenTeams = seenTeams|merge([item.match.awayTeam.id]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+                                {% if not (tx.placedBet and tx.placedBet.suggestion and tx.placedBet.suggestion.suggestionMatchItems|length > 0) %}
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center {{ tx.type.value == 'CREDIT' ? 'bg-success/10 text-success' : 'bg-error/10 text-error' }}">
+                                        <span class="material-symbols-outlined">{{ tx.type.value == 'CREDIT' ? 'add' : 'remove' }}</span>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-body-md font-medium text-on-surface">{{ tx.description }}</span>

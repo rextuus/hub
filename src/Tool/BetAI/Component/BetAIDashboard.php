@@ -97,10 +97,50 @@ class BetAIDashboard extends AbstractController
         $stats = [];
 
         foreach ($gameWeeks as $gw) {
-            $stats[$gw->id ?? 0] = $this->calculateGameWeekProfit($gw);
+            $stats[$gw->id ?? 0] = [
+                'profit' => $this->calculateGameWeekProfit($gw),
+                'avgOdds' => $this->calculateGameWeekAverageOdds($gw),
+            ];
         }
 
         return $stats;
+    }
+
+    public function getAverageOdds(): float
+    {
+        $bets = $this->placedBetRepository->findAll();
+        if (empty($bets)) {
+            return 0.0;
+        }
+
+        $totalOdds = 0.0;
+        foreach ($bets as $bet) {
+            $totalOdds += $bet->getActualOdds();
+        }
+
+        return $totalOdds / count($bets);
+    }
+
+    public function getBetCounts(): array
+    {
+        $bets = $this->placedBetRepository->findAll();
+        $counts = [
+            'total' => count($bets),
+            'won' => 0,
+            'lost' => 0,
+            'open' => 0,
+        ];
+
+        foreach ($bets as $bet) {
+            match ($bet->getStatus()) {
+                'WON' => $counts['won']++,
+                'LOST' => $counts['lost']++,
+                'OPEN' => $counts['open']++,
+                default => null,
+            };
+        }
+
+        return $counts;
     }
 
     public function getBankrollHistory(): array
@@ -152,5 +192,22 @@ class BetAIDashboard extends AbstractController
         }
 
         return (float)$profit;
+    }
+
+    private function calculateGameWeekAverageOdds($gameWeek): float
+    {
+        $suggestions = $this->betSuggestionRepository->findBy(['gameWeek' => $gameWeek]);
+        $totalOdds = 0.0;
+        $count = 0;
+
+        foreach ($suggestions as $suggestion) {
+            $placedBets = $this->placedBetRepository->findBy(['suggestion' => $suggestion]);
+            foreach ($placedBets as $bet) {
+                $totalOdds += $bet->getActualOdds();
+                $count++;
+            }
+        }
+
+        return $count > 0 ? $totalOdds / $count : 0.0;
     }
 }

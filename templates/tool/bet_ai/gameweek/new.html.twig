@@ -1,27 +1,105 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Neue Spielwoche erstellen{% endblock %}
+{% block title %}BetAI - Neue Spielwoche{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            },
+            blocklist: ["navbar", "nav-item", "nav-link", "dropdown", "dropdown-toggle", "dropdown-menu", "btn", "container", "collapse", "navbar-collapse", "navbar-brand", "navbar-toggler", "sticky-top", "fixed-top", "shadow-sm"],
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f7f9fb",
+                        "primary": "#0050cb",
+                        "on-primary": "#ffffff",
+                        "secondary": "#505f76",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c2c6d8",
+                        "on-surface": "#191c1e",
+                        "surface-container": "#eceef0",
+                        "surface-container-high": "#e6e8ea",
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "40px",
+                        "sm": "8px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .betai-wrapper {
+            background-color: #f7f9fb;
+            color: #191c1e;
+            min-height: calc(100vh - 120px);
+        }
+        .betai-wrapper * {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #c2c6d8;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>Neue Spielwoche erstellen</h1>
-        <form method="post" class="card p-3">
-            <div class="mb-3">
-                <label for="name" class="form-label">Name der Spielwoche</label>
-                <input type="text" class="form-control" id="name" name="name" required>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="startDate" class="form-label">Startdatum</label>
-                    <input type="date" class="form-control" id="startDate" name="startDate" value="{{ startDate }}" required>
+<div class="betai-wrapper">
+    <main class="flex-grow w-full max-w-3xl mx-auto px-lg md:px-xl py-lg md:py-xl flex flex-col gap-xl">
+        <section>
+            <h1 class="text-headline-lg font-bold text-on-surface mb-2">Neue Spielwoche hinzufügen</h1>
+            <p class="text-secondary mb-8">Erstelle eine neue Analyse-Woche für deine Wetten.</p>
+
+            <form method="post" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl shadow-sm flex flex-col gap-lg">
+                <div class="flex flex-col gap-sm">
+                    <label for="name" class="text-label-caps font-bold text-secondary uppercase tracking-wider">Name der Spielwoche</label>
+                    <input type="text" id="name" name="name" required placeholder="z.B. Spielwoche 34"
+                           class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface-bright focus:outline-none focus:border-primary transition-colors">
                 </div>
-                <div class="col-md-6">
-                    <label for="endDate" class="form-label">Enddatum</label>
-                    <input type="date" class="form-control" id="endDate" name="endDate" value="{{ endDate }}" required>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                    <div class="flex flex-col gap-sm">
+                        <label for="startDate" class="text-label-caps font-bold text-secondary uppercase tracking-wider">Startdatum</label>
+                        <input type="date" id="startDate" name="startDate" value="{{ startDate }}" required
+                               class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface-bright focus:outline-none focus:border-primary transition-colors">
+                    </div>
+                    <div class="flex flex-col gap-sm">
+                        <label for="endDate" class="text-label-caps font-bold text-secondary uppercase tracking-wider">Enddatum</label>
+                        <input type="date" id="endDate" name="endDate" value="{{ endDate }}" required
+                               class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface-bright focus:outline-none focus:border-primary transition-colors">
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Speichern</button>
-            <a href="{{ path('app_bet_ai_index') }}" class="btn btn-secondary">Abbrechen</a>
-        </form>
-    </div>
+
+                <div class="flex items-center gap-md pt-md">
+                    <button type="submit" class="bg-primary text-on-primary px-xl py-md rounded-lg font-bold hover:opacity-90 transition-opacity cursor-pointer">
+                        Speichern
+                    </button>
+                    <a href="{{ path('app_bet_ai_index') }}" class="text-secondary hover:text-on-surface transition-colors no-underline font-medium">
+                        Abbrechen
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
 {% endblock %}

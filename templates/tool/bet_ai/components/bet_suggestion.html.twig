@@ -13,33 +13,44 @@
             <ul class="list-group list-group-flush">
                 {% for item in this.matchItems %}
                     {% if item.match %}
-                        <li class="list-group-item d-flex align-items-center px-0">
-                            {% if item.match.homeTeam %}
-                                {% if item.match.homeTeam.profileImgUrl %}
-                                    <img src="{{ asset(item.match.homeTeam.profileImgUrl) }}" alt="{{ item.match.homeTeam.name }}" style="width: 30px; height: 30px; object-fit: contain;" class="me-2 rounded-circle border">
+                        <li class="list-group-item px-0 border-0 mb-2">
+                            <div class="d-flex align-items-center mb-1">
+                                {% if item.match.homeTeam %}
+                                    <div class="d-flex align-items-center" style="flex: 1; justify-content: flex-end;">
+                                        <span class="fw-bold text-dark small me-2 text-end">{{ item.match.homeTeam.name }}</span>
+                                        {% if item.match.homeTeam.profileImgUrl %}
+                                            <img src="{{ asset(item.match.homeTeam.profileImgUrl) }}" alt="{{ item.match.homeTeam.name }}" style="width: 24px; height: 24px; object-fit: contain;" class="rounded-circle border">
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="flex-grow-1 text-end">
+                                        <span class="fw-bold text-dark small me-2">{{ item.match.rawHomeTeamName }}</span>
+                                    </div>
                                 {% endif %}
-                                <span class="fw-bold text-dark">{{ item.match.homeTeam.name }}</span>
-                            {% else %}
-                                <span class="fw-bold text-dark">{{ item.match.rawHomeTeamName }}</span>
-                            {% endif %}
 
-                            <span class="mx-2 text-muted">vs</span>
+                                <span class="mx-2 text-muted small fw-light">vs</span>
 
-                            {% if item.match.awayTeam %}
-                                <span class="fw-bold text-dark">{{ item.match.awayTeam.name }}</span>
-                                {% if item.match.awayTeam.profileImgUrl %}
-                                    <img src="{{ asset(item.match.awayTeam.profileImgUrl) }}" alt="{{ item.match.awayTeam.name }}" style="width: 30px; height: 30px; object-fit: contain;" class="ms-2 rounded-circle border">
+                                {% if item.match.awayTeam %}
+                                    <div class="d-flex align-items-center" style="flex: 1;">
+                                        {% if item.match.awayTeam.profileImgUrl %}
+                                            <img src="{{ asset(item.match.awayTeam.profileImgUrl) }}" alt="{{ item.match.awayTeam.name }}" style="width: 24px; height: 24px; object-fit: contain;" class="rounded-circle border">
+                                        {% endif %}
+                                        <span class="fw-bold text-dark small ms-2">{{ item.match.awayTeam.name }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="flex-grow-1">
+                                        <span class="fw-bold text-dark small ms-2">{{ item.match.rawAwayTeamName }}</span>
+                                    </div>
                                 {% endif %}
-                            {% else %}
-                                <span class="fw-bold text-dark">{{ item.match.rawAwayTeamName }}</span>
-                            {% endif %}
-
-                            <small class="text-muted ms-auto small">({{ item.match.matchDate|date('d.m. H:i') }})</small>
-                            {% if item.match.homeTeam is null or item.match.awayTeam is null %}
-                                <a href="{{ path('app_bet_ai_match_fix', {id: item.match.id}) }}" class="btn btn-sm btn-warning ms-2" title="Teams zuordnen">
-                                    <i class="bi bi-magic"></i>
-                                </a>
-                            {% endif %}
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <small class="text-muted" style="font-size: 0.7rem;">{{ item.match.matchDate|date('d.m. H:i') }}</small>
+                                {% if item.match.homeTeam is null or item.match.awayTeam is null %}
+                                    <a href="{{ path('app_bet_ai_match_fix', {id: item.match.id}) }}" class="btn btn-sm btn-link py-0 ms-2" title="Teams zuordnen">
+                                        <i class="bi bi-magic" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </li>
                     {% endif %}
                 {% else %}
