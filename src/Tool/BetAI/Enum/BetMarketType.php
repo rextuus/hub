@@ -45,11 +45,12 @@ enum BetMarketType: string
 
     public static function fromMarketName(string $marketName): self
     {
+        $marketName = mb_strtolower(trim($marketName));
         return match(true) {
-            str_contains($marketName, '3-Weg-Wette (Kombiniert)') => self::THREE_WAY_COMBINED,
-            str_contains($marketName, '3-Weg-Wette') => self::THREE_WAY,
-            str_contains($marketName, 'Handicap') => self::HANDICAP,
-            str_contains($marketName, 'Sieg &') => self::WIN_OVER_UNDER,
+            str_contains($marketName, '3-weg-wette (kombiniert)') => self::THREE_WAY_COMBINED,
+            str_contains($marketName, '3-weg-wette') => self::THREE_WAY,
+            str_contains($marketName, 'handicap') => self::HANDICAP,
+            str_contains($marketName, 'sieg &') => self::WIN_OVER_UNDER,
             default => self::UNKNOWN,
         };
     }
