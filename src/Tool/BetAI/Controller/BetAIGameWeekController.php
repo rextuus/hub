@@ -183,6 +183,64 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
+    #[Route('/{id}/suggestion/{suggestionId}/replace', name: 'replace_suggestion', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function replaceSuggestion(
+        GameWeek $gameWeek,
+        int $suggestionId,
+        BetSuggestionRepository $suggestionRepository,
+        AiResponseRepository $aiResponseRepository,
+        AiGeminiManager $aiGeminiManager,
+        BetSuggestionFactory $betSuggestionFactory,
+        Request $request
+    ): Response {
+        $suggestion = $suggestionRepository->find($suggestionId);
+        if (!$suggestion || $suggestion->getGameWeek() !== $gameWeek) {
+            throw $this->createNotFoundException();
+        }
+
+        $lastAiResponse = $aiResponseRepository->findOneBy(['gameWeek' => $gameWeek], ['createdAt' => 'DESC']);
+        if (!$lastAiResponse) {
+            $this->addFlash('error', 'Keine AI-Historie gefunden.');
+            return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
+        }
+
+        $reason = $request->request->get('reason', 'Quote weicht zu stark ab.');
+        if ($suggestion->getActualOdds()) {
+            $diff = abs($suggestion->getActualOdds() - $suggestion->getTotalOdds());
+            if ($diff > 0.5) {
+                $reason = "Die reale Quote ({$suggestion->getActualOdds()}) weicht stark von der AI-Quote ({$suggestion->getTotalOdds()}) ab.";
+            }
+        }
+
+        // Problematic Bet JSON erstellen
+        $problematicBetJson = json_encode([
+            'type' => $suggestion->getBetType()->value,
+            'market' => $suggestion->getMarket(),
+            'prediction' => $suggestion->getPrediction(),
+            'total_odds' => $suggestion->getTotalOdds(),
+            'actual_odds' => $suggestion->getActualOdds(),
+        ]);
+
+        try {
+            $newAiResponse = $aiGeminiManager->replaceSuggestionAndPersist(
+                $gameWeek,
+                $problematicBetJson,
+                $lastAiResponse,
+                $reason
+            );
+
+            if ($betSuggestionFactory->replaceSuggestionFromJson($newAiResponse->rawResponse, $suggestion)) {
+                $this->addFlash('success', 'Wett-Vorschlag wurde erfolgreich ausgetauscht.');
+            } else {
+                $this->addFlash('error', 'Der neue Vorschlag konnte nicht verarbeitet werden.');
+            }
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Fehler beim Austausch: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
+    }
+
     #[Route('/{id}/placed-bet/{placedBetId}/finalize', name: 'finalize_bet', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function finalizeBet(
         GameWeek $gameWeek,

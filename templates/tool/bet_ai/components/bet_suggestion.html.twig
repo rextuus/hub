@@ -123,6 +123,18 @@
                         Save
                     </button>
                 </form>
+
+                {% if not suggestion.isPlaced %}
+                    {% set diff = (suggestion.actualOdds - suggestion.totalOdds)|abs %}
+                    <form method="post" action="{{ path('app_bet_ai_gameweek_replace_suggestion', {id: suggestion.gameWeek.id, suggestionId: suggestion.id}) }}" class="mt-xs">
+                        <input type="hidden" name="_token" value="{{ csrf_token('bet_ai_gameweek') }}">
+                        <input type="hidden" name="reason" value="Manuelle Anforderung eines Austauschs.">
+                        <button type="submit" class="w-full border {{ diff > 0.5 ? 'border-warning/50 text-warning hover:bg-warning/10' : 'border-outline-variant text-secondary hover:bg-surface-container-highest' }} px-lg py-xs rounded-lg font-label-caps text-label-caps transition-all bg-transparent cursor-pointer flex items-center justify-center gap-xs">
+                            <span class="material-symbols-outlined text-[18px]">cached</span>
+                            Wette austauschen
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         {% else %}
             {% if placedBet %}

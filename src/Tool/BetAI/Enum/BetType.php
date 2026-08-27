@@ -12,7 +12,7 @@ enum BetType: string
     {
         return match($this) {
             self::SINGLE => 'person',
-            self::COMBI => 'group',
+            self::COMBI => 'view_in_ar',
             self::SYSTEM => 'account_tree',
         };
     }

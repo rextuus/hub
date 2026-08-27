@@ -41,7 +41,43 @@ class GeminiService
 
     public function generateBetPredictions(string $startDate, string $endDate): string
     {
-        $systemPrompt = <<<EOT
+        $systemPrompt = $this->getSystemPrompt($startDate, $endDate);
+        $userPrompt = "Analysiere das kommende Fussball-Wochenende vom {$startDate} bis zum {$endDate}. Recherchiere die Spielpläne der Top-5-Ligen und Pokale und generiere mir deine besten Wett-Vorschläge als reines JSON.";
+
+        return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);
+    }
+
+    public function replaceBetSuggestion(string $startDate, string $endDate, string $problematicBetJson, string $previousResponseJson, string $reason): string
+    {
+        $systemPrompt = $this->getSystemPrompt($startDate, $endDate);
+
+        $userPrompt = <<<EOT
+Ich benötige einen Ersatz für eine meiner aktuellen Wett-Vorschläge für den Zeitraum {$startDate} bis {$endDate}.
+
+**Das Problem:**
+Die folgende Wette weicht zu stark von den realen Marktquoten ab:
+{$problematicBetJson}
+
+**Grund für den Austausch:**
+{$reason}
+
+**Wichtige Anweisung:**
+Hier ist meine bisherige vollständige Antwort von dir:
+{$previousResponseJson}
+
+Bitte generiere EINEN NEUEN Wett-Vorschlag, der die oben genannte problematische Wette ersetzt.
+Achte darauf:
+1. Schlage KEINE der Wetten vor, die bereits in der vorherigen Antwort enthalten waren.
+2. Der neue Vorschlag muss den gleichen Qualitätskriterien entsprechen.
+3. Antworte wieder EXAKT im gleichen JSON-Format wie zuvor, aber das `suggested_bets` Array soll NUR diesen EINEN neuen Ersatz-Vorschlag enthalten.
+EOT;
+
+        return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);
+    }
+
+    private function getSystemPrompt(string $startDate, string $endDate): string
+    {
+        return <<<EOT
 Du bist ein erfahrener, datengetriebener Sportwetten-Analyst und ein hochentwickeltes KI-System. Deine Aufgabe ist es, für die anstehenden Spieltage im europäischen Spitzenfussball fundierte Wett-Empfehlungen zu generieren.
 
 ## 1. Relevanter Scope (Ligen & Pokale)
@@ -87,33 +123,9 @@ Antworte **ausschließlich** mit einem validen JSON-Objekt. Verwende keinen Mark
           "match_date": "YYYY-MM-DD HH:MM"
         }
       ]
-    },
-    {
-      "type": "COMBI",
-      "market": "String",
-      "prediction": "String",
-      "total_odds": float,
-      "confidence_score": int,
-      "ai_reasoning": "String",
-      "matches": [
-        {
-          "home_team": "String",
-          "away_team": "String",
-          "match_date": "YYYY-MM-DD HH:MM"
-        },
-        {
-          "home_team": "String",
-          "away_team": "String",
-          "match_date": "YYYY-MM-DD HH:MM"
-        }
-      ]
     }
   ]
 }
 EOT;
-
-        $userPrompt = "Analysiere das kommende Fussball-Wochenende vom {$startDate} bis zum {$endDate}. Recherchiere die Spielpläne der Top-5-Ligen und Pokale und generiere mir deine besten Wett-Vorschläge als reines JSON.";
-
-        return $this->generateContentWithSystemInstruction($userPrompt, $systemPrompt, true);
     }
 }

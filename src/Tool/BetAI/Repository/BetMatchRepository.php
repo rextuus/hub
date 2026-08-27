@@ -15,4 +15,13 @@ class BetMatchRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, BetMatch::class);
     }
+
+    public function countReferences(int $matchId): int
+    {
+        return (int) $this->getEntityManager()->createQuery(
+            'SELECT COUNT(smi.id) FROM App\Tool\BetAI\Entity\SuggestionMatchItem smi WHERE smi.match = :matchId'
+        )
+        ->setParameter('matchId', $matchId)
+        ->getSingleScalarResult();
+    }
 }

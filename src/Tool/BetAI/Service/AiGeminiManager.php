@@ -52,4 +52,26 @@ class AiGeminiManager
 
         return $aiResponse;
     }
+
+    public function replaceSuggestionAndPersist(GameWeek $gameWeek, string $problematicBetJson, AiResponse $lastAiResponse, string $reason): AiResponse
+    {
+        $startDate = $gameWeek->getStartDate()->format('Y-m-d');
+        $endDate = $gameWeek->getEndDate()->format('Y-m-d');
+
+        $rawResponse = $this->geminiService->replaceBetSuggestion(
+            $startDate,
+            $endDate,
+            $problematicBetJson,
+            $lastAiResponse->rawResponse,
+            $reason
+        );
+
+        // Wir setzen hasValidData initial auf false, die Factory wird es validieren
+        $aiResponse = new AiResponse($gameWeek, $rawResponse, false);
+
+        $this->entityManager->persist($aiResponse);
+        $this->entityManager->flush();
+
+        return $aiResponse;
+    }
 }
