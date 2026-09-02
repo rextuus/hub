@@ -1,4 +1,4 @@
-<div class="betai-wrapper">
+<div {{ attributes }} class="betai-wrapper">
     <main class="flex-grow w-full max-w-7xl mx-auto px-lg md:px-xl py-lg md:py-xl flex flex-col gap-xl">
         <!-- Header Section -->
         <section class="flex flex-col gap-base md:flex-row md:justify-between md:items-end">
@@ -7,11 +7,21 @@
                 <p class="text-secondary font-body-md text-body-md">Übersicht deiner Wett-Analysen und aktuellen Spielwochen.</p>
             </div>
             <div class="flex items-center gap-md mt-4 md:mt-0">
+                <select data-model="selectedGameWeekId" data-action="change->live#render" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer">
+                    <option value="">Alle Wochen</option>
+                    {% for gw in this.gameWeeks %}
+                        <option value="{{ gw.id }}" {% if this.selectedGameWeekId == gw.id %}selected{% endif %}>{{ gw.name }}</option>
+                    {% endfor %}
+                </select>
+                <a href="{{ path('app_bet_ai_statistics') }}" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center no-underline">
+                    <span class="material-symbols-outlined text-[20px] mr-2">bar_chart</span>Statistik
+                </a>
                 <a href="{{ path('app_bet_ai_settings_index') }}" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center no-underline">
                     <span class="material-symbols-outlined text-[20px] mr-2">settings</span>Einstellungen
                 </a>
             </div>
         </section>
+
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
         <!-- Bankroll Card -->

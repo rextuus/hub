@@ -15,7 +15,7 @@ class AiResponse
     public ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: GameWeek::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public GameWeek $gameWeek;
 
     #[ORM\Column(type: 'text')]

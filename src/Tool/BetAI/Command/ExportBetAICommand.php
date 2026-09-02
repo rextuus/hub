@@ -2,7 +2,9 @@
 
 namespace App\Tool\BetAI\Command;
 
+use App\Tool\BetAI\Entity\AiResponse;
 use App\Tool\BetAI\Entity\Bankroll;
+use App\Tool\BetAI\Entity\BetAISetting;
 use App\Tool\BetAI\Entity\BetMatch;
 use App\Tool\BetAI\Entity\BetSuggestion;
 use App\Tool\BetAI\Entity\GameWeek;
@@ -10,6 +12,7 @@ use App\Tool\BetAI\Entity\League;
 use App\Tool\BetAI\Entity\PlacedBet;
 use App\Tool\BetAI\Entity\SuggestionMatchItem;
 use App\Tool\BetAI\Entity\Team;
+use App\Tool\BetAI\Entity\TeamAlias;
 use App\Tool\BetAI\Entity\Transaction;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -52,6 +55,9 @@ class ExportBetAICommand extends Command
             'suggestions' => [],
             'placedBets' => [],
             'transactions' => [],
+            'aiResponses' => [],
+            'betAiSettings' => [],
+            'teamAliases' => [],
         ];
 
         // Leagues
@@ -172,6 +178,39 @@ class ExportBetAICommand extends Command
                 'amount' => $tx->getAmount(),
                 'description' => $tx->getDescription(),
                 'createdAt' => $tx->getCreatedAt()->format(\DateTimeInterface::ATOM),
+            ];
+        }
+
+        // AiResponses
+        $aiResponses = $this->entityManager->getRepository(AiResponse::class)->findAll();
+        foreach ($aiResponses as $resp) {
+            $data['aiResponses'][] = [
+                'id' => $resp->id,
+                'gameWeek_id' => $resp->gameWeek->id,
+                'rawResponse' => $resp->rawResponse,
+                'hasValidData' => $resp->hasValidData,
+                'createdAt' => $resp->createdAt->format(\DateTimeInterface::ATOM),
+                'isProcessed' => $resp->isProcessed,
+            ];
+        }
+
+        // BetAISettings
+        $settings = $this->entityManager->getRepository(BetAISetting::class)->findAll();
+        foreach ($settings as $setting) {
+            $data['betAiSettings'][] = [
+                'id' => $setting->id,
+                'key' => $setting->key,
+                'value' => $setting->value,
+            ];
+        }
+
+        // TeamAliases
+        $aliases = $this->entityManager->getRepository(TeamAlias::class)->findAll();
+        foreach ($aliases as $alias) {
+            $data['teamAliases'][] = [
+                'id' => $alias->getId(),
+                'rawName' => $alias->getRawName(),
+                'team_id' => $alias->getTeam()->id,
             ];
         }
 

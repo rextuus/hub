@@ -28,7 +28,7 @@ class BetSuggestion
 
     public function __construct(
         #[ORM\ManyToOne(targetEntity: GameWeek::class)]
-        #[ORM\JoinColumn(nullable: false)]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private GameWeek $gameWeek,
 
         #[ORM\Column(type: 'string', length: 10, enumType: BetType::class)]
@@ -57,6 +57,9 @@ class BetSuggestion
 
         #[ORM\Column]
         private bool $isPlaced = false,
+
+        #[ORM\Column]
+        private bool $isSelected = true,
 
         #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
         private ?float $actualOdds = null,
@@ -193,6 +196,17 @@ class BetSuggestion
     public function setIsPlaced(bool $isPlaced): self
     {
         $this->isPlaced = $isPlaced;
+        return $this;
+    }
+
+    public function isSelected(): bool
+    {
+        return $this->isSelected;
+    }
+
+    public function setIsSelected(bool $isSelected): self
+    {
+        $this->isSelected = $isSelected;
         return $this;
     }
 

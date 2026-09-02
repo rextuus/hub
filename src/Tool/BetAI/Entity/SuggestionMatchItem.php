@@ -16,7 +16,7 @@ class SuggestionMatchItem
 
     public function __construct(
         #[ORM\ManyToOne(targetEntity: BetSuggestion::class, inversedBy: 'suggestionMatchItems')]
-        #[ORM\JoinColumn(nullable: false)]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private BetSuggestion $betSuggestion,
 
         #[ORM\ManyToOne(targetEntity: BetMatch::class)]

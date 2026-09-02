@@ -32,7 +32,7 @@ class BetStakeCalculator
 
         // 3. Filtere alle Wetten heraus
         $validSuggestions = array_filter($suggestions, function (BetSuggestion $s) {
-            return $s->getConfidenceScore() >= 6;
+            return $s->isSelected() && $s->getConfidenceScore() >= 6;
         });
 
         if (empty($validSuggestions)) {
@@ -53,14 +53,32 @@ class BetStakeCalculator
         }
 
         if ($totalWeight <= 0) {
+            foreach ($suggestions as $bet) {
+                $bet->setSuggestedStake(0.0);
+                $this->entityManager->persist($bet);
+            }
+            $this->entityManager->flush();
             return;
         }
 
         // 5. Berechne den Einsatz für jede einzelne Wette
-        foreach ($validSuggestions as $bet) {
+        foreach ($suggestions as $bet) {
+            if (!$bet->isSelected()) {
+                $bet->setSuggestedStake(0.0);
+                $this->entityManager->persist($bet);
+                continue;
+            }
+
+            if ($bet->getConfidenceScore() < 6) {
+                $bet->setSuggestedStake(0.0);
+                $this->entityManager->persist($bet);
+                continue;
+            }
+
             $odds = $bet->getActualOdds() ?: $bet->getTotalOdds();
             if ($odds <= 1.0) {
                 $bet->setSuggestedStake(0.0);
+                $this->entityManager->persist($bet);
                 continue;
             }
 

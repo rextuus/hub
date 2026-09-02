@@ -1,7 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}BetAI - Dashboard{% endblock %}
-
 {% block stylesheets %}
     {{ parent() }}
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -134,16 +132,15 @@
             box-sizing: border-box;
             border-width: 0;
             border-style: solid;
-            border-color: #c2c6d8; /* outline-variant */
+            border-color: #c2c6d8;
         }
-        /* Reset for header elements to ensure they don't inherit the wrapper's border reset */
         .navbar * {
             border-width: initial;
             border-style: initial;
             border-color: initial;
         }
         .navbar, .navbar * {
-            box-sizing: border-box; /* Bootstrap uses border-box too, but let's be safe */
+            box-sizing: border-box;
         }
         .navbar-toggler-icon {
             display: block !important;
@@ -152,5 +149,76 @@
 {% endblock %}
 
 {% block body %}
-    {{ component('bet_ai_dashboard', { selectedGameWeekId: app.request.query.get('selectedGameWeekId') }) }}
+    <div class="betai-wrapper">
+        <main class="flex-grow w-full max-w-7xl mx-auto px-lg md:px-xl py-lg md:py-xl flex flex-col gap-xl">
+            <section class="flex flex-col gap-base md:flex-row md:justify-between md:items-end">
+                <div>
+                    <h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-1">Wett-Statistiken</h1>
+                    <p class="text-secondary font-body-md text-body-md">Detaillierte Analyse deiner Erfolgsbilanz.</p>
+                </div>
+                <div class="flex items-center gap-md mt-4 md:mt-0">
+                    <form action="{{ path('app_bet_ai_statistics') }}" method="GET" class="flex items-center">
+                        <select name="startGameWeekId" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer" onchange="this.form.submit()">
+                            <option value="">Alle Wochen</option>
+                            {% for gw in gameWeeks %}
+                                <option value="{{ gw.id }}" {% if selectedGameWeek and selectedGameWeek.id == gw.id %}selected{% endif %}>{{ gw.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <a href="{{ path('app_bet_ai_index') }}" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center no-underline">
+                        <span class="material-symbols-outlined text-[20px] mr-2">arrow_back</span>Dashboard
+                    </a>
+                </div>
+            </section>
+
+            <!-- Overall Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md">
+                    <div class="bg-primary-container/10 p-sm rounded-lg text-primary"><span class="material-symbols-outlined">numbers</span></div>
+                    <div class="flex flex-col"><span class="text-label-caps text-secondary uppercase tracking-wider">Gesamtzahl Wetten</span><span class="text-title-md text-on-surface">{{ stats.totalBets }}</span></div>
+                </div>
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md">
+                    <div class="bg-success/10 p-sm rounded-lg text-success"><span class="material-symbols-outlined">percent</span></div>
+                    <div class="flex flex-col"><span class="text-label-caps text-secondary uppercase tracking-wider">Gewinnrate</span><span class="text-title-md {{ stats.winRate >= 0.5 ? 'text-success' : 'text-error' }}">{{ (stats.winRate * 100)|number_format(2) }}%</span></div>
+                </div>
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md">
+                    <div class="bg-info/10 p-sm rounded-lg text-info"><span class="material-symbols-outlined">trending_up</span></div>
+                    <div class="flex flex-col"><span class="text-label-caps text-secondary uppercase tracking-wider">Gesamtbilanz</span><span class="text-title-md {{ stats.totalProfitLoss >= 0 ? 'text-success' : 'text-error' }}">{{ stats.totalProfitLoss|number_format(2) }}</span></div>
+                </div>
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm flex items-start gap-md">
+                    <div class="bg-secondary/10 p-sm rounded-lg text-secondary"><span class="material-symbols-outlined">psychology</span></div>
+                    <div class="flex flex-col"><span class="text-label-caps text-secondary uppercase tracking-wider">Ø Confidence</span><span class="text-title-md text-on-surface">{{ stats.avgConfidenceScore|number_format(2) }}</span></div>
+                </div>
+            </div>
+
+            <!-- Detailed Stats Table -->
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
+                <h2 class="title-md mb-lg">Analyse pro Wett-Typ</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-outline-variant text-label-caps text-secondary">
+                                <th class="p-md">Typ</th>
+                                <th class="p-md">Wetten</th>
+                                <th class="p-md">Gewinnrate</th>
+                                <th class="p-md">Bilanz</th>
+                                <th class="p-md">Ø Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type, s in stats.statsPerType %}
+                                <tr class="border-b border-surface-variant hover:bg-surface-container-low transition-colors">
+                                    <td class="p-md font-medium text-on-surface">{{ type }}</td>
+                                    <td class="p-md text-on-surface">{{ s.totalBets }}</td>
+                                    <td class="p-md font-bold {{ s.winRate >= 0.5 ? 'text-success' : 'text-error' }}">{{ (s.winRate * 100)|number_format(2) }}%</td>
+                                    <td class="p-md font-bold {{ s.totalProfitLoss >= 0 ? 'text-success' : 'text-error' }}">{{ s.totalProfitLoss|number_format(2) }}</td>
+                                    <td class="p-md text-on-surface">{{ s.avgConfidenceScore|number_format(2) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
 {% endblock %}

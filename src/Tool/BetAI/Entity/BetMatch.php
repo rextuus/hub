@@ -16,7 +16,7 @@ class BetMatch
 
     public function __construct(
         #[ORM\ManyToOne(targetEntity: GameWeek::class)]
-        #[ORM\JoinColumn(nullable: false)]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private GameWeek $gameWeek,
 
         #[ORM\ManyToOne(targetEntity: Team::class)]

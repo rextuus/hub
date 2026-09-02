@@ -18,7 +18,8 @@ class GeminiService
     public function __construct(
         #[Autowire(env: 'GEMINI_API_KEY')]
         string $apiKey,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private BetStatisticsCalculator $betStatisticsCalculator
     ) {
         $this->client = Gemini::client($apiKey);
     }
@@ -121,8 +122,11 @@ EOT;
 
     private function getSystemPrompt(string $startDate, string $endDate): string
     {
+        $stats = $this->betStatisticsCalculator->calculateStatistics()->formatForAi();
         return <<<EOT
 Du bist ein erfahrener, datengetriebener Sportwetten-Analyst und ein hochentwickeltes KI-System. Deine Aufgabe ist es, für die anstehenden Spieltage im europäischen Spitzenfussball fundierte Wett-Empfehlungen zu generieren.
+
+{$stats}
 
 ## 1. Relevanter Scope (Ligen & Pokale)
 Berücksichtige Spiele aus den **Top-5-Ligen inklusive ihrer nationalen Pokalwettbewerbe**:
@@ -139,9 +143,10 @@ Berücksichtige Spiele aus den **Top-5-Ligen inklusive ihrer nationalen Pokalwet
 
 ## 3. Wett-Regeln & Kriterien
 - Schlage eine gesunde Mischung aus **Einzelwetten (SINGLE)** und **Kombiwetten (COMBI)** vor (insgesamt maximal 6-8 Vorschläge).
+- **Strategische Anpassung:** Analysiere die bereitgestellte Statistik. Wenn bestimmte Wett-Typen (z.B. COMBI) eine signifikant bessere Gewinnrate oder Profitabilität bei hoher Confidence aufweisen, gewichte diese in deinen aktuellen Vorschlägen stärker. Strebe dennoch eine gesunde Mischung an.
 - Begrenze Kombiwetten auf maximal 3 Spiele pro Kombi, um das Risiko zu kontrollieren.
 - Bewerte jede Wette mit einem `confidence_score` von **1 bis 10** (1 = sehr unsicher/hohes Risiko, 10 = extrem hohe analytische Sicherheit).
-- Begründe jede Wette kurz und präzise im Feld `ai_reasoning`.
+- Begründe jede Wette kurz und präzise im Feld `ai_reasoning` und beziehe dich dabei auch auf deine Erfolgsbilanz bei ähnlichen Wetten.
 
 ## 4. Strenges Ausgabeformat (JSON-Schema)
 Antworte **ausschließlich** mit einem validen JSON-Objekt. Verwende keinen Markdown-Codeblock (kein ```json ... ```) um das JSON herum, keinen einleitenden Text und keine erklärenden Sätze. Das JSON muss exakt folgender Struktur entsprechen:

@@ -11,12 +11,56 @@ use App\Tool\BetAI\Repository\BetSuggestionRepository;
 use App\Tool\BetAI\Enum\TransactionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
+use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 #[AsLiveComponent('bet_ai_dashboard', template: 'tool/bet_ai/components/dashboard.html.twig')]
 class BetAIDashboard extends AbstractController
 {
     use DefaultActionTrait;
+
+    #[LiveProp(writable: true)]
+    public ?int $selectedGameWeekId = null;
+
+    private function getFilteredTransactionQuery(): \Doctrine\ORM\QueryBuilder
+    {
+        $query = $this->transactionRepository->createQueryBuilder('t');
+
+        if ($this->selectedGameWeekId) {
+            $selectedGw = $this->gameWeekRepository->find($this->selectedGameWeekId);
+            if ($selectedGw) {
+                $query->leftJoin('t.placedBet', 'b')
+                      ->leftJoin('b.suggestion', 's')
+                      ->leftJoin('s.gameWeek', 'gw')
+                      ->where('t.placedBet IS NULL OR gw.startDate >= :startDate')
+                      ->setParameter('startDate', $selectedGw->getStartDate());
+            }
+        }
+
+        return $query;
+    }
+
+    private function getStartDate(): ?\DateTimeInterface
+    {
+        if (!$this->selectedGameWeekId) {
+            return null;
+        }
+        $gw = $this->gameWeekRepository->find($this->selectedGameWeekId);
+
+        $startDate = $gw ? $gw->getStartDate() : null;
+        error_log('getStartDate: ID ' . $this->selectedGameWeekId . ' -> date ' . ($startDate ? $startDate->format('Y-m-d H:i:s') : 'null'));
+
+        return $startDate;
+    }
+
+    private function shouldIncludeBet(\App\Tool\BetAI\Entity\PlacedBet $bet): bool
+    {
+        $startDate = $this->getStartDate();
+        if (!$startDate) {
+            return true;
+        }
+        return $bet->getSuggestion()->getGameWeek()->getStartDate() >= $startDate;
+    }
 
     public function __construct(
         private BankrollRepository $bankrollRepository,
@@ -29,7 +73,29 @@ class BetAIDashboard extends AbstractController
 
     public function getBankroll(): ?Bankroll
     {
-        return $this->bankrollRepository->findOneBy([]);
+        $bankroll = $this->bankrollRepository->findOneBy([]);
+        if (!$bankroll) {
+            return null;
+        }
+
+        $balance = $bankroll->getInitialBalance();
+
+        $transactions = $this->getFilteredTransactionQuery()->getQuery()->getResult();
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->getType() === TransactionType::CREDIT) {
+                $balance += $transaction->getAmount();
+            } else {
+                $balance -= $transaction->getAmount();
+            }
+        }
+
+        $fakeBankroll = new Bankroll();
+        $fakeBankroll->setInitialBalance($bankroll->getInitialBalance());
+        $fakeBankroll->setTotalBalance($balance);
+        $fakeBankroll->setCurrency($bankroll->getCurrency());
+
+        return $fakeBankroll;
     }
 
     public function getGameWeeks(): array
@@ -47,7 +113,9 @@ class BetAIDashboard extends AbstractController
         $openBets = $this->placedBetRepository->findBy(['status' => 'OPEN']);
         $total = 0.0;
         foreach ($openBets as $bet) {
-            $total += $bet->getActualStake();
+            if ($this->shouldIncludeBet($bet)) {
+                $total += $bet->getActualStake();
+            }
         }
         return $total;
     }
@@ -55,16 +123,18 @@ class BetAIDashboard extends AbstractController
     public function getAverageStake(): float
     {
         $bets = $this->placedBetRepository->findAll();
-        if (empty($bets)) {
+        $filteredBets = array_filter($bets, fn($b) => $this->shouldIncludeBet($b));
+
+        if (empty($filteredBets)) {
             return 0.0;
         }
 
         $totalStake = 0.0;
-        foreach ($bets as $bet) {
+        foreach ($filteredBets as $bet) {
             $totalStake += $bet->getActualStake();
         }
 
-        return $totalStake / count($bets);
+        return $totalStake / count($filteredBets);
     }
 
     public function getAverageProfit(): float
@@ -75,12 +145,14 @@ class BetAIDashboard extends AbstractController
             ->getQuery()
             ->getResult();
 
-        if (empty($settledBets)) {
+        $filteredBets = array_filter($settledBets, fn($b) => $this->shouldIncludeBet($b));
+
+        if (empty($filteredBets)) {
             return 0.0;
         }
 
         $totalProfit = 0.0;
-        foreach ($settledBets as $bet) {
+        foreach ($filteredBets as $bet) {
             if ($bet->getStatus() === 'WON') {
                 $totalProfit += ($bet->getActualPayout() - $bet->getActualStake());
             } else {
@@ -88,15 +160,19 @@ class BetAIDashboard extends AbstractController
             }
         }
 
-        return $totalProfit / count($settledBets);
+        return $totalProfit / count($filteredBets);
     }
 
     public function getGameWeekStats(): array
     {
         $gameWeeks = $this->getGameWeeks();
         $stats = [];
+        $startDate = $this->getStartDate();
 
         foreach ($gameWeeks as $gw) {
+            if ($startDate && $gw->getStartDate() < $startDate) {
+                continue;
+            }
             $stats[$gw->id ?? 0] = [
                 'profit' => $this->calculateGameWeekProfit($gw),
                 'avgOdds' => $this->calculateGameWeekAverageOdds($gw),
@@ -109,29 +185,33 @@ class BetAIDashboard extends AbstractController
     public function getAverageOdds(): float
     {
         $bets = $this->placedBetRepository->findAll();
-        if (empty($bets)) {
+        $filteredBets = array_filter($bets, fn($b) => $this->shouldIncludeBet($b));
+
+        if (empty($filteredBets)) {
             return 0.0;
         }
 
         $totalOdds = 0.0;
-        foreach ($bets as $bet) {
+        foreach ($filteredBets as $bet) {
             $totalOdds += $bet->getActualOdds();
         }
 
-        return $totalOdds / count($bets);
+        return $totalOdds / count($filteredBets);
     }
 
     public function getBetCounts(): array
     {
         $bets = $this->placedBetRepository->findAll();
+        $filteredBets = array_filter($bets, fn($b) => $this->shouldIncludeBet($b));
+
         $counts = [
-            'total' => count($bets),
+            'total' => count($filteredBets),
             'won' => 0,
             'lost' => 0,
             'open' => 0,
         ];
 
-        foreach ($bets as $bet) {
+        foreach ($filteredBets as $bet) {
             match ($bet->getStatus()) {
                 'WON' => $counts['won']++,
                 'LOST' => $counts['lost']++,
@@ -145,20 +225,21 @@ class BetAIDashboard extends AbstractController
 
     public function getBankrollHistory(): array
     {
-        $transactions = $this->transactionRepository->findBy([], ['createdAt' => 'ASC']);
-        $history = [];
-        $currentBalance = 0.0;
+        $bankroll = $this->bankrollRepository->findOneBy([]);
+        if (!$bankroll) return [];
 
-        // Assume initial bankroll is the first transaction or we start at 0
-        // If we have a bankroll entity, it might have an initial balance.
-        $bankroll = $this->getBankroll();
-        if ($bankroll) {
-            $currentBalance = $bankroll->getInitialBalance();
-            $history[] = [
-                'date' => 'Start',
-                'balance' => (float)$currentBalance
-            ];
-        }
+        $currentBalance = $bankroll->getInitialBalance();
+        $history = [];
+
+        $history[] = [
+            'date' => 'Start',
+            'balance' => (float)$currentBalance
+        ];
+
+        $transactions = $this->getFilteredTransactionQuery()
+            ->orderBy('t.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
 
         foreach ($transactions as $transaction) {
             if ($transaction->getType() === TransactionType::CREDIT) {

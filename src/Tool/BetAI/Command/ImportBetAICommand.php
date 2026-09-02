@@ -2,7 +2,9 @@
 
 namespace App\Tool\BetAI\Command;
 
+use App\Tool\BetAI\Entity\AiResponse;
 use App\Tool\BetAI\Entity\Bankroll;
+use App\Tool\BetAI\Entity\BetAISetting;
 use App\Tool\BetAI\Entity\BetMatch;
 use App\Tool\BetAI\Entity\BetSuggestion;
 use App\Tool\BetAI\Entity\GameWeek;
@@ -10,7 +12,9 @@ use App\Tool\BetAI\Entity\League;
 use App\Tool\BetAI\Entity\PlacedBet;
 use App\Tool\BetAI\Entity\SuggestionMatchItem;
 use App\Tool\BetAI\Entity\Team;
+use App\Tool\BetAI\Entity\TeamAlias;
 use App\Tool\BetAI\Entity\Transaction;
+use App\Tool\BetAI\Enum\BetType;
 use App\Tool\BetAI\Enum\TransactionType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -64,10 +68,13 @@ class ImportBetAICommand extends Command
             $io->note('Clearing existing BetAI data...');
             $this->entityManager->createQuery('DELETE FROM ' . Transaction::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . PlacedBet::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . AiResponse::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . BetAISetting::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . SuggestionMatchItem::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . BetSuggestion::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . BetMatch::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . GameWeek::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . TeamAlias::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . Team::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . League::class)->execute();
             $this->entityManager->createQuery('DELETE FROM ' . Bankroll::class)->execute();
@@ -112,6 +119,19 @@ class ImportBetAICommand extends Command
         }
         $this->entityManager->flush();
 
+        // 2.1 TeamAliases
+        $io->section('Importing TeamAliases');
+        foreach ($data['teamAliases'] ?? [] as $taData) {
+            $team = $idMaps['teams'][$taData['team_id']] ?? null;
+            if (!$team) continue;
+
+            $alias = new TeamAlias();
+            $alias->setRawName($taData['rawName']);
+            $alias->setTeam($team);
+            $this->entityManager->persist($alias);
+        }
+        $this->entityManager->flush();
+
         // 3. Bankroll
         $io->section('Importing Bankroll');
         foreach ($data['bankroll'] ?? [] as $brData) {
@@ -137,6 +157,19 @@ class ImportBetAICommand extends Command
             );
             $this->entityManager->persist($gw);
             $idMaps['gameWeeks'][$gwData['id']] = $gw;
+        }
+        $this->entityManager->flush();
+
+        // 4.1 AiResponses
+        $io->section('Importing AiResponses');
+        foreach ($data['aiResponses'] ?? [] as $respData) {
+            $gw = $idMaps['gameWeeks'][$respData['gameWeek_id']] ?? null;
+            if (!$gw) continue;
+
+            $resp = new AiResponse($gw, $respData['rawResponse'], $respData['hasValidData']);
+            $resp->createdAt = new \DateTime($respData['createdAt']);
+            $resp->isProcessed = $respData['isProcessed'];
+            $this->entityManager->persist($resp);
         }
         $this->entityManager->flush();
 
@@ -175,7 +208,7 @@ class ImportBetAICommand extends Command
 
             $sug = new BetSuggestion(
                 gameWeek: $gw,
-                betType: $sData['betType'],
+                betType: BetType::from($sData['betType']),
                 market: $sData['market'],
                 prediction: $sData['prediction'],
                 totalOdds: $sData['totalOdds'],
@@ -236,6 +269,13 @@ class ImportBetAICommand extends Command
             $tx->setCreatedAt(new \DateTime($txData['createdAt']));
 
             $this->entityManager->persist($tx);
+        }
+
+        // 9. BetAISettings
+        $io->section('Importing BetAISettings');
+        foreach ($data['betAiSettings'] ?? [] as $sData) {
+            $setting = new BetAISetting($sData['key'], $sData['value']);
+            $this->entityManager->persist($setting);
         }
         $this->entityManager->flush();
 

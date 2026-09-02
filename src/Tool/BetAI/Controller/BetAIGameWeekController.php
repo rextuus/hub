@@ -131,6 +131,20 @@ class BetAIGameWeekController extends AbstractController
         return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->id]);
     }
 
+    #[Route('/{id}/suggestion/{suggestionId}/toggle-selection', name: 'toggle_selection', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function toggleSelection(GameWeek $gameWeek, int $suggestionId, BetSuggestionRepository $suggestionRepository, EntityManagerInterface $entityManager): Response
+    {
+        $suggestion = $suggestionRepository->find($suggestionId);
+        if (!$suggestion || $suggestion->getGameWeek() !== $gameWeek) {
+            throw $this->createNotFoundException();
+        }
+
+        $suggestion->setIsSelected(!$suggestion->isSelected());
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_bet_ai_gameweek_show', ['id' => $gameWeek->getId()]);
+    }
+
     #[Route('/{id}/calculate', name: 'calculate', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function calculate(
         GameWeek $gameWeek,
