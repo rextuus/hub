@@ -38,16 +38,21 @@ enum BetMarketType: string
         };
     }
 
-    public function getBadgeClass(): string
+    public function getContainerClass(): string
+    {
+        return 'bg-surface-container-high';
+    }
+
+    public function getTextColorClass(): string
     {
         return match($this) {
-            self::THREE_WAY => 'bg-info/20 text-info',
-            self::THREE_WAY_COMBINED => 'bg-primary/20 text-primary',
-            self::HANDICAP => 'bg-warning/20 text-warning',
-            self::WIN_OVER_UNDER => 'bg-success/20 text-success',
-            self::BOTH_TEAMS_SCORE_COMBI => 'bg-info/20 text-info',
-            self::OVER_UNDER => 'bg-secondary/20 text-secondary',
-            self::UNKNOWN => 'bg-neutral/20 text-neutral',
+            self::THREE_WAY => 'text-info',
+            self::THREE_WAY_COMBINED => 'text-primary',
+            self::HANDICAP => 'text-warning',
+            self::WIN_OVER_UNDER => 'text-success',
+            self::BOTH_TEAMS_SCORE_COMBI => 'text-info',
+            self::OVER_UNDER => 'text-secondary',
+            self::UNKNOWN => 'text-neutral',
         };
     }
 

@@ -7,12 +7,13 @@
                 <p class="text-secondary font-body-md text-body-md">Übersicht deiner Wett-Analysen und aktuellen Spielwochen.</p>
             </div>
             <div class="flex items-center gap-md mt-4 md:mt-0">
-                <select data-model="selectedGameWeekId" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer">
-                    <option value="">Alle Wochen</option>
-                    {% for gw in this.gameWeeks %}
-                        <option value="{{ gw.id }}" {% if this.selectedGameWeekId == gw.id %}selected{% endif %}>{{ gw.name }}</option>
-                    {% endfor %}
-                </select>
+                    <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Ab Woche:</span>
+                    <select data-model="selectedGameWeekId" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer">
+                        <option value="">Alle</option>
+                        {% for gw in this.gameWeeks %}
+                            <option value="{{ gw.id }}" {% if this.selectedGameWeekId == gw.id %}selected{% endif %}>{{ gw.name }}</option>
+                        {% endfor %}
+                    </select>
                 <a href="{{ path('app_bet_ai_statistics') }}" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center no-underline">
                     <span class="material-symbols-outlined text-[20px] mr-2">bar_chart</span>Statistik
                 </a>

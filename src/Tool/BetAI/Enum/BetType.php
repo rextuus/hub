@@ -25,4 +25,18 @@ enum BetType: string
             self::SYSTEM => 'Systemwette',
         };
     }
+
+    public function getContainerClass(): string
+    {
+        return 'bg-surface-container-high';
+    }
+
+    public function getTextColorClass(): string
+    {
+        return match($this) {
+            self::SINGLE => 'text-info',
+            self::COMBI => 'text-tertiary',
+            self::SYSTEM => 'text-warning',
+        };
+    }
 }

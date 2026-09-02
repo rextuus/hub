@@ -4,8 +4,11 @@ namespace App\Tool\BetAI\Service;
 
 use App\Tool\BetAI\Entity\PlacedBet;
 use App\Tool\BetAI\Entity\GameWeek;
+use App\Tool\BetAI\Enum\BetMarketType;
 use App\Tool\BetAI\Model\BetStatistics;
 use App\Tool\BetAI\Model\BetTypeStatistics;
+use App\Tool\BetAI\Model\MarketStatistics;
+use App\Tool\BetAI\Model\TypeStatistics;
 use App\Tool\BetAI\Repository\PlacedBetRepository;
 
 class BetStatisticsCalculator
@@ -28,6 +31,7 @@ class BetStatisticsCalculator
 
         $betsWithActualOdds = 0;
         $typeData = [];
+        $marketTypeData = [];
 
         foreach ($allBets as $bet) {
             // Nur Wetten berücksichtigen, die bereits entschieden sind
@@ -39,29 +43,40 @@ class BetStatisticsCalculator
                 continue;
             }
 
-            $type = $bet->getSuggestion()->getBetType()->value;
-            if (!isset($typeData[$type])) {
-                $typeData[$type] = ['total' => 0, 'won' => 0, 'lost' => 0, 'profit' => 0.0, 'confidence' => 0.0];
+            $type = $bet->getSuggestion()->getBetType();
+            if (!isset($typeData[$type->value])) {
+                $typeData[$type->value] = ['type' => $type, 'total' => 0, 'won' => 0, 'lost' => 0, 'profit' => 0.0, 'confidence' => 0.0];
             }
-            $typeData[$type]['total']++;
+            $typeData[$type->value]['total']++;
+
+            $marketType = $bet->getSuggestion()->getMarketType();
+            if (!isset($marketTypeData[$marketType->value])) {
+                $marketTypeData[$marketType->value] = ['type' => $marketType, 'total' => 0, 'won' => 0, 'lost' => 0, 'profit' => 0.0, 'confidence' => 0.0];
+            }
+            $marketTypeData[$marketType->value]['total']++;
 
             $totalBets++;
             $confidence = $bet->getSuggestion()->getConfidenceScore();
             $totalConfidenceScore += $confidence;
-            $typeData[$type]['confidence'] += $confidence;
+            $typeData[$type->value]['confidence'] += $confidence;
+            $marketTypeData[$marketType->value]['confidence'] += $confidence;
 
             if ($bet->getStatus() === 'WON') {
                 $wonBets++;
-                $typeData[$type]['won']++;
+                $typeData[$type->value]['won']++;
+                $marketTypeData[$marketType->value]['won']++;
                 $profit = ($bet->getActualPayout() - $bet->getActualStake());
                 $totalProfitLoss += $profit;
-                $typeData[$type]['profit'] += $profit;
+                $typeData[$type->value]['profit'] += $profit;
+                $marketTypeData[$marketType->value]['profit'] += $profit;
             } else {
                 $lostBets++;
-                $typeData[$type]['lost']++;
+                $typeData[$type->value]['lost']++;
+                $marketTypeData[$marketType->value]['lost']++;
                 $loss = $bet->getActualStake();
                 $totalProfitLoss -= $loss;
-                $typeData[$type]['profit'] -= $loss;
+                $typeData[$type->value]['profit'] -= $loss;
+                $marketTypeData[$marketType->value]['profit'] -= $loss;
             }
 
             $totalPredictedOdds += $bet->getSuggestion()->getTotalOdds();
@@ -75,16 +90,38 @@ class BetStatisticsCalculator
         $avgConfidenceScore = $totalBets > 0 ? $totalConfidenceScore / $totalBets : 0;
 
         $statsPerType = [];
-        foreach ($typeData as $type => $data) {
+        foreach ($typeData as $data) {
+            $betType = $data['type'];
             $typeWinRate = $data['total'] > 0 ? $data['won'] / $data['total'] : 0;
             $typeAvgConfidence = $data['total'] > 0 ? $data['confidence'] / $data['total'] : 0;
-            $statsPerType[$type] = new BetTypeStatistics(
-                $data['total'],
-                $data['won'],
-                $data['lost'],
-                $typeWinRate,
-                $data['profit'],
-                $typeAvgConfidence
+            $statsPerType[] = new TypeStatistics(
+                $betType,
+                new BetTypeStatistics(
+                    $data['total'],
+                    $data['won'],
+                    $data['lost'],
+                    $typeWinRate,
+                    $data['profit'],
+                    $typeAvgConfidence
+                )
+            );
+        }
+
+        $statsPerMarketType = [];
+        foreach ($marketTypeData as $data) {
+            $marketType = $data['type'];
+            $marketWinRate = $data['total'] > 0 ? $data['won'] / $data['total'] : 0;
+            $marketAvgConfidence = $data['total'] > 0 ? $data['confidence'] / $data['total'] : 0;
+            $statsPerMarketType[] = new MarketStatistics(
+                $marketType,
+                new BetTypeStatistics(
+                    $data['total'],
+                    $data['won'],
+                    $data['lost'],
+                    $marketWinRate,
+                    $data['profit'],
+                    $marketAvgConfidence
+                )
             );
         }
 
@@ -97,7 +134,8 @@ class BetStatisticsCalculator
             $avgActualOdds,
             $totalProfitLoss,
             $avgConfidenceScore,
-            $statsPerType
+            $statsPerType,
+            $statsPerMarketType
         );
     }
 }

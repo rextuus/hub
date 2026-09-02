@@ -157,9 +157,10 @@
                     <p class="text-secondary font-body-md text-body-md">Detaillierte Analyse deiner Erfolgsbilanz.</p>
                 </div>
                 <div class="flex items-center gap-md mt-4 md:mt-0">
+                    <span class="text-label-caps font-label-caps text-secondary uppercase tracking-wider">Ab Woche:</span>
                     <form action="{{ path('app_bet_ai_statistics') }}" method="GET" class="flex items-center">
                         <select name="startGameWeekId" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer" onchange="this.form.submit()">
-                            <option value="">Alle Wochen</option>
+                            <option value="">Alle</option>
                             {% for gw in gameWeeks %}
                                 <option value="{{ gw.id }}" {% if selectedGameWeek and selectedGameWeek.id == gw.id %}selected{% endif %}>{{ gw.name }}</option>
                             {% endfor %}
@@ -206,13 +207,51 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for type, s in stats.statsPerType %}
+                            {% for t in stats.statsPerType %}
                                 <tr class="border-b border-surface-variant hover:bg-surface-container-low transition-colors">
-                                    <td class="p-md font-medium text-on-surface">{{ type }}</td>
-                                    <td class="p-md text-on-surface">{{ s.totalBets }}</td>
-                                    <td class="p-md font-bold {{ s.winRate >= 0.5 ? 'text-success' : 'text-error' }}">{{ (s.winRate * 100)|number_format(2) }}%</td>
-                                    <td class="p-md font-bold {{ s.totalProfitLoss >= 0 ? 'text-success' : 'text-error' }}">{{ s.totalProfitLoss|number_format(2) }}</td>
-                                    <td class="p-md text-on-surface">{{ s.avgConfidenceScore|number_format(2) }}</td>
+                                    <td class="p-md">
+                                        <div class="inline-flex items-center gap-xs {{ t.betType.getContainerClass() }} px-sm py-1 rounded-lg">
+                                            <span class="material-symbols-outlined text-[14px] {{ t.betType.getTextColorClass() }}">{{ t.betType.getIcon() }}</span>
+                                            <span class="text-[12px] font-bold uppercase tracking-wider text-black">{{ t.betType.getLabel() }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-md text-on-surface">{{ t.statistics.totalBets }}</td>
+                                    <td class="p-md font-bold {{ t.statistics.winRate >= 0.5 ? 'text-success' : 'text-error' }}">{{ (t.statistics.winRate * 100)|number_format(2) }}%</td>
+                                    <td class="p-md font-bold {{ t.statistics.totalProfitLoss >= 0 ? 'text-success' : 'text-error' }}">{{ t.statistics.totalProfitLoss|number_format(2) }}</td>
+                                    <td class="p-md text-on-surface">{{ t.statistics.avgConfidenceScore|number_format(2) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Detailed Stats Table: Market Types -->
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
+                <h2 class="title-md mb-lg">Analyse pro Markt-Typ</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-outline-variant text-label-caps text-secondary">
+                                <th class="p-md">Markt-Typ</th>
+                                <th class="p-md">Wetten</th>
+                                <th class="p-md">Gewinnrate</th>
+                                <th class="p-md">Bilanz</th>
+                                <th class="p-md">Ø Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in stats.statsPerMarketType %}
+                                <tr class="border-b border-surface-variant hover:bg-surface-container-low transition-colors">
+                                    <td class="p-md">
+                                        <div class="inline-flex items-center gap-xs {{ m.marketType.getContainerClass() }} px-sm py-1 rounded-lg">
+                                            <span class="material-symbols-outlined text-[14px] {{ m.marketType.getTextColorClass() }}">{{ m.marketType.getIcon() }}</span>
+                                            <span class="text-[12px] font-bold uppercase tracking-wider text-black">{{ m.marketType.getLabel() }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-md text-on-surface">{{ m.statistics.totalBets }}</td>
+                                    <td class="p-md font-bold {{ m.statistics.winRate >= 0.5 ? 'text-success' : 'text-error' }}">{{ (m.statistics.winRate * 100)|number_format(2) }}%</td>
+                                    <td class="p-md font-bold {{ m.statistics.totalProfitLoss >= 0 ? 'text-success' : 'text-error' }}">{{ m.statistics.totalProfitLoss|number_format(2) }}</td>
+                                    <td class="p-md text-on-surface">{{ m.statistics.avgConfidenceScore|number_format(2) }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
