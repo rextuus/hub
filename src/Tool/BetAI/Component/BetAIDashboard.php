@@ -84,19 +84,35 @@ class BetAIDashboard extends AbstractController
         $labels = array_map(fn($item) => $item['date'], $bankrollHistory);
         $data = array_map(fn($item) => $item['balance'], $bankrollHistory);
 
+        $borderColor = '#005fb8';
+        $backgroundColor = 'rgba(0, 95, 184, 0.1)';
+
+        if (!empty($bankrollHistory)) {
+            $initialBalance = $bankrollHistory[0]['balance'];
+            $currentBalance = end($bankrollHistory)['balance'];
+
+            if ($currentBalance < $initialBalance) {
+                $borderColor = 'rgb(220, 53, 69)';
+                $backgroundColor = 'rgba(220, 53, 69, 0.1)';
+            } else {
+                $borderColor = 'rgb(40, 167, 69)';
+                $backgroundColor = 'rgba(40, 167, 69, 0.1)';
+            }
+        }
+
         $chart->setData([
             'labels' => $labels,
             'datasets' => [
                 [
                     'label' => 'Bankroll',
                     'data' => $data,
-                    'borderColor' => '#005fb8',
-                    'backgroundColor' => 'rgba(0, 95, 184, 0.1)',
+                    'borderColor' => $borderColor,
+                    'backgroundColor' => $backgroundColor,
                     'fill' => true,
                     'tension' => 0.4,
                     'borderWidth' => 3,
                     'pointRadius' => 4,
-                    'pointBackgroundColor' => '#005fb8'
+                    'pointBackgroundColor' => $borderColor
                 ]
             ],
         ]);
