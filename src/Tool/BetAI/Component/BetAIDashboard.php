@@ -8,6 +8,9 @@ use App\Tool\BetAI\Repository\GameWeekRepository;
 use App\Tool\BetAI\Repository\PlacedBetRepository;
 use App\Tool\BetAI\Repository\TransactionRepository;
 use App\Tool\BetAI\Repository\BetSuggestionRepository;
+use App\Service\ChartService;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
 use App\Tool\BetAI\Enum\TransactionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -67,8 +70,55 @@ class BetAIDashboard extends AbstractController
         private GameWeekRepository $gameWeekRepository,
         private TransactionRepository $transactionRepository,
         private PlacedBetRepository $placedBetRepository,
-        private BetSuggestionRepository $betSuggestionRepository
+        private BetSuggestionRepository $betSuggestionRepository,
+        private ChartService $chartService,
+        private ChartBuilderInterface $chartBuilder
     ) {
+    }
+
+    public function getChart(): Chart
+    {
+        $bankrollHistory = $this->getBankrollHistory();
+        $chart = $this->chartBuilder->createChart(Chart::TYPE_LINE);
+
+        $labels = array_map(fn($item) => $item['date'], $bankrollHistory);
+        $data = array_map(fn($item) => $item['balance'], $bankrollHistory);
+
+        $chart->setData([
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => 'Bankroll',
+                    'data' => $data,
+                    'borderColor' => '#005fb8',
+                    'backgroundColor' => 'rgba(0, 95, 184, 0.1)',
+                    'fill' => true,
+                    'tension' => 0.4,
+                    'borderWidth' => 3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => '#005fb8'
+                ]
+            ],
+        ]);
+
+        $chart->setOptions([
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => ['display' => false]
+            ],
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => false,
+                    'grid' => ['color' => 'rgba(0, 0, 0, 0.05)']
+                ],
+                'x' => [
+                    'grid' => ['display' => false]
+                ]
+            ]
+        ]);
+
+        return $chart;
     }
 
     public function getBankroll(): ?Bankroll
@@ -167,12 +217,8 @@ class BetAIDashboard extends AbstractController
     {
         $gameWeeks = $this->getGameWeeks();
         $stats = [];
-        $startDate = $this->getStartDate();
 
         foreach ($gameWeeks as $gw) {
-            if ($startDate && $gw->getStartDate() < $startDate) {
-                continue;
-            }
             $stats[$gw->id ?? 0] = [
                 'profit' => $this->calculateGameWeekProfit($gw),
                 'avgOdds' => $this->calculateGameWeekAverageOdds($gw),
@@ -228,32 +274,17 @@ class BetAIDashboard extends AbstractController
         $bankroll = $this->bankrollRepository->findOneBy([]);
         if (!$bankroll) return [];
 
-        $currentBalance = $bankroll->getInitialBalance();
-        $history = [];
-
-        $history[] = [
-            'date' => 'Start',
-            'balance' => (float)$currentBalance
-        ];
-
-        $transactions = $this->getFilteredTransactionQuery()
-            ->orderBy('t.createdAt', 'ASC')
-            ->getQuery()
-            ->getResult();
-
-        foreach ($transactions as $transaction) {
-            if ($transaction->getType() === TransactionType::CREDIT) {
-                $currentBalance += $transaction->getAmount();
-            } else {
-                $currentBalance -= $transaction->getAmount();
-            }
-            $history[] = [
-                'date' => $transaction->getCreatedAt()->format('d.m. H:i'),
-                'balance' => (float)$currentBalance
-            ];
+        if (!$this->selectedGameWeekId) {
+            $transactions = $this->transactionRepository
+                ->findBy([], ['createdAt' => 'ASC']);
+        } else {
+            $transactions = $this->getFilteredTransactionQuery()
+                ->orderBy('t.createdAt', 'ASC')
+                ->getQuery()
+                ->getResult();
         }
 
-        return $history;
+        return $this->chartService->getBankrollHistoryData($bankroll, $transactions);
     }
 
     private function calculateGameWeekProfit($gameWeek): float

@@ -336,6 +336,9 @@
             "config/routes/ux_autocomplete.yaml"
         ]
     },
+    "symfony/ux-chartjs": {
+        "version": "v3.4.0"
+    },
     "symfony/ux-icons": {
         "version": "3.0",
         "recipe": {

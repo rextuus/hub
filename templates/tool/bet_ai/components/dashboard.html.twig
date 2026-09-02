@@ -7,7 +7,7 @@
                 <p class="text-secondary font-body-md text-body-md">Übersicht deiner Wett-Analysen und aktuellen Spielwochen.</p>
             </div>
             <div class="flex items-center gap-md mt-4 md:mt-0">
-                <select data-model="selectedGameWeekId" data-action="change->live#render" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer">
+                <select data-model="selectedGameWeekId" class="bg-surface-container border border-outline-variant text-on-surface px-lg py-sm rounded-lg font-label-caps text-label-caps focus:ring-0 focus:outline-none cursor-pointer">
                     <option value="">Alle Wochen</option>
                     {% for gw in this.gameWeeks %}
                         <option value="{{ gw.id }}" {% if this.selectedGameWeekId == gw.id %}selected{% endif %}>{{ gw.name }}</option>
@@ -132,11 +132,9 @@
 
     <!-- Chart Section -->
     <section class="mb-xl">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
-            <h2 class="text-title-md font-title-md text-on-surface mb-lg">Bankroll Entwicklung</h2>
-            <div class="h-[300px] w-full">
-                <canvas id="bankrollChart"></canvas>
-            </div>
+        <h2 class="text-title-md font-title-md text-on-surface mb-lg">Bankroll Entwicklung</h2>
+        <div class="chart-container" key="{{ this.selectedGameWeekId }}">
+            {{ render_chart(this.chart) }}
         </div>
     </section>
 
@@ -231,56 +229,5 @@
         </section>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        (function() {
-            const ctx = document.getElementById('bankrollChart');
-            if (!ctx) return;
-
-            const history = {{ this.bankrollHistory|json_encode|raw }};
-            const labels = history.map(item => item.date);
-            const data = history.map(item => item.balance);
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Bankroll',
-                        data: data,
-                        borderColor: '#005fb8',
-                        backgroundColor: 'rgba(0, 95, 184, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#005fb8'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        })();
-    </script>
     </main>
 </div>
