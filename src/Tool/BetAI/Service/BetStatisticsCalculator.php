@@ -3,6 +3,7 @@
 namespace App\Tool\BetAI\Service;
 
 use App\Tool\BetAI\Entity\PlacedBet;
+use App\Tool\BetAI\Entity\GameWeek;
 use App\Tool\BetAI\Model\BetStatistics;
 use App\Tool\BetAI\Model\BetTypeStatistics;
 use App\Tool\BetAI\Repository\PlacedBetRepository;
