@@ -258,6 +258,32 @@
                     </table>
                 </div>
             </section>
+            <!-- Detailed Stats Table: Confidence Scores -->
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
+                <h2 class="title-md mb-lg">Analyse pro Confidence-Score</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-outline-variant text-label-caps text-secondary">
+                                <th class="p-md">Confidence</th>
+                                <th class="p-md">Wetten</th>
+                                <th class="p-md">Gewinnrate</th>
+                                <th class="p-md">Bilanz</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in stats.statsPerConfidenceScore %}
+                                <tr class="border-b border-surface-variant hover:bg-surface-container-low transition-colors">
+                                    <td class="p-md text-on-surface font-bold">{{ c.confidenceScore }}</td>
+                                    <td class="p-md text-on-surface">{{ c.statistics.totalBets }}</td>
+                                    <td class="p-md font-bold {{ c.statistics.winRate >= 0.5 ? 'text-success' : 'text-error' }}">{{ (c.statistics.winRate * 100)|number_format(2) }}%</td>
+                                    <td class="p-md font-bold {{ c.statistics.totalProfitLoss >= 0 ? 'text-success' : 'text-error' }}">{{ c.statistics.totalProfitLoss|number_format(2) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 {% endblock %}

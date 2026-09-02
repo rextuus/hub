@@ -14,7 +14,8 @@ class BetStatistics
         public float $totalProfitLoss,
         public float $avgConfidenceScore,
         public array $statsPerType, // list of TypeStatistics
-        public array $statsPerMarketType // list of MarketStatistics
+        public array $statsPerMarketType, // list of MarketStatistics
+        public array $statsPerConfidenceScore // list of ConfidenceStatistics
     ) {}
 
     public function formatForAi(): string
@@ -47,6 +48,19 @@ class BetStatistics
             );
         }
 
+        $confidenceStats = "";
+        foreach ($this->statsPerConfidenceScore as $confidenceStatsObj) {
+            $score = $confidenceStatsObj->confidenceScore;
+            $stats = $confidenceStatsObj->statistics;
+            $confidenceStats .= sprintf(
+                "\n  - Confidence %d: %d Wetten, Gewinnrate %.2f%%, P/L: %.2f",
+                $score,
+                $stats->totalBets,
+                $stats->winRate * 100,
+                $stats->totalProfitLoss
+            );
+        }
+
         return sprintf(
             "Statistik bisheriger Wetten:\n" .
             "- Anzahl Wetten: %d\n" .
@@ -54,7 +68,7 @@ class BetStatistics
             "- Ø Prognostizierte Quote: %.2f\n" .
             "- Ø Tatsächliche Quote: %.2f\n" .
             "- Ø Confidence Score: %.2f\n" .
-            "- Gesamtbilanz (Profit/Loss): %.2f%s%s",
+            "- Gesamtbilanz (Profit/Loss): %.2f%s%s%s",
             $this->totalBets,
             $this->winRate * 100,
             $this->avgPredictedOdds,
@@ -62,7 +76,8 @@ class BetStatistics
             $this->avgConfidenceScore,
             $this->totalProfitLoss,
             $typeStats,
-            $marketStats
+            $marketStats,
+            $confidenceStats
         );
     }
 }
