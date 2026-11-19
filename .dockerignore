@@ -1,0 +1,21 @@
+# Nichts davon gehört ins Produktions-Image – vor allem keine Secrets und keine Datenexporte.
+.git
+.idea
+.env.local
+.env.local.php
+.env.*.local
+.env.prod.local
+var/
+vendor/
+public/assets/
+public/bundles/
+assets/vendor/
+tests/
+docs/
+deploy/
+.phpunit.cache
+betai_export.json
+check_markets.php
+design.html
+download_logos.py
+club-logos/
