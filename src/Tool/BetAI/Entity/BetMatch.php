@@ -21,11 +21,11 @@ class BetMatch
 
         #[ORM\ManyToOne(targetEntity: Team::class)]
         #[ORM\JoinColumn(nullable: true)]
-        private ?Team $homeTeam = null,
+        private ?Team $homeTeam,
 
         #[ORM\ManyToOne(targetEntity: Team::class)]
         #[ORM\JoinColumn(nullable: true)]
-        private ?Team $awayTeam = null,
+        private ?Team $awayTeam,
 
         #[ORM\Column(length: 255)]
         private string $rawHomeTeamName,

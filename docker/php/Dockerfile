@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Hub – Produktions-Images (compose.prod.yaml). Die Entwicklungsumgebung nutzt weiter das Dockerfile im
-# Projektordner (php:8.4-apache, compose.yaml).
-FROM php:8.5.12-fpm-alpine AS base
+# Projektordner (php:8.4.28-apache, compose.yaml).
+FROM php:8.5.13-fpm-alpine AS base
 
 RUN apk add --no-cache icu-libs icu-data-full libzip fcgi \
  && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev linux-headers \
