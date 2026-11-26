@@ -18,7 +18,7 @@ WORKDIR /srv/app
 
 # Tailwind (nur die Journey, config/packages/symfonycasts_tailwind.yaml): Das Standalone-Binary von v3 gibt es
 # nur für glibc, nicht für Alpine – deshalb eine eigene Stufe auf Debian. Version und Prüfsumme wie im Bundle.
-FROM debian:13.2-slim AS tailwind
+FROM debian:13.8-slim AS tailwind
 ADD --chmod=755 --checksum=sha256:7d24f7fa191d2193b78cd5f5a42a6093e14409521908529f42d80b11fde1f1d4 \
     https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 /usr/local/bin/tailwindcss
 WORKDIR /src
