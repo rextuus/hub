@@ -40,7 +40,7 @@ class PhotoCalendar
 
     /** @var Collection<int, PhotoCalendarMonth> */
     #[ORM\OneToMany(targetEntity: PhotoCalendarMonth::class, mappedBy: 'calendar', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['month' => 'ASC'])]
+    #[ORM\OrderBy(['month' => \SortDirection::Ascending])]
     private Collection $months;
 
     public function __construct(int $year = 2022, string $title = '')

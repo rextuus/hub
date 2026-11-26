@@ -47,7 +47,7 @@ class AdventDoor
 
     /** @var Collection<int, AdventChoice> */
     #[ORM\OneToMany(targetEntity: AdventChoice::class, mappedBy: 'door', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     #[Assert\Valid]
     #[Assert\Count(min: 2, minMessage: 'Eine Tür braucht mindestens zwei Antworten.')]
     private Collection $choices;

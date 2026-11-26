@@ -2,11 +2,25 @@
 
 This guide provides instructions for setting up and working with the local development environment.
 
+## Schnellstart mit make
+
+```bash
+make up          # php, database, mailer starten → http://localhost:8197
+make db          # Migrationen dev + test (legt app_test an)
+make seed        # Fotos aus ../hub-altbestand/media kopieren, Startseite + Foto-Kalender anlegen
+make admin EMAIL=ich@example.de PASSWORD=geheim
+make watch       # Sass bei Änderungen neu bauen
+make qa          # Lint + PHPUnit
+make probe-up    # Produktions-Stack mit imgproxy lokal (Projekt hubprobe); make probe-status, make probe-down
+```
+
+`make` allein zeigt alle Ziele. Der Web-Port entspricht dem Server-Port im homelab-Inventar, damit sich lokal kein Projekt mit einem anderen überschneidet.
+
 ## Environment Overview
 
 - **PHP Version:** 8.4 (Apache)
 - **Database:** MySQL 8.0
-- **External Web Port:** [http://localhost:8088](http://localhost:8088)
+- **External Web Port:** [http://localhost:8197](http://localhost:8197) (= Server-Port von hub im homelab-Inventar)
 - **External DB Port:** 9906 (for local DB clients)
 
 ## Getting Started

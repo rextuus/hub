@@ -58,17 +58,17 @@ class AdventCalendar
 
     /** @var Collection<int, AdventDoor> */
     #[ORM\OneToMany(targetEntity: AdventDoor::class, mappedBy: 'calendar', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['number' => 'ASC'])]
+    #[ORM\OrderBy(['number' => \SortDirection::Ascending])]
     private Collection $doors;
 
     /** @var Collection<int, AdventWinStage> */
     #[ORM\OneToMany(targetEntity: AdventWinStage::class, mappedBy: 'calendar', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['minPoints' => 'ASC'])]
+    #[ORM\OrderBy(['minPoints' => \SortDirection::Ascending])]
     private Collection $winStages;
 
     /** @var Collection<int, AdventParticipant> */
     #[ORM\OneToMany(targetEntity: AdventParticipant::class, mappedBy: 'calendar', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['name' => 'ASC'])]
+    #[ORM\OrderBy(['name' => \SortDirection::Ascending])]
     private Collection $participants;
 
     public function __construct(string $title = '', ?int $year = null, ?\DateTimeImmutable $startDate = null)

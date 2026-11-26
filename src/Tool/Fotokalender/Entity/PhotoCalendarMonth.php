@@ -42,7 +42,7 @@ class PhotoCalendarMonth
 
     /** @var Collection<int, PhotoCalendarPhoto> */
     #[ORM\OneToMany(targetEntity: PhotoCalendarPhoto::class, mappedBy: 'month', cascade: ['persist'], orphanRemoval: true)]
-    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending, 'id' => \SortDirection::Ascending])]
     private Collection $photos;
 
     public function __construct()

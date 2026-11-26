@@ -1,12 +1,15 @@
 
 services:
+  # Lokaler Web-Port = Server-Port von hub im homelab-Inventar (8197), damit jedes Projekt seinen eigenen hat.
+  # Notfalls änderbar: make up PORT=… DB_PORT=…
+  # .env.local nutzt 127.0.0.1:9906 für Konsolenbefehle vom Host – bei anderem DB_PORT dort mitziehen.
   php:
     ports:
-      - "8088:80"
+      - "${HUB_HTTP_PORT:-8197}:80"
 
   database:
     ports:
-      - "9906:3306"
+      - "${HUB_DB_PORT:-9906}:3306"
 
 ###> symfony/mailer ###
   mailer:
