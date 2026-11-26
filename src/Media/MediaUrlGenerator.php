@@ -30,6 +30,8 @@ final readonly class MediaUrlGenerator
         'card' => ['widths' => [480, 800, 1200], 'ratio' => 1.35],
         'photo' => ['widths' => [960, 1600, 2400], 'quality' => 85],
         'advent' => ['widths' => [480, 960, 1440]],
+        // Journey (kresh.wh-company.com): Originale sind höchstens 1376 bzw. 1672 px groß – nur nach WebP rechnen
+        'journey' => ['widths' => [1680]],
     ];
 
     public function __construct(

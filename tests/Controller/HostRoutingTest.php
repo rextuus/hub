@@ -8,7 +8,7 @@ use App\Entity\Project;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-/** Startseite nur auf der Hauptdomain; andere Domains bleiben frei für Tools (später z. B. kresh.wh-company.com). */
+/** Startseite nur auf der Hauptdomain; andere Domains bleiben frei für Tools (z. B. kresh.wh-company.com, die Journey). */
 final class HostRoutingTest extends WebTestCase
 {
     public function testLandingPageAnswersOnMainHosts(): void
@@ -24,10 +24,10 @@ final class HostRoutingTest extends WebTestCase
     public function testLandingPageDoesNotAnswerOnOtherHosts(): void
     {
         $client = self::createClient();
-        $client->request('GET', 'https://kresh.wh-company.com/');
+        $client->request('GET', 'https://tool.wh-company.com/');
         self::assertResponseStatusCodeSame(404);
 
-        $client->request('GET', 'https://kresh.wh-company.com/projekte');
+        $client->request('GET', 'https://tool.wh-company.com/projekte');
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -35,8 +35,9 @@ final class HostRoutingTest extends WebTestCase
     {
         $client = self::createClient();
         // Fotokalender ist an keine Domain gebunden; sein Logo-Link zeigt von fremden Hosts auf wh-company.com
-        $client->request('GET', 'https://kresh.wh-company.com/calendar/overview.html');
-        self::assertResponseRedirects('https://kresh.wh-company.com/kalender', 301);
+        // (kresh.wh-company.com gehört inzwischen allein der Journey, tests/Tool/Journey)
+        $client->request('GET', 'https://tool.wh-company.com/calendar/overview.html');
+        self::assertResponseRedirects('https://tool.wh-company.com/kalender', 301);
 
         $client->request('GET', 'https://localhost/calendar/detail/march.html');
         self::assertResponseRedirects('https://localhost/kalender/2022/maerz', 301);

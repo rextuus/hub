@@ -1,0 +1,98 @@
+<div class="sketch-card p-4 sm:p-5 text-center shadow-xl flex flex-col max-h-[90vh]">
+    <div class="flex-none">
+        <h2 class="text-lg sm:text-xl font-serif font-bold text-stone-800 mb-4">{{ slide.title }}</h2>
+        <p class="text-[11px] sm:text-xs text-stone-600 mb-4 leading-relaxed">{{ slide.text }}</p>
+    </div>
+
+    <!-- Rollenauswahl Button -->
+    <div class="mt-2 shrink-0">
+        <div id="selected-role-info" class="hidden p-2.5 rounded-xl text-xs font-medium bg-stone-100 border border-stone-200 text-stone-700 mb-2"></div>
+    </div>
+
+    <!-- Feedback & Weiter Button -->
+    <div class="mt-2 shrink-0">
+        <button
+                id="intro-next-btn"
+                class="w-full py-2.5 bg-stone-700 hover:bg-stone-600 text-white font-semibold rounded-xl text-xs transition-all shadow"
+                onclick="proceedJourney()"
+        >
+            Ab in die Journey!
+        </button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="role-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="sketch-card p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto">
+        <h2 class="text-lg font-serif font-bold text-stone-800 mb-4">Wer bist du?</h2>
+        <div class="flex flex-col gap-2">
+            <!-- Kristin -->
+            <button onclick="selectRole('kristin', 'Klar darfst du das machen! Auf geht\'s in dein Geburtstags-Abenteuer.')" class="p-2 bg-stone-100/80 hover:bg-stone-200 border border-stone-200 rounded-xl transition flex flex-col w-full text-left">
+                <span class="text-xs font-bold text-stone-800">Ich bin Kristin</span>
+                <span class="text-[10px] text-stone-600 mt-0.5">Der Geburtstag dreht sich heute komplett um dich.</span>
+            </button>
+
+            <!-- Freunde -->
+            <button onclick="selectRole('freunde', 'Freunde von Kresh? Na klar, ihr dürft natürlich auch rein – solange ihr keine Getränke verschüttet!')" class="p-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl transition flex flex-col w-full text-left">
+                <span class="text-xs font-bold text-stone-800">Freund|in von Kresh</span>
+                <span class="text-[10px] text-stone-500 mt-0.5">Hab zwar keinen Ausweis dabei, aber zahle einfach nen Euro extra.</span>
+            </button>
+
+            <!-- Verwandte -->
+            <button onclick="selectRole('verwandte', 'Verwandte? Herzlich willkommen! Aber psst... keine Sorge, hier gibt es absolut keine Targaryen-Inzest-Vibes, versprochen!')" class="p-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl transition flex flex-col w-full text-left">
+                <span class="text-xs font-bold text-stone-800">Verwandte|r</span>
+                <span class="text-[10px] text-stone-500 mt-0.5">Stammbaum intakt, Drachen im Stall – absolut safe.</span>
+            </button>
+
+            <!-- Kollege -->
+            <button onclick="selectRole('kollege', 'Arbeitskollege? Du darfst zwar auch passieren, aber wehe, du bringst Jira-Tickets mit in den Geburtstag!')" class="p-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl transition flex flex-col w-full text-left">
+                <span class="text-xs font-bold text-stone-800">Arbeitskollege</span>
+                <span class="text-[10px] text-stone-500 mt-0.5">Dienst nach Vorschrift, aber heute nur mit Feierlaune.</span>
+            </button>
+
+            <!-- Nichts von alledem -->
+            <button onclick="selectRole('nichts', 'Nichts von alledem?! Moment mal... In welchem Paralleluniversum lebst du denn bitte?! Du verpasst hier gerade die einzige, wahrhaftige Kristin des gesamten Kosmos! Aber gut, ausnahmsweise darfst du trotzdem einen Blick riskieren, wenn du mutig genug bist!')" class="p-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl transition flex flex-col w-full text-left">
+                <span class="text-xs font-bold text-stone-800">Nichts von alledem</span>
+                <span class="text-[10px] text-stone-500 mt-0.5">Weiß nicht, wie du hiergelandet bist, aber du ziehst es jetzt durch.</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedRole = null;
+
+    function openRoleModal() {
+        document.getElementById('role-modal').classList.remove('hidden');
+    }
+
+    function selectRole(roleKey, message) {
+        selectedRole = roleKey;
+        // Close modal
+        document.getElementById('role-modal').classList.add('hidden');
+        
+        // Show selection info
+        const infoDiv = document.getElementById('selected-role-info');
+        infoDiv.textContent = message;
+        infoDiv.classList.remove('hidden');
+
+        // Visual update for button
+        const nextBtn = document.getElementById('intro-next-btn');
+        nextBtn.classList.remove('bg-stone-700', 'hover:bg-stone-600');
+        nextBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        nextBtn.textContent = 'Jetzt geht\'s los!';
+    }
+
+    function proceedJourney() {
+        if (!selectedRole) {
+            openRoleModal();
+            return;
+        }
+        
+        unlockSection('section-intro-role');
+        const nextSection = document.getElementById('section-neptunbad-aussen');
+        if (nextSection) {
+            nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+</script>

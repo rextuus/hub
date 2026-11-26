@@ -18,7 +18,7 @@ MYSQL_ROOT = $(DC) exec -T database mysql -uroot -p'!ChangeMe!'
 MEDIA_SRC ?= ../hub-altbestand/media
 
 .DEFAULT_GOAL := help
-.PHONY: help up down restart logs sh console install db db-test admin media seed advent-demo sass watch test lint qa \
+.PHONY: help up down restart logs sh console install db db-test admin media seed advent-demo sass watch tailwind test lint qa \
         probe-up probe-down probe-status probe-logs
 
 help: ## Diese Hilfe
@@ -34,7 +34,8 @@ up: ## Umgebung starten (php, database, mailer) und auf die Datenbank warten
 	  echo "  Notbehelf: make up PORT=<frei>"; exit 1; fi
 	@$(DC) up -d --build --wait
 	@echo; echo "  App:     http://localhost:$(PORT)"; echo "  Admin:   http://localhost:$(PORT)/admin (Anmeldung: /login)"; \
-	  echo "  Health:  http://localhost:$(PORT)/healthz"; echo "  Mailpit: $$($(DC) port mailer 8025 2>/dev/null | sed 's/^0.0.0.0/http:\/\/localhost/')"
+	  echo "  Health:  http://localhost:$(PORT)/healthz"; \
+	  echo "  Journey: http://kresh.localhost:$(PORT)/ (vorher einmal make tailwind; /testing ohne Scroll-Sperre)"; echo "  Mailpit: $$($(DC) port mailer 8025 2>/dev/null | sed 's/^0.0.0.0/http:\/\/localhost/')"
 
 down: ## Alles stoppen (Daten bleiben im Volume)
 	@$(DC) down
@@ -80,6 +81,9 @@ sass: ## Sass einmal bauen
 
 watch: ## Sass bei Änderungen neu bauen (läuft im Vordergrund)
 	@$(CONSOLE) sass:build --watch
+
+tailwind: ## Tailwind der Journey bauen (templates/tool/journey), z. B. nach Änderungen an Klassen
+	@$(CONSOLE) tailwind:build
 
 test: ## PHPUnit
 	@$(PHP) vendor/bin/phpunit

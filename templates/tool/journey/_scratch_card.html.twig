@@ -1,0 +1,152 @@
+<div class="sketch-card p-1 sm:p-2 text-center shadow-lg h-full flex flex-col relative overflow-y-auto">
+    <div class="flex-none">
+        <h2 class="text-base sm:text-lg font-serif font-bold text-stone-800 mb-0.5">{{ slide.title }}</h2>
+        <p class="text-[10px] sm:text-xs text-stone-600 mb-1" id="scratch-instructions">
+            {% if slide.id == 'scratch-card-intro' %}
+                Lies dir die Einleitung durch und rubbele weiter unten das Los frei!
+            {% else %}
+                Rubbel das Feld frei und entdecke deinen Gewinn!
+            {% endif %}
+        </p>
+    </div>
+
+    {% if slide.id == 'scratch-card-game' %}
+        <div id="scratch-container" class="relative w-full max-w-[240px] sm:max-w-sm aspect-[3/4] mx-auto border-4 border-stone-800 rounded-lg overflow-hidden bg-white shadow-inner flex-1 my-1 shrink-0">
+            <div id="prize-reveal" class="absolute inset-0 flex flex-col items-center justify-center p-1">
+                <img id="prize-image" src="" alt="Gewinn" class="max-h-40 sm:max-h-56 mb-1 rounded-lg border-2 border-black" />
+                <p id="prize-text" class="font-bold text-stone-800 text-xs sm:text-base"></p>
+            </div>
+            <canvas id="scratch-canvas" class="absolute inset-0 z-10 cursor-crosshair"></canvas>
+        </div>
+
+        <div id="scratch-actions" class="mt-2 hidden flex-none">
+            <div class="flex gap-2">
+                <button onclick="jumpToSection('section-end-slide')" class="flex-1 py-1 bg-stone-300 text-black rounded-lg font-semibold text-[10px] hover:bg-stone-400">
+                    Tour beenden
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-1 flex-none">
+            <button onclick="repeatScratch()" class="flex-1 py-0.5 bg-stone-200 text-black rounded-lg font-semibold text-[9px] hover:bg-stone-300">Wiederholen</button>
+            <button onclick="unlockSection(this)" class="flex-1 py-0.5 bg-stone-200 text-black rounded-lg font-semibold text-[9px] hover:bg-stone-300">Überspringen</button>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    {% if slide.id == 'scratch-card-game' %}
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('scratch-container');
+    const prizeImage = document.getElementById('prize-image');
+    const prizeText = document.getElementById('prize-text');
+    const scratchActions = document.getElementById('scratch-actions');
+    const instructions = document.getElementById('scratch-instructions');
+    
+    // Set canvas size
+    canvas.width = container.offsetWidth;
+    canvas.height = container.offsetHeight;
+
+    // Prizes
+    const prizes = [
+        { text: '1 x Joghurt mit der Ecke: Kirsche', img: '{{ media_url('journey/kirsche.jpg', 'journey')|e('js') }}' }
+    ];
+    const prize = prizes[Math.floor(Math.random() * prizes.length)];
+    prizeImage.src = prize.img;
+    prizeText.innerText = prize.text;
+
+    let isDrawing = false;
+    const scratchImg = new Image();
+    scratchImg.crossOrigin = "anonymous";
+    scratchImg.src = '{{ media_url('journey/lottery2-2.jpg', 'journey')|e('js') }}';
+    scratchImg.onload = function() {
+        ctx.drawImage(scratchImg, 0, 0, canvas.width, canvas.height);
+    };
+
+    function scratch(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Check completion
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let count = 0;
+        for (let i = 3; i < imageData.data.length; i += 4) {
+            if (imageData.data[i] === 0) count++;
+        }
+        if (count > (canvas.width * canvas.height) * 0.5) {
+            canvas.classList.add('hidden');
+            scratchActions.classList.remove('hidden');
+            instructions.innerText = "Herzlichen Glückwunsch! Dein Gewinn wurde enthüllt!";
+            createConfetti();
+        }
+    }
+
+    function createConfetti() {
+        const confettiContainer = document.createElement('div');
+        confettiContainer.style.position = 'fixed';
+        confettiContainer.style.top = '0';
+        confettiContainer.style.left = '0';
+        confettiContainer.style.width = '100%';
+        confettiContainer.style.height = '100%';
+        confettiContainer.style.pointerEvents = 'none';
+        confettiContainer.style.zIndex = '9999';
+        document.body.appendChild(confettiContainer);
+
+        const colors = ['#f87171', '#fb923c', '#fbbf24', '#4ade80', '#22d3ee', '#818cf8', '#c084fc'];
+
+        for (let i = 0; i < 150; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'absolute';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 8 + 4;
+            confetti.style.width = size + 'px';
+            confetti.style.height = size + 'px';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.top = '-20px';
+            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            confettiContainer.appendChild(confetti);
+
+            const duration = Math.random() * 3 + 3;
+            const delay = Math.random() * 2;
+            const drift = (Math.random() - 0.5) * 200;
+            
+            confetti.animate([
+                { transform: 'translateY(0) rotate(0) translateX(0)', opacity: 1 },
+                { transform: `translateY(100vh) rotate(${Math.random() * 360}deg) translateX(${drift}px)`, opacity: 0 }
+            ], {
+                duration: duration * 1000,
+                delay: delay * 1000,
+                easing: 'cubic-bezier(.17,.67,.83,.67)',
+                fill: 'forwards'
+            });
+        }
+
+        setTimeout(() => {
+            confettiContainer.remove();
+        }, 6000);
+    }
+
+    canvas.addEventListener('mousedown', () => isDrawing = true);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mousemove', scratch);
+    canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
+    canvas.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('touchcancel', () => isDrawing = false);
+    canvas.addEventListener('touchmove', scratch);
+
+    window.repeatScratch = function() {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(scratchImg, 0, 0, canvas.width, canvas.height);
+        canvas.classList.remove('hidden');
+        scratchActions.classList.add('hidden');
+    }
+    {% endif %}
+</script>

@@ -16,10 +16,23 @@ COPY docker/php/php-fpm.d/zz-app.conf /usr/local/etc/php-fpm.d/zz-app.conf
 
 WORKDIR /srv/app
 
+# Tailwind (nur die Journey, config/packages/symfonycasts_tailwind.yaml): Das Standalone-Binary von v3 gibt es
+# nur für glibc, nicht für Alpine – deshalb eine eigene Stufe auf Debian. Version und Prüfsumme wie im Bundle.
+FROM debian:13.2-slim AS tailwind
+ADD --chmod=755 --checksum=sha256:7d24f7fa191d2193b78cd5f5a42a6093e14409521908529f42d80b11fde1f1d4 \
+    https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 /usr/local/bin/tailwindcss
+WORKDIR /src
+COPY tailwind.config.js ./
+COPY assets/styles/journey.tailwind.css assets/styles/
+COPY templates/tool/journey templates/tool/journey
+# Dateiname wie beim Bundle (var/tailwind/<eingabe>.built.css); asset-map:compile liest ihn von dort.
+RUN tailwindcss -c tailwind.config.js -i assets/styles/journey.tailwind.css -o /out/journey.tailwind.built.css --minify
+
 FROM base AS prod
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 ENV APP_ENV=prod
 COPY --chown=www-data:www-data . .
+COPY --from=tailwind --chown=www-data:www-data /out/ var/tailwind/
 # Die Composer-Auto-Scripts (cache:clear …) laufen einzeln: Beim Bauen gibt es keine Datenbank, und ohne
 # serverVersion würde Doctrine sie beim Aufwärmen fragen. Die Dummy-URL gilt nur für diese Befehle und landet
 # nicht in .env.local.php (dump-env liest nur die .env-Dateien).
@@ -31,7 +44,7 @@ RUN composer install --no-dev --classmap-authoritative --no-interaction --no-pro
  && php bin/console importmap:install \
  && php bin/console sass:build \
  && php bin/console asset-map:compile \
- && rm -rf var/cache/* var/sass \
+ && rm -rf var/cache/* var/sass var/tailwind \
  && mkdir -p var/media \
  && chown -R www-data:www-data var
 # Medienordner (Volume hub_media_data, siehe compose.prod.yaml). Der Ordner gehört www-data, damit ein neues

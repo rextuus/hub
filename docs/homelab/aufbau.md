@@ -15,8 +15,28 @@
 
 Die Startseite (`/`, `/projekte`) antwortet **nur** auf `wh-company.com` und `www.wh-company.com`. Die Host-Liste
 steht als Parameter `app.main_host_pattern` in `config/services.yaml`; im Dev kommen `localhost` und `127.0.0.1`
-dazu. Alle übrigen Routen hängen an keiner Domain. So kann später ein Tool eine eigene Domain bekommen, z. B. die
-Journey auf `kresh.wh-company.com`, mit einer Route `#[Route('/', host: 'kresh.wh-company.com')]`.
+dazu. Die übrigen Routen von hub hängen an keiner Domain – außer der Journey.
+
+| Domain | Was |
+|---|---|
+| `wh-company.com`, `www.wh-company.com` | Startseite, Projekte und alle Tools ohne eigene Domain |
+| `kresh.wh-company.com` | **nur** die Journey (Geburtstags-Journey für Kristin, früher Repo advent) |
+
+**Journey** (`src/Tool/Journey`, Templates `templates/tool/journey`): Ihre Routen haben
+`host: '%app.journey_host%'` (`kresh.wh-company.com`, im Dev `kresh.localhost` → <http://kresh.localhost:8197/>).
+`JourneyHostListener` sorgt dafür, dass es auf dieser Domain nichts anderes gibt: Jede andere Route (`/admin`,
+`/login`, `/kalender`, …) ist dort 404, bevor die Firewall läuft – also ohne Sitzung, Cookie oder Login-Weiterleitung.
+Erlaubt bleiben `/healthz` und lokal (ohne imgproxy) `/media/journey/…`. Alle Antworten der Domain tragen
+`X-Robots-Tag: noindex, nofollow` (PHP; für `/img` und `/assets` der Caddy im Container), die Seite zusätzlich
+`<meta name="robots" content="noindex">`.
+
+- Keine Benutzer, keine Datenbank: Texte, Rätsel und Lösungen stehen in `SlideProvider` bzw. den Partials.
+- Prüf-Routen (nur POST; fremde Seiten – `Origin` bzw. `Sec-Fetch-Site` passt nicht – bekommen 403):
+  `/api/sauna-choice`, `/api/kennzeichen-check`, `/api/kniffel-roll`, `/api/run-code`.
+- `/testing` (alles ohne Scroll-Sperre) gibt es nur in `APP_ENV=dev`.
+- Bilder aus dem Medienordner `journey/` über imgproxy (Preset `journey`). Tailwind 3.4.17 (wie früher das CDN)
+  wird nur für die Journey gebaut: lokal `make tailwind`, im Image eine eigene Debian-Stufe (das v3-Binary gibt es
+  nicht für Alpine). GSAP 3.12.2 liegt unverändert unter `assets/journey/`.
 
 | Pfad | Was | Zugang |
 |---|---|---|
@@ -26,10 +46,12 @@ Journey auf `kresh.wh-company.com`, mit einer Route `#[Route('/', host: 'kresh.w
 | `/calendar/overview.html`, `/calendar/detail/{month}.html` | alte Adressen → 301 auf `/kalender…` | alle |
 | `/advent/{token}` | Adventskalender eines Teilnehmers | wer den Link hat |
 | `/admin/advent/{id}/vorschau` | alle Türen offen, nichts wird gespeichert | Admin |
-| `/media/{pfad}` | Original aus dem Medienordner (Videos; lokal alles) | öffentliche Ordner; `advent/` nur Admin |
+| `/media/{pfad}` | Original aus dem Medienordner (Videos; lokal alles) | öffentliche Ordner; `advent/`, `journey/` nur Admin |
 | `/img/…` | verkleinerte Bilder (imgproxy, signiert) | wer die signierte URL hat |
 | `/admin`, `/login` | EasyAdmin, Anmeldung | Admin |
 | `/healthz` | Healthcheck bis zur Datenbank | jede Domain |
+| `kresh.wh-company.com/` | Journey | alle, nur diese Domain |
+| `kresh.wh-company.com/api/…` | Prüf-Routen der Journey (POST) | nicht von fremden Seiten |
 
 Die Anmeldung ist nirgends verlinkt außer über das Logo der Startseite.
 
@@ -38,7 +60,8 @@ Die Anmeldung ist nirgends verlinkt außer über das Logo der Startseite.
   Liste würde die Healthchecks (`127.0.0.1`, `10.0.0.2`) und jede neue Tool-Domain brechen.
 - Das Session-Cookie gilt nur für die eigene Domain. Admin-Login auf wh-company.com, Advent-Teilnehmer brauchen
   keine Sitzung.
-- Der Caddy im Container antwortet auf jeden Host (`SERVER_NAME=":80"`).
+- Der Caddy im Container antwortet auf jeden Host (`SERVER_NAME=":80"`). Nur `X-Robots-Tag` hängt am Host der Journey
+  (`JOURNEY_HOST`, Standard `kresh.wh-company.com`).
 
 ## Gemeinsamer Medienordner und imgproxy
 

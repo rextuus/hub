@@ -13,6 +13,9 @@ parameters:
     # (Host-Routen, docs/homelab/aufbau.md). Container-Parameter statt %env()%, weil Routen das nicht erlauben.
     app.main_host: 'wh-company.com'
     app.main_host_pattern: 'wh-company\.com|www\.wh-company\.com'
+    # Domain der Journey (src/Tool/Journey): Dort antwortet nur die Journey, alles andere ist 404. Lokal
+    # kresh.localhost (*.localhost zeigt von selbst auf 127.0.0.1): http://kresh.localhost:8197/
+    app.journey_host: 'kresh.wh-company.com'
 
 services:
     # default configuration for services in *this* file
@@ -30,6 +33,7 @@ services:
 
 when@dev:
     parameters:
+        app.journey_host: 'kresh.localhost'
         app.main_host_pattern: 'wh-company\.com|www\.wh-company\.com|localhost|127\.0\.0\.1'
 
 when@test:

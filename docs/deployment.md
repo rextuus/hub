@@ -6,6 +6,7 @@ Caddy auf dem VPS, der TLS macht und über WireGuard an `10.0.0.2:8197` weiterle
 | | |
 |---|---|
 | Domain | <https://wh-company.com> (www leitet um; Verwaltung: `/admin`, Anmeldung über das Logo) |
+| Journey | <https://kresh.wh-company.com> – nur die Journey, sonst nichts von hub (`docs/homelab/aufbau.md`) |
 | Repo / Branch | `rextuus/hub` / `main` |
 | Stack-Ordner | `/etc/komodo/stacks/hub` (Klon von Komodo, keine Daten darin) |
 | Compose | `docker compose -p hub -f compose.prod.yaml --env-file .env.prod.local` |
@@ -31,7 +32,7 @@ nichts asynchron, und Mails gibt es derzeit nicht (`MAILER_DSN=null://null`).
 | Wo | Was | Gesichert |
 |---|---|---|
 | Volume `hub_database_data` | MySQL | täglich als Dump (`/srv/hub/backups`) + offsite |
-| Volume `hub_media_data` → `/srv/app/var/media` (`app`, schreibend) bzw. `/images` (`imgproxy`, lesend) | gemeinsamer Medienordner: `bet_ai/logos/`, `fotokalender/`, `advent/`, `projekte/` (Aufbau: `docs/homelab/daten.md`) | offsite direkt aus dem Volume |
+| Volume `hub_media_data` → `/srv/app/var/media` (`app`, schreibend) bzw. `/images` (`imgproxy`, lesend) | gemeinsamer Medienordner: `bet_ai/logos/`, `fotokalender/`, `advent/`, `journey/`, `projekte/` (Aufbau: `docs/homelab/daten.md`) | offsite direkt aus dem Volume |
 | Volumes `hub_caddy_data`, `hub_caddy_config` | Caddy-Zustand (ohne TLS unwichtig) | nein |
 | `/srv/hub/backups` | Datenbank-Dumps | offsite |
 
@@ -266,6 +267,44 @@ Volume `hub_media_data` wird zum gemeinsamen Medienordner, und `imgproxy` kommt 
 **Prüfen:** `curl -sI https://wh-company.com/ | head -1` → 200; ein Bild auf `/kalender` öffnen (`/img/…` 200), dieselbe
 URL mit verändertem Zeichen in der Signatur → 403; BetAI zeigt die Team-Logos; `/healthz` ok.
 
+## Journey aus advent übernehmen (einmalig, Stand 26.11.2026)
+
+Die Journey (`kresh.wh-company.com`) läuft bisher im Stack `advent` (Port 7999) und zieht als Tool in hub. Die Domain
+zeigt schon auf den VPS; es ändert sich nur das Ziel im VPS-Caddy. Keine neuen Secrets. Reihenfolge ohne Ausfall:
+
+1. **Komodo → Deploy** von hub. Die Journey ist danach in hub da, der VPS schickt `kresh` aber noch zu advent.
+2. **Bilder ins Volume** (35 Dateien, 29 MB; liegen nicht im Repo). Vom Arbeitsrechner:
+   ```bash
+   tar -C ~/Documents/programming/hub-altbestand/media -czf /tmp/journey-medien.tgz journey
+   scp /tmp/journey-medien.tgz abyss-remote:/tmp/
+   ```
+   Dann **auf abyss** (nicht per SSH-Pipe, `sudo` fragt nach dem Passwort):
+   ```bash
+   sudo docker run --rm -v hub_media_data:/m -v /tmp/journey-medien.tgz:/t.tgz:ro alpine:3.22 \
+     sh -c 'tar -C /m -xzf /t.tgz && chown -R 82:82 /m/journey && ls /m/journey | wc -l'   # → 35
+   rm /tmp/journey-medien.tgz
+   ```
+3. **Auf abyss prüfen**, bevor der VPS umschaltet (direkt am Port von hub, Host-Header gesetzt):
+   ```bash
+   H='Host: kresh.wh-company.com'
+   curl -s -o /dev/null -w '%{http_code}\n' -H "$H" http://10.0.0.2:8197/            # 200
+   curl -s -o /dev/null -w '%{http_code}\n' -H "$H" http://10.0.0.2:8197/admin       # 404
+   img=$(curl -s -H "$H" http://10.0.0.2:8197/ | grep -o '/img/[^"]*' | head -1)
+   curl -s -o /dev/null -w '%{http_code}\n' -H "$H" "http://10.0.0.2:8197$img"       # 200
+   curl -s -H "$H" -H 'Origin: https://kresh.wh-company.com' -H 'Content-Type: application/json' \
+     -d '{"choice":"Um 21:00 Uhr"}' http://10.0.0.2:8197/api/sauna-choice              # "success":true
+   ```
+4. **homelab:** `kresh.wh-company.com` in **einem** Schritt aus dem Eintrag `advent` entfernen und bei `hub` unter
+   `domains` eintragen (stünde sie in beiden, gäbe es den Site-Block im VPS-Caddy doppelt). Dann `bin/inventory`,
+   `bin/gen-docs`, `bin/gen-caddy`, `bin/caddy-deploy` (Trockenlauf), `bin/caddy-deploy --apply` (Reload ohne
+   Unterbrechung), `bin/check`.
+5. **Prüfen:** `curl -sI https://kresh.wh-company.com/ | grep -i -e '^HTTP' -e x-robots` → 200, `noindex`;
+   `https://kresh.wh-company.com/admin` → 404; Journey im Handy-Browser einmal durchspielen.
+6. advent stilllegen (siehe homelab `docs/offene-punkte.md`): letzter Dump, Stack und Procedure `advent-backup` weg.
+
+**Zurück:** Domain im Inventar wieder zu `advent`, `bin/gen-caddy` + `bin/caddy-deploy --apply` – solange der Stack
+advent noch läuft.
+
 ## Rollback
 
 - **Code:** Im Stack unter **Commit** den letzten guten Hash eintragen → **Deploy**, danach das Feld wieder leeren.
@@ -371,6 +410,7 @@ dem Umzug (während der Vorbereitung: `status: migrating`, `ingress: legacy`, zu
     domains:
       - wh-company.com          # erste Domain = Monitor
       - www.wh-company.com
+      - kresh.wh-company.com    # Journey (vorher Projekt advent)
     former_domains:
       - hub.wh-company.de
     monitor: { path: /healthz }
@@ -382,7 +422,7 @@ dem Umzug (während der Vorbereitung: `status: migrating`, `ingress: legacy`, zu
         www.wh-company.com: https://wh-company.com{uri}
     data:
       - Named Volume hub_database_data
-      - Named Volume hub_media_data (Medienordner: Team-Logos, Fotokalender, Adventskalender, Startseite)
+      - Named Volume hub_media_data (Medienordner: Team-Logos, Fotokalender, Adventskalender, Journey, Startseite)
       - /srv/hub/backups
     backup:
       time: "02:15"

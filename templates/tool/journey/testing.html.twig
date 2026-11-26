@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Ein Lebensjahr mit Kristin (Testing)</title>
+
+    {# Früher von cdn.tailwindcss.com bzw. cdnjs; jetzt lokal (Tailwind 3.4.17 gebaut, GSAP 3.12.2 unverändert). #}
+    <script src="{{ asset('journey/gsap.min.js') }}"></script>
+    <script src="{{ asset('journey/ScrollTrigger.min.js') }}"></script>
+    <script src="{{ asset('journey/journey.js') }}"></script>
+
+    <style>
+        body {
+            background-color: #f5f2eb;
+            color: #2d3748;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .stage-container {
+            position: relative;
+            width: 100vw;
+            height: 100dvh;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100dvh;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .bg-image.active {
+            opacity: 1;
+        }
+
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+        }
+
+        .story-section {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem 1.25rem 4rem 1.25rem;
+        }
+
+        .sketch-card {
+            background: rgba(255, 253, 248, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(180, 160, 140, 0.3);
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Wie index.html.twig: zu hohe Karten oben beginnen lassen und in der Section scrollen. */
+        .story-section {
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .story-section::before,
+        .story-section.justify-center::after {
+            content: '';
+            flex: 1 1 0;
+        }
+    </style>
+
+    {# Steht wie früher das <style> des Tailwind-CDN am Ende von <head> (gleiche Reihenfolge der Regeln). #}
+    <link rel="stylesheet" href="{{ asset('styles/journey.tailwind.css') }}">
+</head>
+<body>
+
+<!-- Fixierter Hintergrund -->
+<div class="fixed inset-0 z-0 stage-container">
+    {% for slide in slides %}
+        <img
+                id="bg-{{ slide.id }}"
+                src="{{ media_url(slide.image, 'journey') }}"
+                alt="{{ slide.title }}"
+                class="bg-image {% if loop.first %}active{% endif %}"
+        >
+    {% endfor %}
+</div>
+
+<!-- Scrollbarer Inhalt -->
+<div class="content-overlay">
+
+    {% for slide in slides %}
+        <section
+                id="section-{{ slide.id }}"
+                class="story-section {% if slide.id == 'it-hacking' %}justify-center{% endif %}"
+                data-bg="bg-{{ slide.id }}"
+        >
+
+            {% if slide.id == 'intro-role' %}
+                {% include 'tool/journey/_intro.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'it-hacking' %}
+                {% include 'tool/journey/_terminal.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'neptunbad-sauna' %}
+                {% include 'tool/journey/_sauna.html.twig' with {'slide': slide, 'saunaQuestion': saunaQuestion} %}
+            {% elseif slide.id == 'kennzeichen-game' %}
+                {% include 'tool/journey/_kennzeichen.html.twig' with {'slide': slide, 'kennzeichenRiddle': kennzeichenRiddle} %}
+            {% elseif slide.id == 'rio-kniffel' %}
+                {% include 'tool/journey/_rio_kniffel.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'taylor-kardashian-game' %}
+                {% include 'tool/journey/_taylor_kardashian_game.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'food-game' %}
+                {% include 'tool/journey/_food_game.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'taste-tinder' %}
+                {% include 'tool/journey/_taste_tinder.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'scratch-card-game' %}
+                {% include 'tool/journey/_scratch_card.html.twig' with {'slide': slide} %}
+            {% else %}
+                {# Standard-Karte #}
+                <div class="sketch-card p-6 text-center shadow-lg">
+                    <h2 class="text-2xl font-serif font-bold text-amber-900 mb-2">{{ slide.title }}</h2>
+                    <p class="text-base text-stone-700 leading-relaxed">{{ slide.text }}</p>
+                </div>
+            {% endif %}
+
+        </section>
+    {% endfor %}
+
+</div>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('.story-section[data-bg]');
+
+    sections.forEach((section) => {
+        const targetBgId = section.getAttribute('data-bg');
+        const targetBg = document.getElementById(targetBgId);
+
+        ScrollTrigger.create({
+            trigger: section,
+            start: "top 50%", // Greift, wenn die Section die Mitte erreicht
+            end: "bottom center",
+            onEnter: () => {
+                activateImage(targetBg);
+            },
+            onEnterBack: () => activateImage(targetBg)
+        });
+    });
+
+    function activateImage(targetBg) {
+        document.querySelectorAll('.bg-image').forEach(img => img.classList.remove('active'));
+        if (targetBg) targetBg.classList.add('active');
+    }
+
+    function preventScroll(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function lockScroll(section) {
+        // Empty in testing
+    }
+
+    function jumpToSection(sectionId) {
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            // Unlock all sections up to targetSection
+            const sections = document.querySelectorAll('.story-section');
+            for (let i = 0; i < sections.length; i++) {
+                sections[i].dataset.unlocked = 'true';
+                sections[i].removeAttribute('data-locked');
+                if (sections[i] === targetSection) break;
+            }
+            
+            document.body.classList.remove('scroll-locked');
+            window.removeEventListener('wheel', preventScroll);
+            window.removeEventListener('touchmove', preventScroll);
+
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function unlockSection(sectionIdOrElementOrEvent, skipAll = false) {
+        let section;
+        if (typeof sectionIdOrElementOrEvent === 'string') {
+            section = document.getElementById(sectionIdOrElementOrEvent);
+        } else if (sectionIdOrElementOrEvent instanceof Event) {
+            section = sectionIdOrElementOrEvent.target.closest('section');
+        } else if (sectionIdOrElementOrEvent instanceof HTMLElement) {
+            section = sectionIdOrElementOrEvent.closest('section');
+        }
+        
+        if (section) {
+            section.dataset.unlocked = 'true';
+            section.removeAttribute('data-locked');
+            document.body.classList.remove('scroll-locked');
+
+            // Event-Listener wieder entfernen
+            window.removeEventListener('wheel', preventScroll);
+            window.removeEventListener('touchmove', preventScroll);
+
+            // Automatisch zur nächsten Section scrollen und alle locked slides unlocken
+            let nextSection = section.nextElementSibling;
+            
+            if (skipAll) {
+                // Unlock all subsequent locked sections
+                while (nextSection && nextSection.tagName === 'SECTION' && nextSection.dataset.locked === 'true') {
+                    nextSection.dataset.unlocked = 'true';
+                    nextSection.removeAttribute('data-locked');
+                    nextSection = nextSection.nextElementSibling;
+                }
+            }
+            
+            if (nextSection && nextSection.tagName === 'SECTION') {
+                nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+</script>
+</body>
+</html>

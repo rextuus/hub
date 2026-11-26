@@ -1,0 +1,114 @@
+<div class="sketch-card p-3 sm:p-5 text-center shadow-xl h-[400px] sm:h-[85dvh] overflow-y-auto flex flex-col">
+    <div>
+        <h2 class="text-xl font-serif font-bold text-amber-900 mb-4">{{ slide.title }}</h2>
+        <p class="text-xs text-stone-600 mb-3 leading-relaxed">{{ slide.text }}</p>
+
+        <!-- Geburtstags-Text mit eingebetteten Kennzeichen -->
+        <div id="solution-box" class="hidden mb-6 p-4 bg-amber-100/90 border border-amber-300 rounded-xl shadow-inner text-left leading-relaxed text-xs text-stone-800">
+            <p class="mb-2 font-serif font-bold text-amber-900 text-sm">Alles Liebe zum Geburtstag!</p>
+            <p>
+                Egal ob <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">MI</span>ttendrin in der Heimat,
+                beim Spaziergang durch <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">LK</span>-Süd,
+                zu Hause in <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">K</span>öln,
+                beim Besuch in <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">HH</span>amburg,
+                beim Ausflug in das "verbotene" <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">D</span>üsseldorf,
+                in <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">MON</span>schau beim Rentner-Sonntagsausflug
+                oder ganz <span class="px-1.5 py-0.5 bg-white border border-stone-800 rounded font-mono font-bold text-[11px]">VS</span>unken in Erinnerungen an die letzten Ausflüge daheim auf der Couch –
+                mit ihr macht jede Reise und jedes gesammelte Kennzeichen einfach unendlich viel Spaß!
+            </p>
+        </div>
+    </div>
+
+    <!-- Kennzeichen Eingabeliste -->
+    <div id="kz-inputs-list" class="flex-1 flex flex-col gap-1 my-1 pr-1">
+        {% for item in kennzeichenRiddle.items %}
+            <div class="flex items-center justify-between bg-stone-100/90 p-1 rounded-xl border border-stone-200 shrink-0">
+                <div class="text-left pr-2">
+                    <span class="text-[10px] font-bold text-stone-800 block">{{ item.city }}</span>
+                    <span class="text-[9px] text-stone-500 leading-none block">{{ item.hint }}</span>
+                </div>
+
+                <!-- Deutsches Nummernschild Design -->
+                <div class="flex items-center bg-white border border-stone-800 rounded shadow-sm overflow-hidden h-7 px-0.5 shrink-0">
+                    <div class="bg-blue-700 text-white text-[6px] font-bold h-full px-0.5 flex flex-col justify-between py-0.5 mr-1 rounded-l-sm">
+                        <span>★</span>
+                        <span>D</span>
+                    </div>
+                    <input
+                            type="text"
+                            id="kz-input-{{ loop.index0 }}"
+                            maxlength="3"
+                            placeholder="???"
+                            autocomplete="off"
+                            class="w-8 text-center uppercase font-mono font-bold text-[10px] text-stone-900 focus:outline-none bg-transparent"
+                            oninput="this.value = this.value.toUpperCase()"
+                    >
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <button
+                type="button"
+                id="check-kz-btn"
+                onclick="event.stopPropagation(); checkKennzeichen()"
+                class="w-full py-2 bg-amber-800 hover:bg-amber-700 text-white font-semibold rounded-xl text-xs transition-all shadow mt-1"
+        >
+            In die App eintragen
+        </button>
+
+        <div class="mt-6 flex gap-2">
+            <button type="button" onclick="event.stopPropagation(); repeatKennzeichen()" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-xl text-[9px] transition-all shadow">
+                Wiederholen
+            </button>
+            <button type="button" onclick="event.stopPropagation(); unlockSection(this)" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-xl text-[9px] transition-all shadow">
+                Überspringen
+            </button>
+        </div>
+
+        <div id="kz-result" class="hidden mt-2 p-2 rounded-lg text-xs font-medium"></div>
+    </div>
+</div>
+
+<script>
+    window.repeatKennzeichen = function() {
+        {% for item in kennzeichenRiddle.items %}
+        document.getElementById('kz-input-{{ loop.index0 }}').value = '';
+        {% endfor %}
+        document.getElementById('kz-result').classList.add('hidden');
+    };
+
+    async function checkKennzeichen() {
+        const inputs = [];
+        {% for item in kennzeichenRiddle.items %}
+        inputs.push(document.getElementById('kz-input-{{ loop.index0 }}').value);
+        {% endfor %}
+
+        const response = await journeyFetch('{{ path("app_journey_kennzeichen_check") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ inputs: inputs })
+        });
+
+        const data = await response.json();
+        const resultDiv = document.getElementById('kz-result');
+        const solutionBox = document.getElementById('solution-box');
+
+        resultDiv.textContent = data.message;
+        resultDiv.classList.remove('hidden', 'bg-rose-100', 'text-rose-900', 'bg-emerald-100', 'text-emerald-900');
+
+        if (data.success) {
+            resultDiv.classList.add('bg-emerald-100', 'text-emerald-900');
+            document.getElementById('check-kz-btn').classList.add('hidden');
+            document.getElementById('kz-inputs-list').classList.add('hidden');
+
+            solutionBox.classList.remove('hidden');
+
+            // Scroll-Sperre aufheben
+            unlockSection('section-kennzeichen-game');
+        } else {
+            resultDiv.classList.add('bg-rose-100', 'text-rose-900');
+        }
+    }
+</script>

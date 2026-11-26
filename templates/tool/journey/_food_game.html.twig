@@ -1,0 +1,165 @@
+<div class="sketch-card p-4 sm:p-5 text-center shadow-xl flex flex-col justify-between max-h-[94vh]">
+    <div>
+        <h2 class="text-xl sm:text-2xl font-serif font-bold text-amber-900 mb-1">{{ slide.title }}</h2>
+        <p class="text-xs sm:text-sm text-stone-600 mb-2 leading-relaxed" id="sauce-instructions">
+            Halte den Button unten gedrückt, um Soße einzuschenken!
+        </p>
+    </div>
+
+    <!-- Höheres Spielfeld (470px - 510px) -->
+    <div class="relative w-full h-[470px] sm:h-[510px] my-2 bg-stone-100/50 rounded-2xl border border-stone-200/60 overflow-hidden flex items-center justify-center select-none">
+        <!-- Spargel Teller Hintergrund -->
+        <img
+                src="{{ media_url('journey/spargel-2.jpg', 'journey') }}"
+                alt="Spargel"
+                class="absolute inset-0 w-full h-full object-cover object-bottom rounded-2xl opacity-90 scale-105"
+        />
+
+        <!-- Saucenfleck auf dem Teller -->
+        <img
+                id="sauce-puddle"
+                src="{{ media_url('journey/hollandaise.png', 'journey') }}"
+                alt="Hollandaise Fleck"
+                class="absolute z-10 w-72 h-72 sm:w-80 sm:h-80 object-contain transition-transform duration-75 pointer-events-none opacity-0"
+                style="bottom: 7%; left: 48%; transform: translate(-50%, 0) scale(0);"
+        />
+
+        <!-- Lang gezogener Saucenstrahl -->
+        <img
+                id="sauce-stream"
+                src="{{ media_url('journey/strahl.png', 'journey') }}"
+                alt="Strahl"
+                class="absolute z-20 w-16 h-80 object-contain pointer-events-none opacity-0 transition-opacity duration-150"
+                style="top: 21%; left: 44%; transform: translateX(-50%);"
+        />
+
+        <!-- Sauciere (Gespiegelt) -->
+        <img
+                id="sauciere"
+                src="{{ media_url('journey/sauciere.png', 'journey') }}"
+                alt="Sauciere"
+                class="absolute z-30 w-56 h-56 sm:w-64 sm:h-64 object-contain pointer-events-none transition-transform duration-200 scale-x-[-1]"
+                style="top: 1%; left: 48%; transform: translateX(-50%) scaleX(-1) rotate(0deg);"
+        />
+    </div>
+
+    <!-- Controls & Feedback -->
+    <div class="mt-2">
+        <div id="sauce-feedback" class="hidden p-2.5 rounded-xl text-xs sm:text-sm font-medium bg-stone-50 border border-stone-200 text-stone-800 mb-2 leading-relaxed"></div>
+
+        <!-- Pour Button -->
+        <button
+                id="pour-btn"
+                class="w-full py-3 bg-stone-700 hover:bg-stone-600 text-white font-semibold rounded-xl text-xs sm:text-sm transition-all shadow active:scale-95 touch-none select-none mb-1" style="-webkit-touch-callout: none;"
+        >
+            Gedrückt halten zum Soße gießen!
+        </button>
+
+        <button
+                id="sauce-next-btn"
+                disabled
+                class="hidden w-full py-3 bg-stone-300 text-stone-500 font-semibold rounded-xl text-xs sm:text-sm transition-all shadow cursor-not-allowed"
+                onclick="unlockSection(this)"
+        >
+            Weiter im Menü!
+        </button>
+
+        <div class="flex gap-2 mt-6">
+            <button onclick="repeatSauce()" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-xl text-[9px] transition-all shadow">
+                Wiederholen
+            </button>
+            <button onclick="unlockSection(this)" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-xl text-[9px] transition-all shadow">
+                Überspringen
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.repeatSauce = function() {
+        sauceLevel = 0;
+        isFinished = false;
+        pourBtn.classList.remove('hidden');
+        nextBtn.classList.add('hidden');
+        feedback.classList.add('hidden');
+        puddle.style.transform = `translate(-50%, 0) scale(0)`;
+        puddle.classList.add('opacity-0');
+        stream.classList.add('opacity-0');
+    };
+    let pourInterval = null;
+    let sauceLevel = 0; // 0 bis 100
+    let isFinished = false;
+
+    const pourBtn = document.getElementById('pour-btn');
+    const sauciere = document.getElementById('sauciere');
+    const stream = document.getElementById('sauce-stream');
+    const puddle = document.getElementById('sauce-puddle');
+    const feedback = document.getElementById('sauce-feedback');
+    const nextBtn = document.getElementById('sauce-next-btn');
+
+    function startPouring(e) {
+        if (isFinished) return;
+        if (e) e.preventDefault();
+
+        // Animate Sauciere & Stream
+        sauciere.style.transform = "translateX(-50%) scaleX(-1) rotate(-25deg)";
+        stream.classList.remove('opacity-0');
+        puddle.classList.remove('opacity-0');
+
+        pourInterval = setInterval(() => {
+            if (sauceLevel < 120) {
+                sauceLevel += 2;
+                let scaleVal = sauceLevel / 40;
+                puddle.style.transform = `translate(-50%, 0) scale(${scaleVal})`;
+            }
+        }, 50);
+    }
+
+    function stopPouring() {
+        if (isFinished || !pourInterval) return;
+
+        clearInterval(pourInterval);
+        pourInterval = null;
+
+        // Reset Visuals
+        sauciere.style.transform = "translateX(-50%) scaleX(-1) rotate(0deg)";
+        stream.classList.add('opacity-0');
+
+        evaluateSauce();
+    }
+
+    function evaluateSauce() {
+        isFinished = true;
+        pourBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+
+        feedback.classList.remove('hidden');
+
+        if (sauceLevel < 35) {
+            feedback.textContent = "Trockenübung! Das ist viel zu wenig Hollandaise. Selbst für die Ansprüche eines Normalverbrauchers. Aber wir lassen es gelten!";
+            feedback.className = "p-2.5 rounded-xl text-xs font-medium bg-amber-50 border border-amber-200 text-amber-900 mb-2";
+        } else if (sauceLevel >= 35 && sauceLevel <= 75) {
+            feedback.textContent = "Perfekte Dosierung! Der Spargel schwimmt genau in der richtigen Menge goldenem Glücks!";
+            feedback.className = "p-2.5 rounded-xl text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-900 mb-2";
+        } else {
+            feedback.textContent = "Hollandaise-Tsunami! Man sieht zwar keinen Spargel mehr, aber genau SO gehört sich das eigentlich! Wolf ist stolz auf dich!";
+            feedback.className = "p-2.5 rounded-xl text-xs font-medium bg-amber-100 border border-amber-300 text-amber-950 mb-2";
+        }
+
+        nextBtn.disabled = false;
+        nextBtn.classList.remove('bg-stone-300', 'text-stone-500', 'cursor-not-allowed');
+        nextBtn.classList.add('bg-amber-800', 'hover:bg-amber-700', 'text-white');
+    }
+
+    // Touch & Mouse Events für Hold-Button
+    pourBtn.addEventListener('mousedown', startPouring);
+    pourBtn.addEventListener('mouseup', stopPouring);
+    pourBtn.addEventListener('mouseleave', stopPouring);
+
+    pourBtn.addEventListener('touchstart', startPouring);
+    pourBtn.addEventListener('touchend', stopPouring);
+    // iPhone: Bricht iOS die Berührung ab (Mitteilung, Wischgeste, langes Drücken), kommt kein touchend – die Soße
+    // lief dann endlos weiter. touchcancel beendet das Gießen genauso; das Kontextmenü bleibt aus.
+    pourBtn.addEventListener('touchcancel', stopPouring);
+    pourBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+</script>

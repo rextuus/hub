@@ -17,12 +17,15 @@ hub_media_data/
 ├── fotokalender/2022/<monat>/titel.jpg, dsc_….jpg  Foto-Kalender (Import)
 ├── fotokalender/<jahr>/<monat>/<zufall>.jpg        Fotos per Admin-Upload
 ├── advent/<zufall>.jpg                             Bilder zu Fragen und Antworten
+├── journey/<name>.jpg|png                          Journey (35 Bilder, einmalig eingespielt, kein Upload)
 └── projekte/<datei>                                Startseite (Bilder, about.mp4)
 ```
 
 - Dateien gehören `82:82` (www-data im PHP-Image); imgproxy läuft als `65534:82` und liest über die Gruppe.
 - Pfade in der Datenbank sind relativ zum Ordner (`advent/3f9c….jpg`); nur BetAI speichert `/media/bet_ai/logos/…`.
 - Neue Uploads bekommen zufällige Namen. Wird ein Bild im Admin ersetzt, löscht EasyAdmin die alte Datei.
+- `journey/` kommt nicht aus dem Admin, sondern einmalig aus `hub-altbestand/media/journey` (Originale von Cloudinary,
+  Namen ohne Cloudinary-Kürzel). Die Pfade stehen im Code (`src/Tool/Journey/Service/SlideProvider.php`, Partials).
 
 ## Wiederherstellen
 

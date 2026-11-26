@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Ein Lebensjahr mit Kristin</title>
+
+    {# Früher von cdn.tailwindcss.com bzw. cdnjs; jetzt lokal (Tailwind 3.4.17 gebaut, GSAP 3.12.2 unverändert). #}
+    <script src="{{ asset('journey/gsap.min.js') }}"></script>
+    <script src="{{ asset('journey/ScrollTrigger.min.js') }}"></script>
+    <script src="{{ asset('journey/journey.js') }}"></script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .stage-container {
+            position: relative;
+            width: 100vw;
+            height: 100dvh;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100dvh;
+            object-fit: cover; /* Changed from contain to cover for better modern look */
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .bg-image.active {
+            opacity: 1;
+        }
+
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+        }
+
+        .story-section {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem 1.25rem 4rem 1.25rem;
+        }
+
+        .sketch-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body.scroll-locked {
+            overflow: hidden !important;
+            touch-action: none;
+        }
+
+        /* iPhone: Ohne das Sperren auch auf <html> scrollt Safari trotz body overflow:hidden weiter. */
+        html.scroll-locked {
+            overflow: hidden !important;
+        }
+
+        /* Scrollbare Karten bleiben auch während der Sperre per Finger scrollbar (siehe preventScroll). */
+        body.scroll-locked .overflow-y-auto,
+        body.scroll-locked .story-section {
+            touch-action: pan-y;
+        }
+
+        /*
+         * Kleine Bildschirme (iPhone mit eingeblendeter Leiste): Ist eine Karte höher als die Section, wurde sie bei
+         * justify-content:flex-end oben abgeschnitten – ohne Möglichkeit, dorthin zu scrollen. Gleiche Anordnung über
+         * Abstandhalter, aber „sicher“: Passt die Karte nicht, beginnt sie oben, und die Section scrollt.
+         */
+        .story-section {
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .story-section::before,
+        .story-section.justify-center::after {
+            content: '';
+            flex: 1 1 0;
+        }
+    </style>
+
+    {# Steht wie früher das <style> des Tailwind-CDN am Ende von <head> (gleiche Reihenfolge der Regeln). #}
+    <link rel="stylesheet" href="{{ asset('styles/journey.tailwind.css') }}">
+</head>
+<body>
+
+<!-- Fixierter Hintergrund -->
+<div class="fixed inset-0 z-0 stage-container">
+    {% for slide in slides %}
+        <img
+                id="bg-{{ slide.id }}"
+                src="{{ media_url(slide.image, 'journey') }}"
+                alt="{{ slide.title }}"
+                class="bg-image {% if loop.first %}active{% endif %}"
+        >
+    {% endfor %}
+</div>
+
+<!-- Scrollbarer Inhalt -->
+<div class="content-overlay">
+
+    {% for slide in slides %}
+        <section
+                id="section-{{ slide.id }}"
+                class="story-section {% if slide.id == 'it-hacking' %}justify-center{% endif %}"
+                data-bg="bg-{{ slide.id }}"
+                {% if slide.id == 'intro-role' or slide.id == 'neptunbad-sauna' or slide.id == 'it-hacking' or slide.id == 'kennzeichen-game' or slide.id == 'rio-kniffel' or slide.id == 'taylor-kardashian-game' or slide.id == 'food-game' or slide.id == 'taste-tinder' or slide.id == 'scratch-card-game' %}data-locked="true"{% endif %}
+        >
+
+            {% if slide.id == 'intro-role' %}
+                {% include 'tool/journey/_intro.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'it-hacking' %}
+                {% include 'tool/journey/_terminal.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'neptunbad-sauna' %}
+                {% include 'tool/journey/_sauna.html.twig' with {'slide': slide, 'saunaQuestion': saunaQuestion} %}
+            {% elseif slide.id == 'kennzeichen-game' %}
+                {% include 'tool/journey/_kennzeichen.html.twig' with {'slide': slide, 'kennzeichenRiddle': kennzeichenRiddle} %}
+            {% elseif slide.id == 'rio-kniffel' %}
+                {% include 'tool/journey/_rio_kniffel.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'taylor-kardashian-game' %}
+                {% include 'tool/journey/_taylor_kardashian_game.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'food-game' %}
+                {% include 'tool/journey/_food_game.html.twig' with {'slide': slide} %}
+            {% elseif slide.id == 'taste-tinder' %}
+                {% include 'tool/journey/_taste_tinder.html.twig' with {'slide': slide} %}
+                {% elseif slide.id == 'scratch-card-game' %}
+                {% include 'tool/journey/_scratch_card.html.twig' with {'slide': slide} %}
+            {% else %}
+                {# Standard-Karte #}
+                <div class="sketch-card p-6 text-center shadow-lg">
+                    <h2 class="text-2xl font-serif font-bold text-amber-900 mb-2">{{ slide.title }}</h2>
+                    <p class="text-base text-stone-700 leading-relaxed">{{ slide.text }}</p>
+                </div>
+            {% endif %}
+
+        </section>
+    {% endfor %}
+
+</div>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Sperre immer aktiv in der Produktion
+    const sections = document.querySelectorAll('.story-section[data-bg]');
+
+    sections.forEach((section) => {
+        const targetBgId = section.getAttribute('data-bg');
+        const targetBg = document.getElementById(targetBgId);
+        const isLocked = section.getAttribute('data-locked') === 'true';
+
+        ScrollTrigger.create({
+            trigger: section,
+            start: "top 10%", // Greift, wenn die Section die Oberkante erreicht
+            end: "bottom center",
+            onEnter: () => {
+                activateImage(targetBg);
+                if (isLocked && section.dataset.unlocked !== 'true') {
+                    lockScroll(section);
+                }
+            },
+            onEnterBack: () => activateImage(targetBg)
+        });
+    });
+
+    function activateImage(targetBg) {
+        document.querySelectorAll('.bg-image').forEach(img => img.classList.remove('active'));
+        if (targetBg) targetBg.classList.add('active');
+    }
+
+    // Während der Sperre: Seite nicht scrollen – scrollbare Bereiche (Karten mit overflow-y-auto, eine zu hohe
+    // Section) aber schon, solange sie in diese Richtung noch Platz haben. Früher war auf dem iPhone jedes Wischen
+    // blockiert, auch in Karten, deren Weiter-Button unterhalb des sichtbaren Bereichs lag.
+    let touchStartY = 0;
+    let lockedSection = null;
+    let settleTimer = null;
+
+    function canScrollInside(target, down) {
+        for (let el = target; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+            const overflowY = getComputedStyle(el).overflowY;
+            if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) {
+                if (down && el.scrollTop + el.clientHeight < el.scrollHeight - 1) return true;
+                if (!down && el.scrollTop > 0) return true;
+            }
+        }
+        return false;
+    }
+
+    function rememberTouch(e) {
+        touchStartY = e.touches[0] ? e.touches[0].clientY : 0;
+    }
+
+    function preventScroll(e) {
+        let down;
+        if (e.type === 'wheel') {
+            down = e.deltaY > 0;
+        } else {
+            const y = e.touches[0] ? e.touches[0].clientY : touchStartY;
+            down = y < touchStartY; // Finger nach oben = Inhalt nach unten
+            touchStartY = y;
+        }
+        if (canScrollInside(e.target, down)) return;
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // iPhone: Der Schwung eines Wischers läuft nach dem Sperren weiter (kein touchmove mehr, das man verhindern
+    // könnte) und trug die Seite über die gesperrte Section hinaus – dann hing man halb im nächsten Abschnitt fest.
+    // Kommt die Seite zur Ruhe, wird die gesperrte Section wieder genau eingepasst.
+    function holdLockedSection() {
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(() => {
+            if (!lockedSection) return;
+            const offset = lockedSection.getBoundingClientRect().top;
+            if (Math.abs(offset) > 2) {
+                window.scrollTo({ top: window.scrollY + offset, behavior: 'auto' });
+            }
+        }, 180);
+    }
+
+    function releaseLock() {
+        lockedSection = null;
+        clearTimeout(settleTimer);
+        document.body.classList.remove('scroll-locked');
+        document.documentElement.classList.remove('scroll-locked');
+
+        // Event-Listener wieder entfernen
+        window.removeEventListener('wheel', preventScroll);
+        window.removeEventListener('touchstart', rememberTouch);
+        window.removeEventListener('touchmove', preventScroll);
+        window.removeEventListener('scroll', holdLockedSection);
+    }
+
+    function lockScroll(section) {
+        if (section.dataset.unlocked === 'true') return;
+
+        lockedSection = section;
+        document.body.classList.add('scroll-locked');
+        document.documentElement.classList.add('scroll-locked');
+
+        // Aktive Scroll-Sperre gegen Touch-Swipes und Mausrad
+        window.addEventListener('wheel', preventScroll, { passive: false });
+        window.addEventListener('touchstart', rememberTouch, { passive: true });
+        window.addEventListener('touchmove', preventScroll, { passive: false });
+        window.addEventListener('scroll', holdLockedSection, { passive: true });
+
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        holdLockedSection();
+    }
+
+    function jumpToSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.dataset.unlocked = 'true';
+            section.removeAttribute('data-locked');
+            releaseLock();
+
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function unlockSection(sectionIdOrElementOrEvent, skipAll = false) {
+        let section;
+        if (typeof sectionIdOrElementOrEvent === 'string') {
+            section = document.getElementById(sectionIdOrElementOrEvent);
+        } else if (sectionIdOrElementOrEvent instanceof Event) {
+            section = sectionIdOrElementOrEvent.target.closest('section');
+        } else if (sectionIdOrElementOrEvent instanceof HTMLElement) {
+            section = sectionIdOrElementOrEvent.closest('section');
+        }
+        
+        if (section) {
+            section.dataset.unlocked = 'true';
+            section.removeAttribute('data-locked');
+            releaseLock();
+
+            // Automatisch zur nächsten Section scrollen und alle locked slides unlocken
+            let nextSection = section.nextElementSibling;
+            
+            if (skipAll) {
+                // Unlock all subsequent locked sections
+                while (nextSection && nextSection.tagName === 'SECTION' && nextSection.dataset.locked === 'true') {
+                    nextSection.dataset.unlocked = 'true';
+                    nextSection.removeAttribute('data-locked');
+                    nextSection = nextSection.nextElementSibling;
+                }
+            }
+            
+            if (nextSection && nextSection.tagName === 'SECTION') {
+                nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+</script>
+</body>
+</html>

@@ -32,13 +32,14 @@
 
 Symfony-App auf **abyss** (Komodo-Stack `hub`), erreichbar unter **wh-company.com** (www leitet um). Sie bündelt
 die Startseite von WH-Company und mehrere kleine Tools unter `src/Tool/<Name>/`: **Fotokalender**,
-**Adventskalender**, **BetAI** (nur angemeldet) und **ESC Voting**. Die Anmeldung braucht nur der Admin.
+**Adventskalender**, **BetAI** (nur angemeldet), **ESC Voting** und die **Journey** (Geburtstags-Journey, allein auf
+kresh.wh-company.com, früher Projekt advent). Die Anmeldung braucht nur der Admin.
 Teilnehmer des Adventskalenders kommen über ihren persönlichen Link.
 
 <div class="hl-stats">
   <div class="hl-stat hl-stat--accent"><b>4</b><span>Dienste dauerhaft<br>web, app, imgproxy, database</span></div>
   <div class="hl-stat"><b>2</b><span>Dienste auf Abruf<br>migrate, backup</span></div>
-  <div class="hl-stat"><b>4</b><span>Tools<br>Fotokalender, Advent, BetAI, ESC</span></div>
+  <div class="hl-stat"><b>5</b><span>Tools<br>Fotokalender, Advent, BetAI, ESC, Journey</span></div>
   <div class="hl-stat"><b>31</b><span>Tabellen<br>eine Datenbank</span></div>
   <div class="hl-stat"><b>1</b><span>Medienordner<br>Volume hub_media_data</span></div>
 </div>
@@ -63,7 +64,7 @@ Teilnehmer des Adventskalenders kommen über ihren persönlichen Link.
 
     ---
 
-    Uploads landen im Medienordner (`advent/`, `fotokalender/`, `projekte/`, `bet_ai/logos/`), ausgeliefert über
+    Uploads landen im Medienordner (`advent/`, `fotokalender/`, `projekte/`, `bet_ai/logos/`; dazu `journey/` ohne Upload), ausgeliefert über
     imgproxy. Details: [Daten](daten.md).
 
 </div>

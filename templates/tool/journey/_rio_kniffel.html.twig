@@ -1,0 +1,339 @@
+<div class="sketch-card p-4 sm:p-5 text-center shadow-xl flex flex-col max-h-[95vh] overflow-y-auto">
+    <div>
+        <h2 class="text-lg sm:text-xl font-serif font-bold text-stone-800 mb-4">{{ slide.title }}</h2>
+        <p class="text-[11px] sm:text-xs text-stone-600 mb-4 leading-relaxed">
+            Abwechselndes Kniffel-Duell: Wer erzielt nach 3 Zügen das bessere Ergebnis?
+        </p>
+    </div>
+
+    <!-- Arena: Kristin vs. Spieler -->
+    <div class="space-y-2 my-1 shrink-0">
+
+        <!-- Kristins Würfel-Bereich -->
+        <div class="p-2.5 bg-amber-900/10 rounded-xl border border-amber-300">
+            <div class="flex justify-between items-center mb-1 px-1">
+                <span class="text-xs font-bold text-amber-950 flex items-center gap-1">
+                    Kristin
+                </span>
+                <span id="kristin-score-display" class="text-xs font-bold text-amber-900 font-mono">0 Pkt</span>
+            </div>
+
+            <div id="kristin-dice-container" class="flex justify-center gap-1.5 my-1">
+                <div class="w-8 h-8 bg-stone-50 border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-stone-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-stone-50 border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-stone-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-stone-50 border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-stone-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-stone-50 border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-stone-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-stone-50 border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-stone-900 shadow-sm opacity-40">?</div>
+            </div>
+            <div id="kristin-status" class="text-[10px] text-amber-800 italic text-center">Wartet auf deinen 1. Wurf...</div>
+        </div>
+
+        <!-- Spieler Würfel-Bereich -->
+        <div class="p-2.5 bg-amber-100/60 rounded-xl border border-amber-300">
+            <div class="flex justify-between items-center mb-1 px-1">
+                <span class="text-xs font-bold text-stone-800 flex items-center gap-1">
+                    Deine Würfel
+                </span>
+                <span id="player-score-display" class="text-xs font-bold text-stone-700 font-mono">0 Pkt</span>
+            </div>
+
+            <div id="kniffel-dice-container" class="flex justify-center gap-1.5 my-1">
+                <div class="w-8 h-8 bg-white border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-white border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-white border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-white border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm opacity-40">?</div>
+                <div class="w-8 h-8 bg-white border-2 border-stone-800 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm opacity-40">?</div>
+            </div>
+            <p class="text-[10px] text-stone-500 italic">Klicke Würfel an, um sie einzufrieren</p>
+        </div>
+    </div>
+
+    <button
+            id="roll-dice-btn"
+            onclick="kniffelRollDice()"
+            class="mt-2 w-full py-2.5 bg-stone-600 hover:bg-stone-500 text-white font-semibold rounded-xl text-xs transition-all shadow"
+    >
+        Würfeln! (Wurf 1/3)
+    </button>
+
+    <!-- Ergebnis & Auswertungen -->
+    <div class="mt-1">
+        <div id="kniffel-result" class="hidden p-2 rounded-xl text-xs font-medium mb-2 leading-relaxed"></div>
+
+        <button
+                id="kniffel-next-btn"
+                disabled
+                class="hidden w-full py-2.5 bg-stone-300 text-stone-500 font-semibold rounded-xl text-xs transition-all shadow cursor-not-allowed mt-1"
+                onclick="proceedKniffelJourney()"
+        >
+            Auf ins nächste Abenteuer!
+        </button>
+    </div>
+    <div class="mt-8 flex gap-2">
+        <button onclick="repeatKniffel()" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-xl text-[9px] transition-all shadow">
+            Wiederholen
+        </button>
+        <button onclick="unlockSection(this)" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-xl text-[9px] transition-all shadow">
+            Überspringen
+        </button>
+    </div>
+</div>
+
+<!-- Modal für Kategorie-Auswahl -->
+<div id="kniffel-category-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="sketch-card p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto">
+        <h2 class="text-lg font-serif font-bold text-amber-900 mb-4">Wähle dein Wurf-Ergebnis:</h2>
+        <div id="categories-container" class="grid grid-cols-1 gap-2 text-xs"></div>
+    </div>
+</div>
+
+<script>
+    {
+        let attempts = 0;
+        let kristinAttempts = 0;
+
+        // Spieler State
+        let dice = [0, 0, 0, 0, 0];
+        let held = [false, false, false, false, false];
+        let playerScore = 0;
+
+        // Kristins State
+        let kristinDice = [0, 0, 0, 0, 0];
+        let kristinHeld = [false, false, false, false, false];
+        let kristinScore = 0;
+        let kristinCategory = "";
+
+        window.toggleHold = function(index) {
+            if (attempts === 0 || attempts >= 3) return;
+            held[index] = !held[index];
+            renderPlayerDiceUI();
+        };
+
+        window.repeatKniffel = function() {
+            attempts = 0;
+            kristinAttempts = 0;
+            dice = [0, 0, 0, 0, 0];
+            held = [false, false, false, false, false];
+            playerScore = 0;
+            kristinDice = [0, 0, 0, 0, 0];
+            kristinHeld = [false, false, false, false, false];
+            kristinScore = 0;
+            kristinCategory = "";
+
+            renderPlayerDiceUI();
+            renderKristinDiceUI();
+            
+            const btn = document.getElementById('roll-dice-btn');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.textContent = 'Würfeln! (Wurf 1/3)';
+            
+            document.getElementById('kniffel-result').classList.add('hidden');
+            document.getElementById('category-selection').classList.add('hidden');
+            document.getElementById('kniffel-next-btn').classList.add('hidden');
+            document.getElementById('kristin-score-display').textContent = '0 Pkt';
+            document.getElementById('player-score-display').textContent = '0 Pkt';
+            document.getElementById('kristin-status').textContent = 'Wartet auf deinen 1. Wurf...';
+        };
+
+        function renderPlayerDiceUI() {
+            const container = document.getElementById('kniffel-dice-container');
+            container.innerHTML = '';
+
+            dice.forEach((val, index) => {
+                const die = document.createElement('div');
+                const isHeld = held[index];
+
+                die.className = `w-8 h-8 border-2 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm transition-transform ${attempts < 3 ? 'cursor-pointer active:scale-95' : ''} ${isHeld ? 'bg-amber-300 border-amber-600 ring-2 ring-amber-400 -translate-y-0.5' : 'bg-white border-stone-800'}`;
+                die.textContent = val > 0 ? val : '?';
+
+                if (attempts < 3) {
+                    die.onclick = () => window.toggleHold(index);
+                }
+                container.appendChild(die);
+            });
+        }
+
+        function renderKristinDiceUI() {
+            const container = document.getElementById('kristin-dice-container');
+            container.innerHTML = '';
+
+            kristinDice.forEach((val, index) => {
+                const die = document.createElement('div');
+                const isHeld = kristinHeld[index];
+
+                die.className = `w-8 h-8 border-2 rounded-lg flex items-center justify-center font-mono font-bold text-sm text-amber-900 shadow-sm transition-transform ${isHeld ? 'bg-amber-300 border-amber-600 ring-2 ring-amber-400 -translate-y-0.5' : 'bg-amber-50 border-amber-800'}`;
+                die.textContent = val > 0 ? val : '?';
+                container.appendChild(die);
+            });
+        }
+
+        // KI-Logik: Kristin wählt die besten Würfel zum Rauslegen
+        function updateKristinHolds() {
+            const counts = {};
+            kristinDice.forEach(val => counts[val] = (counts[val] || 0) + 1);
+
+            let bestVal = 0;
+            let maxCount = 0;
+            for (const [val, count] of Object.entries(counts)) {
+                if (count > maxCount || (count === maxCount && Number(val) > bestVal)) {
+                    maxCount = count;
+                    bestVal = Number(val);
+                }
+            }
+
+            kristinHeld = kristinDice.map(val => val === bestVal);
+        }
+
+        // KI-Logik: Kristin führt ihren Wurf aus
+        function playKristinTurn(callback) {
+            const btn = document.getElementById('roll-dice-btn');
+            const kristinStatus = document.getElementById('kristin-status');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            kristinStatus.textContent = "Kristin würfelt...";
+
+            setTimeout(() => {
+                kristinAttempts++;
+                kristinDice = kristinDice.map((val, idx) => kristinHeld[idx] ? val : Math.floor(Math.random() * 6) + 1);
+
+                if (kristinAttempts < 3) {
+                    updateKristinHolds();
+                    kristinStatus.textContent = `Kristin (Wurf ${kristinAttempts}/3): Behält ${kristinHeld.filter(Boolean).length} Würfel`;
+                } else {
+                    const kristinFinal = evaluateKristinFinal();
+                    kristinScore = kristinFinal.score;
+                    kristinCategory = kristinFinal.category;
+                    document.getElementById('kristin-score-display').textContent = `${kristinScore} Pkt`;
+                    kristinStatus.textContent = `Wählt: ${kristinCategory} (${kristinScore} Pkt)`;
+                }
+
+                renderKristinDiceUI();
+
+                if (attempts < 3) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
+                if (callback) callback();
+            }, 800);
+        }
+
+        // KI-Logik: Kristins Endergebnis berechnen
+        function evaluateKristinFinal() {
+            const counts = {};
+            let sum = 0;
+            kristinDice.forEach(val => {
+                counts[val] = (counts[val] || 0) + 1;
+                sum += val;
+            });
+
+            const values = Object.values(counts);
+
+            if (values.includes(5)) return { category: "Kniffel", score: 50 };
+            if (values.includes(4)) return { category: "Viererpasch", score: sum };
+            if (values.includes(3) && values.includes(2)) return { category: "Full House", score: 25 };
+            if (values.includes(3)) return { category: "Dreierpasch", score: sum };
+
+            let maxSingleVal = 0;
+            for (let num = 6; num >= 1; num--) {
+                if (counts[num]) {
+                    const total = num * counts[num];
+                    if (total > maxSingleVal) maxSingleVal = total;
+                }
+            }
+            return { category: "Augenzahl", score: Math.max(maxSingleVal, sum) };
+        }
+
+        window.kniffelRollDice = async function() {
+            if (attempts >= 3) return;
+            attempts++;
+
+            // 1. Spieler Würfel holen (Backend)
+            const response = await journeyFetch('{{ path("app_journey_kniffel_roll") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ attempts: attempts, dice: dice, held: held })
+            });
+            const data = await response.json();
+            dice = data.dice;
+
+            renderPlayerDiceUI();
+
+            const btn = document.getElementById('roll-dice-btn');
+            const resultDiv = document.getElementById('kniffel-result');
+
+            resultDiv.textContent = data.message;
+            resultDiv.classList.remove('hidden', 'bg-rose-100', 'text-rose-900', 'bg-amber-50', 'text-amber-900');
+            resultDiv.classList.add('bg-amber-50', 'text-amber-900');
+
+            if (attempts < 3) {
+                btn.textContent = `Würfeln! (Wurf ${attempts + 1}/3)`;
+                // Kristin würfelt direkt nach dir (Wurf 1 & 2)
+                playKristinTurn();
+            } else {
+                btn.textContent = '3 von 3 Würfen absolviert!';
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+                if (data.scores) {
+                    renderCategories(data.scores);
+                }
+            }
+        };
+
+        function renderCategories(scores) {
+            const container = document.getElementById('categories-container');
+            const modal = document.getElementById('kniffel-category-modal');
+            container.innerHTML = '';
+
+            for (const [category, score] of Object.entries(scores)) {
+                const btn = document.createElement('button');
+                btn.className = 'p-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-amber-950 font-medium text-xs shadow-sm flex justify-between items-center transition';
+                btn.innerHTML = `<span>${category}</span> <span class="font-bold text-amber-800">${score} P</span>`;
+                btn.onclick = () => finishKniffelGame(category, score);
+                container.appendChild(btn);
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function finishKniffelGame(category, score) {
+            playerScore = score;
+            const modal = document.getElementById('kniffel-category-modal');
+            const playerScoreDisplay = document.getElementById('player-score-display');
+
+            modal.classList.add('hidden');
+            playerScoreDisplay.textContent = `${playerScore} Pkt`;
+
+            // Nachdem du deine Kategorie gewählt hast, zieht Kristin ihren 3. und letzten Wurf durch!
+            playKristinTurn(() => {
+                const resultDiv = document.getElementById('kniffel-result');
+                const nextBtn = document.getElementById('kniffel-next-btn');
+
+                resultDiv.classList.remove('hidden', 'bg-rose-100', 'text-rose-900', 'bg-amber-50', 'text-amber-900', 'bg-emerald-100', 'text-emerald-900');
+
+                if (playerScore >= kristinScore) {
+                    resultDiv.innerHTML = `<b>Glückwunsch!</b> Du erreichst ${playerScore} Pkt (${category}) und schlägst Kristin (${kristinScore} Pkt mit ${kristinCategory})!`;
+                    resultDiv.classList.add('bg-emerald-100', 'text-emerald-900');
+                } else {
+                    resultDiv.innerHTML = `<b>Kristin gewinnt!</b> Sie holt ${kristinScore} Pkt (${kristinCategory}) gegen deine ${playerScore} Pkt (${category}). Dennoch starke Leistung!`;
+                    resultDiv.classList.add('bg-rose-100', 'text-rose-900');
+                }
+
+                nextBtn.classList.remove('hidden');
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('bg-stone-300', 'text-stone-500', 'cursor-not-allowed');
+                nextBtn.classList.add('bg-amber-800', 'hover:bg-amber-700', 'text-white');
+            });
+        }
+
+        window.proceedKniffelJourney = function() {
+            unlockSection('section-rio-kniffel');
+            const nextSection = document.getElementById('section-taylor-kardashian-intro');
+            if (nextSection) {
+                nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+    }
+</script>

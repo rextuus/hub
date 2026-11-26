@@ -1,0 +1,7 @@
+# Tailwind nur für die Journey (templates/tool/journey), Ersatz für cdn.tailwindcss.com. Version wie das CDN
+# (3.4.17) – v4 sähe anders aus. Gebaut wird beim Docker-Build (docker/php/Dockerfile) bzw. mit make tailwind.
+symfonycasts_tailwind:
+    input_css:
+        - '%kernel.project_dir%/assets/styles/journey.tailwind.css'
+    config_file: '%kernel.project_dir%/tailwind.config.js'
+    binary_version: 'v3.4.17'

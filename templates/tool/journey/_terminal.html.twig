@@ -1,0 +1,130 @@
+<div class="sketch-card p-5 text-center shadow-xl">
+    <h2 class="text-xl font-serif font-bold text-stone-800 mb-1">{{ slide.title }}</h2>
+    <p class="text-xs text-stone-600 mb-4 leading-relaxed">{{ slide.text }}</p>
+
+    <!-- Code Editor Container -->
+    <div class="p-4 text-left text-xs mb-4 shadow-inner bg-slate-900 text-slate-300 font-mono rounded-xl border border-slate-700">
+        <div class="flex items-center gap-1.5 mb-3 border-b border-slate-700 pb-2">
+            <span class="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+            <span class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></span>
+            <span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+            <span class="ml-2 text-slate-400 text-[10px]">coding_challenge.php</span>
+        </div>
+
+        <div class="leading-relaxed">
+            <span class="text-purple-400">&lt;?php</span><br><br>
+            <span class="text-slate-500">// Wolf's Life Konfiguration...</span><br>
+            <span class="text-blue-400">$wolf</span> = <span class="text-emerald-300">'Wolf'</span>;<br>
+            <span class="text-blue-400">$life</span> = <span class="text-yellow-300">new</span> Life(<span class="text-blue-400">$wolf</span>);<br><br>
+
+            <span class="text-blue-400">$life</span>-&gt;optimize(<br>
+            &nbsp;&nbsp;<span class="text-amber-300 font-bold" id="selected-var-display">$&lt;wähle_aus&gt;</span><br>
+            );<br><br>
+
+            <span class="text-purple-400">echo</span> <span class="text-blue-400">$life</span>-&gt;status();
+        </div>
+    </div>
+
+    <!-- Auswahltasten -->
+    <p class="text-[11px] text-stone-500 mb-2 font-medium">Ergänze die fehlende Variable:</p>
+    <div class="grid grid-cols-3 gap-2 mb-3" id="code-buttons">
+        <button onclick="selectVariable('kaffee', '$kaffee')" class="py-2.5 bg-stone-100 border border-stone-300 text-stone-800 rounded-lg font-mono text-xs font-semibold hover:bg-stone-200 transition">
+            $kaffee
+        </button>
+        <button onclick="selectVariable('kristin', '$kristin')" class="py-2.5 bg-stone-100 border border-stone-300 text-stone-800 rounded-lg font-mono text-xs font-semibold hover:bg-stone-200 transition">
+            $kristin
+        </button>
+        <button onclick="selectVariable('ruhe', '$ruhe')" class="py-2.5 bg-stone-200/70 border border-stone-300/50 text-stone-800 rounded-lg font-mono text-xs font-semibold hover:bg-stone-300/60 transition">
+            $ruhe
+        </button>
+    </div>
+
+    <button
+            id="run-code-btn"
+            onclick="executeCode()"
+            disabled
+            class="w-full py-3 bg-slate-800 opacity-40 text-white font-semibold rounded-xl text-xs transition-all shadow"
+    >
+        Code ausführen
+    </button>
+    
+    <!-- Output Bereich -->
+    <div id="console-output" class="hidden mt-3 p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl text-left whitespace-pre-line border border-slate-800"></div>
+
+    <div class="mt-8 flex gap-2">
+        <button onclick="repeatTerminal()" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-lg text-[9px] transition-all shadow">
+            Wiederholen
+        </button>
+        <button onclick="unlockSection(this)" class="flex-1 py-1 bg-stone-200 text-black font-semibold rounded-lg text-[9px] transition-all shadow">
+            Überspringen
+        </button>
+    </div>
+</div>
+
+<script>
+    let selectedVarValue = null;
+    let countdownInterval = null;
+
+    function repeatTerminal() {
+        clearInterval(countdownInterval);
+        selectedVarValue = null;
+        document.getElementById('selected-var-display').textContent = '$<wähle_aus>';
+        const btn = document.getElementById('run-code-btn');
+        btn.disabled = true;
+        btn.classList.add('opacity-40');
+        btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+        const consoleOut = document.getElementById('console-output');
+        consoleOut.classList.add('hidden');
+        consoleOut.textContent = "";
+        const timerEl = document.getElementById('terminal-timer');
+        if (timerEl) timerEl.textContent = "";
+    }
+
+    function selectVariable(value, label) {
+        selectedVarValue = value;
+        document.getElementById('selected-var-display').textContent = label;
+
+        const btn = document.getElementById('run-code-btn');
+        btn.disabled = false;
+        btn.classList.remove('opacity-40');
+        btn.classList.add('bg-stone-700', 'hover:bg-stone-600');
+    }
+
+    async function executeCode() {
+        if(!selectedVarValue) return;
+
+        clearInterval(countdownInterval);
+
+        const consoleOut = document.getElementById('console-output');
+        consoleOut.classList.remove('hidden');
+        consoleOut.textContent = "Kompiliere...";
+
+        const response = await journeyFetch('{{ path("app_journey_run_code") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ variable: selectedVarValue })
+        });
+
+        const data = await response.json();
+
+        consoleOut.innerHTML = data.output + '<br><span id="terminal-timer" class="font-bold mt-2 text-xs"></span>';
+        if(data.success) {
+            consoleOut.className = "mt-3 p-3 bg-emerald-950/60 text-emerald-300 font-mono text-xs rounded-xl text-left whitespace-pre-line border border-emerald-700/50";
+
+            let timeLeft = 5;
+            const timerEl = document.getElementById('terminal-timer');
+            timerEl.textContent = `Weiter in ${timeLeft}s...`;
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    timerEl.textContent = `Weiter in ${timeLeft}s...`;
+                } else {
+                    clearInterval(countdownInterval);
+                    unlockSection(document.getElementById('section-it-hacking'));
+                }
+            }, 1000);
+        } else {
+            consoleOut.className = "mt-3 p-3 bg-rose-950/60 text-rose-300 font-mono text-xs rounded-xl text-left whitespace-pre-line border border-rose-700/50";
+        }
+    }
+</script>

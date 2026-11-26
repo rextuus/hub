@@ -26,6 +26,11 @@
 		-Server
 	}
 
+	# Die Journey (src/Tool/Journey) ist privat: Auch Bilder und Assets auf ihrer Domain nicht indexieren. Antworten
+	# von PHP setzen den Header selbst (JourneyHostListener); hier kommen /img/* und /assets/* dazu.
+	@journey host {$JOURNEY_HOST:kresh.wh-company.com}
+	header @journey ?X-Robots-Tag "noindex, nofollow"
+
 	# Kompilierte Assets tragen einen Hash im Namen.
 	@hashed path_regexp ^/assets/.+-[A-Za-z0-9_-]{7,}\.\w+$
 	header @hashed Cache-Control "public, max-age=31536000, immutable"
