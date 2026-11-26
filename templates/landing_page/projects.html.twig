@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% set show_header = false %}
+{% set show_footer = false %}
+
+{% block title %}Alle Projekte · WH-Company{% endblock %}
+{% block body_class %}wh-page{% endblock %}
+
+{% block body %}
+<main class="wh-projects">
+    <header class="wh-projects__head">
+        <a href="{{ path('app_landing_page') }}" aria-label="Zur Startseite">
+            <img src="{{ asset('images/brand/logo-mark.svg') }}" alt="WH-Company" width="288" height="156">
+        </a>
+        <a class="wh-projects__back" href="{{ path('app_landing_page') }}">Startseite</a>
+    </header>
+
+    <h1>Alle Projekte</h1>
+
+    <ul class="wh-projects__list">
+        {% for project in projects %}
+            {% set href = project.route ? path(project.route) : project.url %}
+            <li>
+                {% if href %}<a class="wh-project" href="{{ href }}">{% else %}<div class="wh-project wh-project--soon">{% endif %}
+                    {% if project.image %}
+                        <img class="wh-project__thumb" src="{{ media_url(project.image, 'logo', 96) }}" alt="" loading="lazy" width="48" height="48">
+                    {% else %}
+                        <span class="wh-project__icon">{{ ux_icon(project.icon ?: 'lucide:box') }}</span>
+                    {% endif %}
+                    <span>
+                        <span class="wh-project__name">{{ project.name }}</span>
+                        <span class="wh-project__desc">{{ project.description }}</span>
+                    </span>
+                    {% if href %}
+                        <svg class="wh-project__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ project.url ? 'M7 17 17 7M8 7h9v9' : 'M5 12h14M13 6l6 6-6 6' }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {% endif %}
+                {% if href %}</a>{% else %}</div>{% endif %}
+            </li>
+        {% else %}
+            <li class="wh-project">Noch keine Projekte.</li>
+        {% endfor %}
+    </ul>
+</main>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% set show_header = false %}
+{% set show_footer = false %}
+
+{% block title %}{{ calendar.title }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block body_class %}adv-page{% endblock %}
+
+{% block body %}
+    <div class="adv-snow" aria-hidden="true"></div>
+    <main class="adv adv-welcome">
+        <p class="adv-eyebrow">{{ calendar.year }}</p>
+        <h1 class="adv-title">{{ calendar.title }}</h1>
+        <p>Öffne den persönlichen Link, den du bekommen hast – dann geht’s los.</p>
+    </main>
+{% endblock %}

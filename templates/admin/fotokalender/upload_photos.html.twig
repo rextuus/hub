@@ -1,0 +1,29 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block content_title %}Fotos hochladen: {{ month }}{% endblock %}
+
+{% block main %}
+    <div class="content-panel">
+        <div class="content-panel-body">
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="_token" value="{{ csrf_token('fotokalender_upload_' ~ month.id) }}">
+                <div class="mb-3">
+                    <label class="form-label" for="photos">Fotos (JPG, PNG, WebP; je bis 20 MB, zusammen bis 100 MB)</label>
+                    <input class="form-control" type="file" id="photos" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple required>
+                    <div class="form-text">Die Fotos werden hinten angehängt; die Reihenfolge lässt sich danach unter „Fotos“ über die Position ändern.</div>
+                </div>
+                <button class="btn btn-primary" type="submit"><i class="fa fa-upload"></i> Hochladen</button>
+            </form>
+
+            {% if month.photos is not empty %}
+                <h2 class="h5 mt-5">Bisher ({{ month.photos|length }})</h2>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if month.cover %}<img src="{{ media_url(month.cover, 'admin') }}" alt="Titelbild" title="Titelbild" style="height: 90px; border-radius: 6px; outline: 2px solid #d97824;">{% endif %}
+                    {% for photo in month.photos %}
+                        <img src="{{ media_url(photo.image, 'admin') }}" alt="" title="Position {{ photo.position }}" style="height: 90px; border-radius: 6px;">
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

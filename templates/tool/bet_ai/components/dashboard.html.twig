@@ -192,11 +192,11 @@
                                     {% set seenTeams = [] %}
                                     {% for item in tx.placedBet.suggestion.suggestionMatchItems %}
                                         {% if item.match.homeTeam and item.match.homeTeam.profileImgUrl and item.match.homeTeam.id not in seenTeams %}
-                                            <img src="{{ item.match.homeTeam.profileImgUrl }}" alt="{{ item.match.homeTeam.name }}" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" title="{{ item.match.homeTeam.name }}">
+                                            <img src="{{ media_url(item.match.homeTeam.profileImgUrl, 'logo') }}" alt="{{ item.match.homeTeam.name }}" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" title="{{ item.match.homeTeam.name }}">
                                             {% set seenTeams = seenTeams|merge([item.match.homeTeam.id]) %}
                                         {% endif %}
                                         {% if item.match.awayTeam and item.match.awayTeam.profileImgUrl and item.match.awayTeam.id not in seenTeams %}
-                                            <img src="{{ item.match.awayTeam.profileImgUrl }}" alt="{{ item.match.awayTeam.name }}" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" title="{{ item.match.awayTeam.name }}">
+                                            <img src="{{ media_url(item.match.awayTeam.profileImgUrl, 'logo') }}" alt="{{ item.match.awayTeam.name }}" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" title="{{ item.match.awayTeam.name }}">
                                             {% set seenTeams = seenTeams|merge([item.match.awayTeam.id]) %}
                                         {% endif %}
                                     {% endfor %}

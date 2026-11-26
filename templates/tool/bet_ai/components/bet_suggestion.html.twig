@@ -54,7 +54,7 @@
                                     {% if item.match.homeTeam %}
                                         <span class="text-[12px] sm:text-body-sm font-bold text-on-surface text-right truncate">{{ item.match.homeTeam.name }}</span>
                                         {% if item.match.homeTeam.profileImgUrl %}
-                                            <img src="{{ item.match.homeTeam.profileImgUrl }}" alt="{{ item.match.homeTeam.name }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-outline-variant shrink-0">
+                                            <img src="{{ media_url(item.match.homeTeam.profileImgUrl, 'logo') }}" alt="{{ item.match.homeTeam.name }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-outline-variant shrink-0">
                                         {% endif %}
                                     {% else %}
                                         <span class="text-[12px] sm:text-body-sm font-bold text-on-surface text-right truncate">{{ item.match.rawHomeTeamName }}</span>
@@ -67,7 +67,7 @@
                                 <div class="flex items-center gap-xs sm:gap-sm flex-1 overflow-hidden">
                                     {% if item.match.awayTeam %}
                                         {% if item.match.awayTeam.profileImgUrl %}
-                                            <img src="{{ item.match.awayTeam.profileImgUrl }}" alt="{{ item.match.awayTeam.name }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-outline-variant shrink-0">
+                                            <img src="{{ media_url(item.match.awayTeam.profileImgUrl, 'logo') }}" alt="{{ item.match.awayTeam.name }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-outline-variant shrink-0">
                                         {% endif %}
                                         <span class="text-[12px] sm:text-body-sm font-bold text-on-surface truncate">{{ item.match.awayTeam.name }}</span>
                                     {% else %}

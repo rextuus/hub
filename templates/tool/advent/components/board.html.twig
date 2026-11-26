@@ -1,0 +1,151 @@
+{# Adventskalender (src/Tool/Advent/Component/AdventBoard.php). Alles, was eine Antwort verrät, steht nur im
+   Dialog einer offenen Tür, und Reaktionen erst nach dem Antworten. #}
+{% set calendar = this.calendar %}
+{% set participant = this.participant %}
+{% set openDoor = this.openDoor %}
+{% set points = this.points %}
+<div {{ attributes.defaults({class: 'adv-board'}) }}>
+    <header class="adv-head">
+        <div>
+            <p class="adv-eyebrow">
+                {% if participant %}Hallo {{ participant.name }}!{% else %}Vorschau{% endif %}
+            </p>
+            <h1 class="adv-title">{{ calendar.title }}</h1>
+            {% if calendar.intro %}<p class="adv-intro">{{ calendar.intro }}</p>{% endif %}
+        </div>
+        {% if participant %}
+            <div class="adv-score" aria-live="polite">
+                <span class="adv-score__value">{{ points }}</span>
+                <span class="adv-score__label">{{ points == 1 ? 'Punkt' : 'Punkte' }}</span>
+                <span class="adv-score__sub">{{ this.openedCount }} von {{ constant('App\\Tool\\Advent\\Entity\\AdventCalendar::DOORS') }} Türen</span>
+            </div>
+        {% endif %}
+    </header>
+
+    {% if this.message and not openDoor %}
+        <p class="adv-toast" role="status">{{ this.message }}</p>
+    {% endif %}
+
+    {% set next = this.nextUnlock %}
+    {% if next and not (this.doors|filter(d => d.unlocked)|length) %}
+        <p class="adv-countdown">Geduld – die erste Tür öffnet am {{ next|date('j.n.Y', calendar.timezone) }} um 0 Uhr.</p>
+    {% endif %}
+
+    <ol class="adv-doors" aria-label="Türen">
+        {% for d in this.doors %}
+            {% set isOpen = openDoor and openDoor.number == d.number %}
+            {% set state = not d.unlocked ? 'locked' : (d.answered ? (d.correct ? 'right' : 'wrong') : 'ready') %}
+            <li class="adv-cell adv-cell--n{{ d.number }}">
+                <button type="button"
+                        class="adv-door adv-door--tone{{ d.number % 6 }}{{ isOpen or d.answered ? ' is-open' }}{{ d.today and d.unlocked and not d.answered ? ' is-today' }}"
+                        data-state="{{ state }}"
+                        data-action="live#action"
+                        data-live-action-param="open"
+                        data-live-number-param="{{ d.number }}"
+                        {% if not d.unlocked %}aria-disabled="true"{% endif %}
+                        aria-label="Tür {{ d.number }}{{ not d.unlocked ? ', öffnet am ' ~ d.unlocksAt|date('j.n.', calendar.timezone) : (d.answered ? (d.correct ? ', richtig beantwortet' : ', beantwortet') : ', jetzt offen') }}">
+                    <span class="adv-door__inside" aria-hidden="true">
+                        {% if state == 'right' %}<span class="adv-door__mark">★</span>
+                        {% elseif state == 'wrong' %}<span class="adv-door__mark adv-door__mark--muted">✕</span>
+                        {% else %}<span class="adv-door__mark adv-door__mark--muted">?</span>{% endif %}
+                    </span>
+                    <span class="adv-door__leaf" aria-hidden="true">
+                        <span class="adv-door__num">{{ d.number }}</span>
+                        {% if not d.unlocked %}
+                            <span class="adv-door__date">{{ d.unlocksAt|date('j.n.', calendar.timezone) }}</span>
+                        {% elseif this.preview and not d.hasContent %}
+                            <span class="adv-door__date">leer</span>
+                        {% endif %}
+                        <span class="adv-door__knob"></span>
+                    </span>
+                </button>
+            </li>
+        {% endfor %}
+    </ol>
+
+    {% if calendar.winStages is not empty %}
+        <section class="adv-wins" aria-labelledby="adv-wins-title">
+            <h2 id="adv-wins-title">Du gewinnst für</h2>
+            <ul>
+                {% for stage in this.stages %}
+                    <li class="{{ stage.reached ? 'is-reached' }}">
+                        <span class="adv-wins__label">{{ stage.label }}</span>
+                        <span class="adv-wins__prize">{{ stage.prize }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
+    {% if openDoor %}
+        {% set chosen = this.chosen %}
+        {% set answer = this.givenAnswer %}
+        <div class="adv-dialog" role="dialog" aria-modal="true" aria-labelledby="adv-q"
+             data-action="keydown.esc@window->live#action" data-live-action-param="close">
+            <button type="button" class="adv-dialog__backdrop" aria-label="Schließen"
+                    data-action="live#action" data-live-action-param="close"></button>
+            <article class="adv-sheet" data-controller="adv-sheet">
+                <header class="adv-sheet__head">
+                    <span class="adv-sheet__door">Tür {{ openDoor.number }}</span>
+                    <button type="button" class="adv-sheet__close" data-action="live#action" data-live-action-param="close" aria-label="Schließen">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+                </header>
+
+                <h2 id="adv-q" class="adv-sheet__question">{{ openDoor.question|nl2br }}</h2>
+
+                {% if openDoor.image %}
+                    <img class="adv-sheet__image" alt=""
+                         src="{{ media_url(openDoor.image, 'advent', 960) }}"
+                         srcset="{{ media_srcset(openDoor.image, 'advent') }}"
+                         sizes="(min-width: 48em) 40rem, 92vw">
+                {% endif %}
+
+                {% if this.message %}<p class="adv-sheet__error" role="alert">{{ this.message }}</p>{% endif %}
+
+                {% if not chosen and not answer %}
+                    <div class="adv-choices">
+                        {% for choice in openDoor.choices %}
+                            <button type="button" class="adv-choice"
+                                    data-action="live#action" data-live-action-param="answer" data-live-choice-param="{{ choice.id }}"
+                                    data-loading="attr(disabled)">
+                                <span class="adv-choice__key">{{ 'ABCDEFGH'[loop.index0:1] }}</span>
+                                <span>{{ choice.text }}</span>
+                            </button>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {% set correct = chosen ? chosen.correct : answer.correct %}
+                    <div class="adv-result adv-result--{{ correct ? 'right' : 'wrong' }}" role="status">
+                        {% if correct %}
+                            <span class="adv-confetti" aria-hidden="true">{% for i in 1..14 %}<i></i>{% endfor %}</span>
+                        {% endif %}
+                        <p class="adv-result__badge">
+                            {% if correct %}Richtig! +{{ answer ? answer.points : openDoor.points }} {{ (answer ? answer.points : openDoor.points) == 1 ? 'Punkt' : 'Punkte' }}{% else %}Leider daneben – kein Punkt{% endif %}
+                        </p>
+                        {% if chosen %}
+                            <p class="adv-result__chosen">Deine Antwort: <strong>{{ chosen.text }}</strong></p>
+                            {% if not correct and openDoor.correctChoice %}
+                                <p class="adv-result__chosen">Richtig wäre: <strong>{{ openDoor.correctChoice.text }}</strong></p>
+                            {% endif %}
+                            {% if chosen.response %}<p class="adv-result__text">{{ chosen.response|nl2br }}</p>{% endif %}
+                            {% if chosen.youtubeId %}
+                                <div class="adv-result__video">
+                                    <iframe src="https://www.youtube-nocookie.com/embed/{{ chosen.youtubeId }}?rel=0&amp;playsinline=1"
+                                            title="Video" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                                            allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+                                </div>
+                            {% elseif chosen.responseImage %}
+                                <img class="adv-sheet__image" alt=""
+                                     src="{{ media_url(chosen.responseImage, 'advent', 960) }}"
+                                     srcset="{{ media_srcset(chosen.responseImage, 'advent') }}"
+                                     sizes="(min-width: 48em) 40rem, 92vw">
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    <button type="button" class="adv-sheet__done" data-action="live#action" data-live-action-param="close">Zurück zum Kalender</button>
+                {% endif %}
+            </article>
+        </div>
+    {% endif %}
+</div>

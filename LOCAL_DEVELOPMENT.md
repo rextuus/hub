@@ -64,9 +64,15 @@ docker compose exec php bin/console make:migration
   docker compose exec php vendor/bin/phpunit
   ```
 
-- **Compile Assets:**
+- **Compile Assets** (nur zum Testen; danach `rm -rf public/assets`, sonst liefert der Dev-Server diesen alten
+  Stand statt der aktuellen Dateien aus):
   ```bash
   docker compose exec php bin/console asset-map:compile
+  ```
+
+- **Sass bauen** (nach Änderungen an `assets/styles/`, oder dauerhaft mit `--watch`):
+  ```bash
+  docker compose exec php bin/console sass:build --watch
   ```
 
 - **Database Schema Validation:**
@@ -100,11 +106,42 @@ These commands are custom-built for this application.
   docker compose exec php bin/console app:esc:seed-countries
   ```
 
-- **Seed Dummy Projects:**
-  (Seeds projects for the landing page)
+- **Startseite abgleichen** (Debes, Nimbus, Secret Santa, About, ESC, BetAI; entfernt alte Platzhalter):
   ```bash
   docker compose exec php bin/console app:projects:seed
   ```
+
+- **Foto-Kalender 2022 importieren** (Fotos vorher nach `var/media/fotokalender/2022/<monat>/` kopieren,
+  Quelle: `~/Documents/programming/hub-altbestand/media/`):
+  ```bash
+  cp -r ../hub-altbestand/media/fotokalender ../hub-altbestand/media/projekte var/media/
+  docker compose exec php bin/console app:fotokalender:import --year=2022
+  ```
+
+- **Adventskalender aus YAML** (Beispiel mit 24 Türen; gibt die Teilnehmer-Links aus):
+  ```bash
+  docker compose exec php bin/console app:advent:import docs/advent/beispiel.yaml
+  ```
+
+## Medienordner und Bilder
+
+Uploads und Bilder liegen in `var/media/` (gitignored; in Produktion das Volume `hub_media_data`). Lokal gibt es
+kein imgproxy: Ohne `IMGPROXY_KEY`/`IMGPROXY_SALT` liefert PHP die Originale über `/media/…`. Wer imgproxy lokal
+testen will, folgt der Generalprobe in `docs/deployment.md`.
+
+## Hosts
+
+Die Startseite (`/`, `/projekte`) antwortet nur auf `wh-company.com`, `www.wh-company.com` und lokal auf
+`localhost`/`127.0.0.1` (`app.main_host_pattern` in `config/services.yaml`).
+
+## Tests
+
+Die Tests brauchen die Datenbank `app_test` (einmalig anlegen, dann migrieren):
+```bash
+docker compose exec database mysql -uroot -p'!ChangeMe!' -e "CREATE DATABASE IF NOT EXISTS app_test; GRANT ALL ON app_test.* TO 'app'@'%';"
+docker compose exec php sh -c 'APP_ENV=test php bin/console doctrine:migrations:migrate -n'
+docker compose exec php vendor/bin/phpunit
+```
 
 ## Admin Features
 

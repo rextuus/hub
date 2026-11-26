@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% set show_header = false %}
+{% set show_footer = false %}
+
+{% block title %}{{ calendar.title }}{% endblock %}
+{% block meta %}
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0b1626">
+{% endblock %}
+{% block body_class %}adv-page{% endblock %}
+
+{% block body %}
+    <div class="adv-snow" aria-hidden="true"></div>
+    {% if preview %}
+        <div class="adv-preview-bar">
+            Vorschau für Admins – alle Türen offen, Antworten werden nicht gespeichert.
+            <a href="{{ path('admin') }}">Zurück zum Admin</a>
+        </div>
+    {% endif %}
+    <main class="adv">
+        {{ component('AdventBoard', {token: token, previewCalendarId: preview}) }}
+    </main>
+{% endblock %}

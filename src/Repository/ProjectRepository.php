@@ -16,28 +16,21 @@ class ProjectRepository extends ServiceEntityRepository
         parent::__construct($registry, Project::class);
     }
 
-    //    /**
-    //     * @return Project[] Returns an array of Project objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Project> sortiert nach Position, dann Name; ohne Anmeldung ohne die Projekte mit requiresLogin
+     */
+    public function findVisible(bool $loggedIn, ?bool $featured = null): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->orderBy('p.position', 'ASC')
+            ->addOrderBy('p.name', 'ASC');
+        if (!$loggedIn) {
+            $qb->andWhere('p.requiresLogin = false');
+        }
+        if (null !== $featured) {
+            $qb->andWhere('p.featured = :featured')->setParameter('featured', $featured);
+        }
 
-    //    public function findOneBySomeField($value): ?Project
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $qb->getQuery()->getResult();
+    }
 }

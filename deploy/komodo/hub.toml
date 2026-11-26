@@ -19,8 +19,8 @@ deploy = false
 server = "abyss"
 # Quick-Links im Kopf des Stacks
 links = [
-  "https://hub.wh-company.de",
-  "https://hub.wh-company.de/admin",
+  "https://wh-company.com",
+  "https://wh-company.com/admin",
   "https://github.com/rextuus/hub",
   "http://localhost:9121/projekte/#hub",
 ]
@@ -47,7 +47,7 @@ env_file_path = ".env.prod.local"
 # Kommentare in diesem Block landen ebenfalls in der Datei: dort nie Platzhalter erwähnen.
 environment = """
 # Öffentliche Adresse (Links in Konsolenbefehlen); TLS macht der Caddy auf dem VPS
-DEFAULT_URI = https://hub.wh-company.de
+DEFAULT_URI = https://wh-company.com
 
 # Secrets
 APP_SECRET = [[HUB_APP_SECRET]]
@@ -55,6 +55,8 @@ MYSQL_PASSWORD = [[HUB_MYSQL_PASSWORD]]
 MYSQL_ROOT_PASSWORD = [[HUB_MYSQL_ROOT_PASSWORD]]
 GEMINI_API_KEY = [[HUB_GEMINI_API_KEY]]
 SENTRY_DSN = [[HUB_SENTRY_DSN]]
+IMGPROXY_KEY = [[HUB_IMGPROXY_KEY]]
+IMGPROXY_SALT = [[HUB_IMGPROXY_SALT]]
 MAILER_DSN = [[HUB_MAILER_DSN]]
 
 # Datenbank (nicht ändern, sonst passt es nicht mehr zum bestehenden Volume)

@@ -1,0 +1,8 @@
+{# Persönlicher Link eines Teilnehmers mit Kopier-Knopf (AdventParticipantCrudController). #}
+<span class="d-inline-flex align-items-center gap-2">
+    <a href="{{ field.formattedValue }}" target="_blank" rel="noopener" style="font-family: monospace; font-size: 0.8rem;">{{ field.formattedValue|length > 48 ? field.formattedValue|slice(0, 47) ~ '…' : field.formattedValue }}</a>
+    <button type="button" class="btn btn-sm btn-secondary" title="Link kopieren"
+            onclick="navigator.clipboard.writeText('{{ field.formattedValue|e('js') }}').then(() => { this.textContent = '✓'; setTimeout(() => this.innerHTML = '<i class=&quot;fa fa-copy&quot;></i>', 1500); });">
+        <i class="fa fa-copy"></i>
+    </button>
+</span>

@@ -32,9 +32,9 @@ RUN composer install --no-dev --classmap-authoritative --no-interaction --no-pro
  && php bin/console sass:build \
  && php bin/console asset-map:compile \
  && rm -rf var/cache/* var/sass \
- && mkdir -p public/assets/bet_ai/logos \
- && chown -R www-data:www-data var public/assets/bet_ai
-# Team-Logos (Volume hub_media_data, siehe compose.prod.yaml). Der Ordner gehört www-data, damit ein neues
+ && mkdir -p var/media \
+ && chown -R www-data:www-data var
+# Medienordner (Volume hub_media_data, siehe compose.prod.yaml). Der Ordner gehört www-data, damit ein neues
 # Volume diese Rechte übernimmt.
 USER www-data
 

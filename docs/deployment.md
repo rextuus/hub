@@ -5,7 +5,7 @@ Caddy auf dem VPS, der TLS macht und über WireGuard an `10.0.0.2:8197` weiterle
 
 | | |
 |---|---|
-| Domain | <https://hub.wh-company.de> (Verwaltung: `/admin`) |
+| Domain | <https://wh-company.com> (www leitet um; Verwaltung: `/admin`, Anmeldung über das Logo) |
 | Repo / Branch | `rextuus/hub` / `main` |
 | Stack-Ordner | `/etc/komodo/stacks/hub` (Klon von Komodo, keine Daten darin) |
 | Compose | `docker compose -p hub -f compose.prod.yaml --env-file .env.prod.local` |
@@ -16,7 +16,8 @@ Caddy auf dem VPS, der TLS macht und über WireGuard an `10.0.0.2:8197` weiterle
 
 | Dienst | Image | Aufgabe |
 |---|---|---|
-| `web` | `hub-web:prod` (Caddy 2.11, gebaut) | einziger Host-Port `10.0.0.2:8197`, liefert Assets und Team-Logos aus, leitet PHP an `app` weiter. Healthcheck `/healthz` (bis zur Datenbank) |
+| `web` | `hub-web:prod` (Caddy 2.11, gebaut) | einziger Host-Port `10.0.0.2:8197`, liefert die Assets aus, leitet `/img/*` an `imgproxy` und alles andere an `app` weiter. Healthcheck `/healthz` (bis zur Datenbank) |
+| `imgproxy` | `ghcr.io/imgproxy/imgproxy:v4.0.25` | Bilder in passender Größe aus dem Medienordner (nur lesend), nur mit gültiger Signatur. Kein Host-Port (Baustein `homelab/docs/baustein-imgproxy.md`) |
 | `app` | `hub-app:prod` (PHP 8.5 FPM, gebaut) | Symfony. Healthcheck per FPM-Ping |
 | `migrate` | wie `app` | läuft bei jedem Deploy einmal `doctrine:migrations:migrate`, beendet sich danach. `app` startet erst, wenn das geklappt hat |
 | `database` | `mysql:8.4.13` | Datenbank `hub`, kein Host-Port |
@@ -30,7 +31,7 @@ nichts asynchron, und Mails gibt es derzeit nicht (`MAILER_DSN=null://null`).
 | Wo | Was | Gesichert |
 |---|---|---|
 | Volume `hub_database_data` | MySQL | täglich als Dump (`/srv/hub/backups`) + offsite |
-| Volume `hub_media_data` → `public/assets/bet_ai/logos` | Team-Logos für BetAI (in der DB als `/assets/bet_ai/logos/…` hinterlegt) | offsite direkt aus dem Volume |
+| Volume `hub_media_data` → `/srv/app/var/media` (`app`, schreibend) bzw. `/images` (`imgproxy`, lesend) | gemeinsamer Medienordner: `bet_ai/logos/`, `fotokalender/`, `advent/`, `projekte/` (Aufbau: `docs/homelab/daten.md`) | offsite direkt aus dem Volume |
 | Volumes `hub_caddy_data`, `hub_caddy_config` | Caddy-Zustand (ohne TLS unwichtig) | nein |
 | `/srv/hub/backups` | Datenbank-Dumps | offsite |
 
@@ -74,8 +75,10 @@ Netz. Fällt einer davon aus, scheitert der Build – die laufende Version bleib
    | `HUB_GEMINI_API_KEY` | `GEMINI_API_KEY` von securitas (Pflicht; ohne Wert startet `app` nicht) |
    | `HUB_SENTRY_DSN` | `SENTRY_DSN` von securitas bzw. aus Sentry. Ohne Sentry: Zeile im Stack-Environment löschen |
    | `HUB_MAILER_DSN` | `null://null` (Hub verschickt keine Mails) |
+   | `HUB_IMGPROXY_KEY` | neu: `openssl rand -hex 32` (Pflicht; gilt für `app` und `imgproxy`) |
+   | `HUB_IMGPROXY_SALT` | neu: `openssl rand -hex 32` (Pflicht) |
 
-   Nicht geheim und direkt in `hub.toml`: `DEFAULT_URI=https://hub.wh-company.de`, `HTTP_BIND=10.0.0.2`,
+   Nicht geheim und direkt in `hub.toml`: `DEFAULT_URI=https://wh-company.com`, `HTTP_BIND=10.0.0.2`,
    `HTTP_PORT=8197`, `REVERSE_PROXY_IPS=10.0.0.1`, `BACKUP_DIR=/srv/hub/backups`, `BACKUP_KEEP=14`,
    `MYSQL_DATABASE=hub`, `MYSQL_USER=hub`. Alle Secrets zusätzlich im Passwortmanager ablegen.
 4. **Resource Sync:** Syncs → New Resource Sync, Git-Repo `rextuus/hub` (Account `rextuus`), Branch `main`,
@@ -179,8 +182,8 @@ ESC-Abstimmung.
 
 ```bash
 curl -s http://10.0.0.2:8197/healthz                     # vom VPS: {"status":"ok","database":"ok"}
-curl -sI https://hub.wh-company.de/ | head -1            # HTTP/2 200 (nach DNS-Umstellung)
-curl -sI https://hub.wh-company.de/admin | grep -i location   # → /login
+curl -sI https://wh-company.com/ | head -1               # HTTP/2 200 (nach DNS-Umstellung)
+curl -sI https://wh-company.com/admin | grep -i location    # → /login
 ```
 
 - Im Browser anmelden (bestehendes Konto), `/admin` öffnen, Benutzerliste und eine ESC-Edition ansehen.
@@ -213,7 +216,55 @@ sudo docker exec -it hub-app-1 php bin/console app:admin:create-user <email> <pa
 sudo docker exec -it hub-app-1 php bin/console app:bet-ai:import-logos --dry-run
 ```
 
-Neue Logos landen per `docker cp <ordner> hub-app-1:/srv/app/public/assets/bet_ai/logos/` im Volume.
+Neue Logos landen per `docker cp <ordner> hub-app-1:/srv/app/var/media/bet_ai/logos/` im Volume. Bilder für
+Fotokalender, Adventskalender und Startseite lädt man in EasyAdmin hoch.
+
+## Umstellung auf wh-company.com, Medienordner und imgproxy (einmalig, Stand 26.11.2026)
+
+Mit diesem Stand zieht die Startseite von `wh-company.de` (securitas) zu hub, `hub.wh-company.de` fällt weg, das
+Volume `hub_media_data` wird zum gemeinsamen Medienordner, und `imgproxy` kommt dazu. Reihenfolge:
+
+1. **Komodo-Variablen** `HUB_IMGPROXY_KEY` und `HUB_IMGPROXY_SALT` anlegen (je `openssl rand -hex 32`, Secret).
+   Ohne sie bricht der Deploy ab, ohne etwas zu ändern.
+2. **Resource Sync** ausführen (neue Links, `DEFAULT_URI`, Variablen aus `hub.toml`).
+3. **abyss – Logos im Volume umziehen** (heute liegen sie flach im Volume; danach unter `bet_ai/logos/`).
+   Direkt vor dem Deploy ausführen, dazwischen fehlen der alten Version die Logos. Der Befehl ist wiederholbar:
+   ```bash
+   sudo docker run --rm -v hub_media_data:/m alpine:3.22 sh -c '
+     set -e; cd /m
+     if [ -d bet_ai/logos ]; then echo "bet_ai/logos gibt es schon – nichts zu tun"; exit 0; fi
+     mkdir -p bet_ai/logos
+     for f in *; do [ -e "$f" ] || continue; [ "$f" = bet_ai ] && continue; mv "$f" bet_ai/logos/; done
+     chown -R 82:82 /m
+     echo "Dateien unter bet_ai/logos: $(find bet_ai/logos -type f | wc -l)"'
+   ```
+4. **Komodo → Deploy.** Die Migration `Version20261126120000` schreibt die Logo-Pfade in der DB von
+   `/assets/bet_ai/logos/…` auf `/media/bet_ai/logos/…` um; die weiteren legen Fotokalender und Adventskalender an.
+5. **Fotos und Startseiten-Bilder ins Volume** (vom Arbeitsrechner, etwa 43 MB; der Ordner liegt nicht im Repo):
+   ```bash
+   tar -C ~/Documents/programming/hub-altbestand/media -cz fotokalender projekte \
+     | ssh abyss 'sudo docker run --rm -i -v hub_media_data:/m alpine:3.22 sh -c "tar -C /m -xz && chown -R 82:82 /m/fotokalender /m/projekte && du -sh /m/*"'
+   ```
+6. **Inhalte anlegen:**
+   ```bash
+   sudo docker exec hub-app-1 php bin/console app:projects:seed
+   sudo docker exec hub-app-1 php bin/console app:fotokalender:import --year=2022
+   ```
+7. **homelab:** Domains und Weiterleitung umstellen (Eintrag `hub` im Inventar: `wh-company.com`,
+   `www.wh-company.com` mit `caddy.redirects` auf `https://wh-company.com{uri}`, `hub.wh-company.de` unter
+   `former_domains`), DNS bei Strato für `wh-company.com` und `www` auf den VPS. Dann `bin/inventory`, `bin/gen-docs`,
+   `bin/gen-caddy`, `bin/caddy-deploy` (Trockenlauf), `bin/caddy-deploy --apply`, `bin/check`.
+8. **securitas – alte Adressen umleiten** (Apache, vHosts von `wh-company.de`/`www.wh-company.de`). Nextcloud unter
+   `https://wh-company.de/nextcloud` bleibt, wie es ist:
+   ```apache
+   RedirectMatch 301 ^/calendar/(.*)$ https://wh-company.com/calendar/$1
+   RedirectMatch 301 ^/$ https://wh-company.com/
+   ```
+   hub leitet `/calendar/overview.html` auf `/kalender` und `/calendar/detail/<month>.html` auf
+   `/kalender/2022/<monat>` weiter.
+
+**Prüfen:** `curl -sI https://wh-company.com/ | head -1` → 200; ein Bild auf `/kalender` öffnen (`/img/…` 200), dieselbe
+URL mit verändertem Zeichen in der Signatur → 403; BetAI zeigt die Team-Logos; `/healthz` ok.
 
 ## Rollback
 
@@ -257,7 +308,7 @@ $DC run --rm --no-deps -T --entrypoint sh backup -c 'gunzip -c /backups/hub-db-<
 
 Danach in Komodo **Deploy**. Der Dump enthält `CREATE DATABASE IF NOT EXISTS` und ersetzt alle Tabellen.
 
-**Logos** zurück ins Volume: wie Umzug B.5 (aus einem tar) bzw. Dateien nach
+**Medienordner** zurück ins Volume: aus einem tar (`docs/homelab/daten.md`) bzw. Dateien nach
 `/var/lib/docker/volumes/hub_media_data/_data/` kopieren und `chown -R 82:82`.
 
 **Aus der Offsite-Sicherung** (Dump oder Logos aus restic/B2 holen): `homelab/docs/offsite.md`; danach wie oben.
@@ -276,8 +327,10 @@ Danach in Komodo **Deploy**. Der Dump enthält `CREATE DATABASE IF NOT EXISTS` u
   erneut deployen; die alte Version läuft weiter.
 - **Login schlägt fehl / Redirects auf `http://`:** Kommt die Anfrage nicht von `10.0.0.1` (`REVERSE_PROXY_IPS`),
   ignoriert Caddy `X-Forwarded-Proto`, und der CSRF-Schutz lehnt den Login wegen des Origins ab. VPS-Weg prüfen.
-- **Logos fehlen (404 unter `/assets/bet_ai/logos/…`):** Volume leer oder Pfad in der DB passt nicht –
-  `sudo docker exec hub-web-1 ls /srv/app/public/assets/bet_ai/logos`.
+- **Logos fehlen:** Volume noch nicht umgezogen (siehe „Umstellung“) oder Pfad in der DB passt nicht –
+  `sudo docker exec hub-app-1 ls /srv/app/var/media/bet_ai/logos`.
+- **Bilder fehlen, `/img/…` 403:** `IMGPROXY_KEY`/`IMGPROXY_SALT` fehlen oder unterscheiden sich; weitere Fälle in
+  `docs/homelab/probleme.md`.
 - **Stack „Unhealthy“:** `migrate` und `backup` müssen unter Ignore Services stehen.
 - **Ein Dienst wird nicht gesund:** `sudo docker inspect --format '{{json .State.Health}}' hub-<dienst>-1`.
 - **Logs:** `sudo docker logs -f hub-app-1` (Symfony schreibt in prod nach stderr, JSON).
@@ -316,14 +369,20 @@ dem Umzug (während der Vorbereitung: `status: migrating`, `ingress: legacy`, zu
     status: live-komodo
     ingress: caddy
     domains:
+      - wh-company.com          # erste Domain = Monitor
+      - www.wh-company.com
+    former_domains:
       - hub.wh-company.de
     monitor: { path: /healthz }
     port: 8197
     bind: 10.0.0.2
-    # Kein caddy:-Block nötig: Caddy setzt X-Forwarded-* selbst, keine Uploads/Streams.
+    caddy:
+      comment: hub (WH-Company)
+      redirects:
+        www.wh-company.com: https://wh-company.com{uri}
     data:
       - Named Volume hub_database_data
-      - Named Volume hub_media_data (Team-Logos BetAI)
+      - Named Volume hub_media_data (Medienordner: Team-Logos, Fotokalender, Adventskalender, Startseite)
       - /srv/hub/backups
     backup:
       time: "02:15"
@@ -331,10 +390,11 @@ dem Umzug (während der Vorbereitung: `status: migrating`, `ingress: legacy`, zu
       target: /srv/hub/backups
       active: true
       offsite_paths:
-        - /var/lib/docker/volumes/hub_media_data/_data # Team-Logos, nicht im Dump
+        - /var/lib/docker/volumes/hub_media_data/_data # Medienordner (Originale), nicht im Dump
       notes: Komodo-Procedure hub-backup, täglich 02:15; dazu ein Dump vor jedem Deploy. Je Anlass bleiben 14.
     notes: >-
-      Von securitas umgezogen (/var/www/hub, MySQL 8.0 hub_db → 8.4). Kein Worker, keine Mails.
+      Von securitas umgezogen (/var/www/hub, MySQL 8.0 hub_db → 8.4). Seit 11/2026 Startseite von WH-Company
+      (wh-company.com, vorher statisch auf securitas) und imgproxy im Stack. Kein Worker, keine Mails.
 ```
 
 Danach: `bin/inventory`, `bin/gen-docs`, `bin/gen-caddy`, `bin/gen-offsite`, `bin/caddy-deploy` (Trockenlauf),

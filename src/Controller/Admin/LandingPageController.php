@@ -2,28 +2,37 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Project;
 use App\Repository\ProjectRepository;
+use App\Routing\MainHostContextListener;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Startseite von WH-Company: nur auf der Hauptdomain (app.main_host_pattern), sonst gehört „/“ dem Tool der
+ * jeweiligen Domain. Bewusst schlicht: die großen Projekte, ein Weg zur Liste aller Projekte; die Anmeldung ist
+ * nur über das Logo erreichbar.
+ */
+#[Route(
+    host: '{'.MainHostContextListener::PARAMETER.'}',
+    requirements: [MainHostContextListener::PARAMETER => '%app.main_host_pattern%'],
+    defaults: [MainHostContextListener::PARAMETER => '%app.main_host%'],
+)]
 class LandingPageController extends AbstractController
 {
-    #[Route('/', name: 'app_landing_page')]
-    public function index(ProjectRepository $projectRepository, Security $security): Response
+    #[Route('/', name: 'app_landing_page', methods: ['GET'])]
+    public function index(ProjectRepository $projects): Response
     {
-        $projects = $projectRepository->findAll();
-
-        if (!$security->getUser()) {
-            $projects = array_filter($projects, function ($project) {
-                return $project->getRoute() !== 'app_bet_ai_index';
-            });
-        }
-
         return $this->render('landing_page/index.html.twig', [
-            'projects' => $projects,
+            'featured' => $projects->findVisible(null !== $this->getUser(), true),
+        ]);
+    }
+
+    #[Route('/projekte', name: 'app_projects', methods: ['GET'])]
+    public function projects(ProjectRepository $projects): Response
+    {
+        return $this->render('landing_page/projects.html.twig', [
+            'projects' => $projects->findVisible(null !== $this->getUser()),
         ]);
     }
 }

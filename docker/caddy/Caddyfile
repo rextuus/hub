@@ -14,8 +14,9 @@
 	root * /srv/app/public
 	encode zstd gzip
 
+	# Uploads in EasyAdmin (mehrere Fotos auf einmal): PHP nimmt bis 100 MB an (docker/php/conf.d/app.ini).
 	request_body {
-		max_size 9MB
+		max_size 104MB
 	}
 
 	header {
@@ -25,13 +26,22 @@
 		-Server
 	}
 
-	# Kompilierte Assets tragen einen Hash im Namen (Team-Logos nicht).
-	@hashed {
-		path_regexp ^/assets/.+-[A-Za-z0-9_-]{7,}\.\w+$
-		not path /assets/bet_ai/*
-	}
+	# Kompilierte Assets tragen einen Hash im Namen.
+	@hashed path_regexp ^/assets/.+-[A-Za-z0-9_-]{7,}\.\w+$
 	header @hashed Cache-Control "public, max-age=31536000, immutable"
 
-	php_fastcgi app:9000
-	file_server
+	# Bilder aus dem Medienordner: signierte URLs (src/Media/MediaUrlGenerator.php) → imgproxy, das den Ordner nur
+	# lesend kennt. Ohne gültige Signatur antwortet imgproxy 403. Die URL ändert sich mit jeder Größe/Datei, also
+	# lange cachen. Originale (/media/…) liefert PHP (src/Media/Controller/MediaController.php).
+	handle_path /img/* {
+		reverse_proxy imgproxy:8080 {
+			header_down -Server
+			header_down Cache-Control "public, max-age=31536000, immutable"
+		}
+	}
+
+	handle {
+		php_fastcgi app:9000
+		file_server
+	}
 }

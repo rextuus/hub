@@ -28,8 +28,28 @@ class Project
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $url = null;
 
+    /** Bild im Medienordner (projekte/…), angezeigt über imgproxy. */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
+
+    /** Optionales kurzes Video im Medienordner (projekte/…), ersetzt das Bild auf der Startseite (Standbild = image). */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $video = null;
+
+    /** CSS object-position für den Bildausschnitt, z. B. „30% 50%“. */
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $imagePosition = null;
+
+    /** Groß auf der Startseite (sonst nur in der Liste aller Projekte). */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $featured = false;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private int $position = 0;
+
+    /** Nur für angemeldete Benutzer sichtbar (z. B. BetAI). */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $requiresLogin = false;
 
     public function getId(): ?int
     {
@@ -106,5 +126,70 @@ class Project
         $this->image = $image;
 
         return $this;
+    }
+
+    public function getVideo(): ?string
+    {
+        return $this->video;
+    }
+
+    public function setVideo(?string $video): static
+    {
+        $this->video = $video;
+
+        return $this;
+    }
+
+    public function getImagePosition(): ?string
+    {
+        return $this->imagePosition;
+    }
+
+    public function setImagePosition(?string $imagePosition): static
+    {
+        $this->imagePosition = null !== $imagePosition && preg_match('/^[0-9 .%a-z-]{1,32}$/i', $imagePosition) ? $imagePosition : null;
+
+        return $this;
+    }
+
+    public function isFeatured(): bool
+    {
+        return $this->featured;
+    }
+
+    public function setFeatured(bool $featured): static
+    {
+        $this->featured = $featured;
+
+        return $this;
+    }
+
+    public function getPosition(): int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): static
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function isRequiresLogin(): bool
+    {
+        return $this->requiresLogin;
+    }
+
+    public function setRequiresLogin(bool $requiresLogin): static
+    {
+        $this->requiresLogin = $requiresLogin;
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->name;
     }
 }

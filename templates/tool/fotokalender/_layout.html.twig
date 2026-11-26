@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% set show_header = false %}
+{% set show_footer = false %}
+{% block body_class %}wh-page fk-page{% endblock %}
+
+{% block body %}
+<div class="fk">
+    <header class="fk-head">
+        <a class="fk-head__logo" href="{{ path('app_landing_page') }}" aria-label="WH-Company – Startseite">
+            <img src="{{ asset('images/brand/logo-mark.svg') }}" alt="WH-Company" width="288" height="156">
+        </a>
+        {% block nav %}{% endblock %}
+    </header>
+    {% block content %}{% endblock %}
+    <footer class="fk-foot">
+        <a href="{{ path('app_landing_page') }}">&copy; WH-Company</a>
+    </footer>
+</div>
+{% endblock %}

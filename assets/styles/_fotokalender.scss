@@ -1,0 +1,300 @@
+// Fotokalender (templates/tool/fotokalender/): dunkel und ruhig wie die Startseite, die Fotos stehen im Vordergrund.
+
+.fk {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+
+    @media (min-width: 48em) { padding: 2.5rem 2.5rem 4rem; }
+}
+
+.fk-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--wh-line);
+
+    &__logo img { display: block; width: 8.5rem; height: auto; }
+}
+
+.fk-back, .fk-years a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--wh-muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+
+    svg { width: 1.1rem; height: 1.1rem; }
+    &:hover, &:focus-visible, &[aria-current] { color: #fff; }
+}
+
+.fk-years { display: flex; gap: 1.2rem; }
+
+.fk-intro {
+    text-align: center;
+    margin: 2.5rem auto 2rem;
+    max-width: 40rem;
+
+    h1 {
+        font-family: var(--wh-serif);
+        font-weight: 500;
+        font-size: clamp(2.2rem, 7vw, 3.6rem);
+        margin: 0 0 0.75rem;
+    }
+    p { color: var(--wh-muted); margin: 0; }
+}
+
+.fk-badge {
+    display: inline-block;
+    margin-top: 1rem !important;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--wh-orange);
+    color: var(--wh-orange) !important;
+    font-size: 0.8rem;
+}
+
+.fk-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+
+    @media (min-width: 64em) { gap: 2rem; }
+}
+
+.fk-card {
+    display: block;
+    perspective: 900px;
+    color: #fff;
+    text-decoration: none;
+
+    &__inner {
+        position: relative;
+        display: block;
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        border-radius: 0.6rem;
+        background: #151515;
+        box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        transition: transform 0.6s var(--wh-ease), box-shadow 0.4s var(--wh-ease);
+        transform-style: preserve-3d;
+    }
+
+    &__bg {
+        position: absolute;
+        inset: -6%;
+        width: 112%;
+        height: 112%;
+        object-fit: cover;
+        opacity: 0.75;
+        transition: transform 0.6s var(--wh-ease), opacity 0.4s var(--wh-ease);
+    }
+
+    &__info {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 3rem 1.25rem 1.25rem;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    &__month {
+        font-family: var(--wh-serif);
+        font-size: 1.9rem;
+        line-height: 1.1;
+    }
+
+    &__motto {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        transform: translateY(0.3rem);
+        transition: transform 0.4s var(--wh-ease);
+    }
+
+    &:hover &__inner, &:focus-visible &__inner {
+        box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 1), inset 0 0 0 1px var(--wh-orange);
+    }
+    &:hover &__bg, &:focus-visible &__bg { opacity: 1; }
+    &:hover &__motto, &:focus-visible &__motto { transform: none; }
+    &:focus-visible { outline: none; }
+}
+
+.fk-empty { color: var(--wh-muted); }
+
+// ---------------------------------------------------------------- Monat
+.fk-month__head {
+    margin: 2rem 0 1.25rem;
+
+    h1 {
+        font-family: var(--wh-serif);
+        font-weight: 500;
+        font-size: clamp(2.2rem, 8vw, 4rem);
+        margin: 0;
+        line-height: 1.05;
+
+        span {
+            display: block;
+            margin-top: 0.4rem;
+            font-family: var(--wh-sans);
+            font-size: 0.85rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--wh-orange);
+        }
+    }
+}
+
+.fk-month__eyebrow {
+    margin: 0 0 0.4rem;
+    color: var(--wh-muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.fk-stage { position: relative; }
+
+.fk-slides {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    border-radius: 0.6rem;
+    background: #0b0b0b;
+
+    &::-webkit-scrollbar { display: none; }
+    &:focus-visible { outline: 1px solid var(--wh-orange); outline-offset: 4px; }
+}
+
+.fk-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    max-height: 78vh;
+
+    img {
+        max-width: 100%;
+        max-height: 78vh;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+.fk-arrow {
+    position: absolute;
+    top: 50%;
+    width: 3rem;
+    height: 3rem;
+    margin-top: -1.5rem;
+    border: 0;
+    border-radius: 50%;
+    display: none;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: background 0.3s var(--wh-ease);
+
+    svg { width: 1.4rem; height: 1.4rem; }
+    &:hover, &:focus-visible { background: var(--wh-orange); outline: none; }
+    &--prev { left: 1rem; }
+    &--next { right: 1rem; }
+
+    @media (hover: hover) { display: grid; }
+}
+
+.fk-caption {
+    margin: 0.75rem 0 0;
+    text-align: center;
+    color: var(--wh-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+}
+
+.fk-thumbs {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0 0 0.5rem;
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    justify-content: safe center;
+
+    button {
+        display: block;
+        padding: 0;
+        border: 0;
+        border-radius: 0.35rem;
+        overflow: hidden;
+        background: none;
+        cursor: pointer;
+        opacity: 0.45;
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        transition: opacity 0.3s var(--wh-ease), outline-color 0.3s var(--wh-ease);
+
+        &:hover { opacity: 0.8; }
+        &[aria-current] { opacity: 1; outline-color: var(--wh-orange); }
+        &:focus-visible { opacity: 1; outline-color: #fff; }
+    }
+
+    img { display: block; width: 5.5rem; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+}
+
+.fk-pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--wh-line);
+
+    a {
+        display: flex;
+        flex-direction: column;
+        color: #fff;
+        text-decoration: none;
+        font-family: var(--wh-serif);
+        font-size: 1.4rem;
+
+        small {
+            font-family: var(--wh-sans);
+            font-size: 0.72rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--wh-muted);
+        }
+        &[rel=next] { text-align: right; margin-left: auto; }
+        &:hover, &:focus-visible { color: var(--wh-orange); }
+    }
+}
+
+.fk-foot {
+    margin-top: 3rem;
+    text-align: center;
+    a { color: var(--wh-muted); text-decoration: none; font-size: 0.85rem; }
+    a:hover { color: #fff; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fk-card__inner, .fk-card__bg, .fk-card__motto { transition: none; }
+}

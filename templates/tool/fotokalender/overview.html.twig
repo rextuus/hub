@@ -1,0 +1,47 @@
+{% extends 'tool/fotokalender/_layout.html.twig' %}
+
+{% block title %}{{ calendar.title }} · WH-Company{% endblock %}
+{% block meta %}<meta name="description" content="{{ calendar.title }} der WH-Company – zwölf Monate, zwölf Mottos.">{% endblock %}
+
+{% block nav %}
+    {% if calendars|length > 1 %}
+        <nav class="fk-years" aria-label="Jahrgänge">
+            {% for c in calendars %}
+                <a href="{{ path('app_fotokalender_calendar', {year: c.year}) }}" {% if c.year == calendar.year %}aria-current="page"{% endif %}>{{ c.year }}</a>
+            {% endfor %}
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section class="fk-intro">
+        <h1>{{ calendar.title }}</h1>
+        <p>{{ calendar.intro ?: 'Tippe auf einen Monat, um die Bilder groß zu sehen.' }}</p>
+        {% if not calendar.published %}<p class="fk-badge">Nicht veröffentlicht – nur für Admins sichtbar</p>{% endif %}
+    </section>
+
+    <ol class="fk-cards">
+        {% for sheet in calendar.months %}
+            <li>
+                <a class="fk-card" href="{{ path('app_fotokalender_month', {year: calendar.year, month: sheet.slug}) }}"
+                   data-controller="fk-tilt" data-action="pointermove->fk-tilt#move pointerleave->fk-tilt#reset">
+                    <span class="fk-card__inner" data-fk-tilt-target="card">
+                        {% if sheet.cover %}
+                            <img class="fk-card__bg" data-fk-tilt-target="bg" alt=""
+                                 src="{{ media_url(sheet.cover, 'card', 800) }}"
+                                 srcset="{{ media_srcset(sheet.cover, 'card') }}"
+                                 sizes="(min-width: 64em) 30vw, (min-width: 40em) 45vw, 90vw"
+                                 {% if loop.index > 3 %}loading="lazy"{% endif %}>
+                        {% endif %}
+                        <span class="fk-card__info">
+                            <span class="fk-card__month">{{ sheet.name }}</span>
+                            <span class="fk-card__motto">{{ sheet.motto }}</span>
+                        </span>
+                    </span>
+                </a>
+            </li>
+        {% else %}
+            <li class="fk-empty">Noch keine Monatsblätter.</li>
+        {% endfor %}
+    </ol>
+{% endblock %}

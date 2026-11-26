@@ -1,0 +1,309 @@
+# Beispiel für app:advent:import (src/Tool/Advent/Command/ImportAdventCommand.php).
+# Aufruf: php bin/console app:advent:import docs/advent/beispiel.yaml [--dry-run]
+# Gleicher Titel + Jahr = derselbe Kalender (wird aktualisiert). Felder:
+#   start      Tag, an dem Tür 1 aufgeht (0 Uhr in timezone); Tür n einen Tag später je Nummer
+#   host       optional eigene Domain (DNS + Caddy nötig)
+#   doors      number, question, image (Pfad im Medienordner, z. B. advent/tuer-05.jpg), points,
+#              choices: text, correct (genau eine true), response, image, video (YouTube-Link)
+#   participants  Namen; jeder bekommt einen persönlichen Link (wird am Ende ausgegeben)
+title: Beispiel-Adventskalender
+year: 2026
+start: '2026-12-01'
+timezone: Europe/Berlin
+intro: Jeden Tag eine Frage – sammle Punkte für die Gewinne unten.
+win_stages:
+- min_points: 0
+  label: 0–4 Punkte
+  prize: Eine Woche PS5-Leihe
+- min_points: 5
+  label: 5–12 Punkte
+  prize: Ein eigener Tesa-Abroller
+- min_points: 13
+  label: 13–18 Punkte
+  prize: Sushi-Abend
+- min_points: 19
+  label: ab 19 Punkten
+  prize: Ein Wunsch frei beim Entwickler
+participants:
+- Testperson
+doors:
+- number: 1
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 2
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 3
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 4
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 5
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 6
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 7
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 8
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 9
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 10
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 11
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 12
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 13
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 14
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 15
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 16
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 17
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 18
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 19
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 20
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 21
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 1
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false
+- number: 22
+  question: Wie viele Türchen hat ein Adventskalender?
+  points: 1
+  choices:
+  - text: '24'
+    correct: true
+    response: Genau – heute ist die erste!
+  - text: '25'
+    correct: false
+    response: Fast – der 25. ist schon Weihnachten.
+  - text: '31'
+    correct: false
+    response: Das wäre ein Monatskalender.
+- number: 23
+  question: Aus welchem Land stammt der Brauch des Adventskranzes?
+  points: 1
+  choices:
+  - text: Deutschland
+    correct: true
+    response: Johann Hinrich Wichern, Hamburg 1839.
+  - text: Schweden
+    correct: false
+  - text: Österreich
+    correct: false
+- number: 24
+  question: Wie heißt Rudolphs Nase auf Englisch?
+  points: 2
+  choices:
+  - text: Shiny
+    correct: false
+  - text: Red
+    correct: true
+    response: Rudolph the red-nosed reindeer!
+  - text: Bright
+    correct: false

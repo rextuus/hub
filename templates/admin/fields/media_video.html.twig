@@ -1,0 +1,6 @@
+{# Video aus dem Medienordner (src/Media/Admin/MediaImageField.php::video). #}
+{% if field.value %}
+    <video src="{{ media_original(field.value) }}" muted loop playsinline preload="metadata" style="max-width: 120px; max-height: 90px; border-radius: 6px;"></video>
+{% else %}
+    <span class="badge badge-secondary">–</span>
+{% endif %}

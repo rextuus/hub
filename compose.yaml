@@ -4,6 +4,8 @@ services:
     build: .
     volumes:
       - .:/var/www/html
+      # Gleiche PHP-Grenzen wie in Produktion (Uploads bis 20 MB je Datei)
+      - ./docker/php/conf.d/app.ini:/usr/local/etc/php/conf.d/zz-app.ini:ro
     environment:
       DATABASE_URL: "mysql://app:!ChangeMe!@database:3306/app?serverVersion=8.0&charset=utf8mb4"
     depends_on:

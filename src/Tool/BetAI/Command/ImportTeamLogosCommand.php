@@ -2,6 +2,7 @@
 
 namespace App\Tool\BetAI\Command;
 
+use App\Media\MediaStorage;
 use App\Tool\BetAI\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -14,7 +15,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
-#[AsCommand(name: 'app:bet-ai:import-logos', description: 'Import team logos from public/assets/bet_ai/logos')]
+#[AsCommand(name: 'app:bet-ai:import-logos', description: 'Ordnet Team-Logos aus dem Medienordner (bet_ai/logos) den Teams zu')]
 class ImportTeamLogosCommand extends Command
 {
     private AsciiSlugger $slugger;
@@ -132,8 +133,8 @@ class ImportTeamLogosCommand extends Command
     public function __construct(
         private TeamRepository $teamRepository,
         private EntityManagerInterface $entityManager,
-        #[Autowire('%kernel.project_dir%')]
-        private string $projectDir
+        #[Autowire('%app.media_dir%')]
+        private string $mediaDir
     ) {
         parent::__construct();
         $this->slugger = new AsciiSlugger();
@@ -148,7 +149,7 @@ class ImportTeamLogosCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $dryRun = $input->getOption('dry-run');
-        $logoDir = $this->projectDir . '/public/assets/bet_ai/logos';
+        $logoDir = $this->mediaDir . '/bet_ai/logos';
 
         if (!is_dir($logoDir)) {
             $io->error('Verzeichnis nicht gefunden: ' . $logoDir);
@@ -203,7 +204,7 @@ class ImportTeamLogosCommand extends Command
                     continue;
                 }
 
-                $team->setProfileImgUrl('/assets/bet_ai/logos/' . $file->getRelativePathname());
+                $team->setProfileImgUrl(MediaStorage::URL_PREFIX . 'bet_ai/logos/' . $file->getRelativePathname());
                 $processedTeams[$team->getId()] = true;
                 $stats['matched']++;
                 $stats['png']++;

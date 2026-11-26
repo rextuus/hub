@@ -1,0 +1,517 @@
+// Adventskalender (templates/tool/advent/). Winternacht, Türen aus warmem Papier, die am Scharnier aufschwingen.
+
+$adv-night: #0b1626;
+$adv-night-2: #13243b;
+$adv-cream: #f6ecd9;
+$adv-gold: #e2b04a;
+$adv-red: #b23a2e;
+$adv-green: #2f5d4a;
+
+body.adv-page {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(226, 176, 74, 0.16), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(47, 93, 74, 0.35), transparent 60%),
+        linear-gradient(180deg, $adv-night 0%, $adv-night-2 100%);
+    background-attachment: fixed;
+    color: $adv-cream;
+    font-family: var(--wh-sans);
+    -webkit-font-smoothing: antialiased;
+}
+
+html.adv-locked { overflow: hidden; }
+
+// Leiser Schneefall: zwei Lagen Punkte, die langsam nach unten wandern.
+.adv-snow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+
+    &::before, &::after {
+        content: '';
+        position: absolute;
+        inset: -100% 0 0 0;
+        background-image:
+            radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.7), transparent 60%),
+            radial-gradient(1.5px 1.5px at 120px 80px, rgba(255, 255, 255, 0.5), transparent 60%),
+            radial-gradient(2.5px 2.5px at 200px 160px, rgba(255, 255, 255, 0.6), transparent 60%),
+            radial-gradient(1.5px 1.5px at 300px 40px, rgba(255, 255, 255, 0.45), transparent 60%),
+            radial-gradient(2px 2px at 360px 220px, rgba(255, 255, 255, 0.55), transparent 60%);
+        background-size: 400px 260px;
+        animation: adv-snow 40s linear infinite;
+    }
+    &::after {
+        background-size: 260px 200px;
+        opacity: 0.5;
+        animation-duration: 65s;
+    }
+}
+
+@keyframes adv-snow { to { transform: translateY(50%); } }
+
+.adv-preview-bar {
+    position: relative;
+    z-index: 2;
+    padding: 0.6rem 1rem;
+    background: $adv-gold;
+    color: #1b1b1b;
+    font-size: 0.9rem;
+    text-align: center;
+
+    a { color: inherit; font-weight: 700; margin-left: 0.75rem; }
+}
+
+.adv {
+    position: relative;
+    z-index: 1;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 4rem;
+
+    @media (min-width: 48em) { padding: 2.5rem 2rem 5rem; }
+}
+
+.adv-welcome {
+    min-height: 80vh;
+    display: grid;
+    place-content: center;
+    text-align: center;
+}
+
+// ---------------------------------------------------------------- Kopf
+.adv-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.adv-eyebrow {
+    margin: 0 0 0.35rem;
+    color: $adv-gold;
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.adv-title {
+    margin: 0;
+    font-family: var(--wh-serif);
+    font-weight: 500;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    line-height: 1.05;
+}
+
+.adv-intro {
+    margin: 0.6rem 0 0;
+    max-width: 36rem;
+    color: rgba($adv-cream, 0.75);
+}
+
+.adv-score {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    padding: 0.75rem 1.1rem;
+    border: 1px solid rgba($adv-gold, 0.45);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(6px);
+
+    &__value { font-family: var(--wh-serif); font-size: 2.2rem; line-height: 1; color: $adv-gold; }
+    &__label { font-size: 0.9rem; }
+    &__sub { grid-column: 1 / -1; font-size: 0.78rem; color: rgba($adv-cream, 0.65); }
+}
+
+.adv-toast, .adv-countdown {
+    margin: 0 0 1.25rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.75rem;
+    background: rgba($adv-gold, 0.14);
+    border: 1px solid rgba($adv-gold, 0.35);
+    animation: adv-fade-in 0.3s ease-out;
+}
+
+// ---------------------------------------------------------------- Türen
+.adv-doors {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(5.25rem, 1fr);
+    grid-auto-flow: dense;
+    gap: 0.55rem;
+
+    @media (min-width: 40em) { grid-template-columns: repeat(6, 1fr); grid-auto-rows: minmax(6.5rem, 1fr); gap: 0.8rem; }
+    @media (min-width: 64em) { grid-template-columns: repeat(8, 1fr); grid-auto-rows: 7.5rem; gap: 1rem; }
+}
+
+// Ein paar Türen sind größer, wie bei einem echten Kalender
+.adv-cell {
+    display: flex;
+    &--n24 { grid-column: span 2; grid-row: span 2; }
+    &--n6, &--n13, &--n19 { grid-column: span 2; }
+    &--n1, &--n10 { grid-row: span 2; }
+}
+
+.adv-door {
+    position: relative;
+    flex: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 0.6rem;
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+    perspective: 900px;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    -webkit-tap-highlight-color: transparent;
+
+    &:focus-visible { outline: 2px solid $adv-gold; outline-offset: 3px; }
+
+    &__inside {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        border-radius: inherit;
+        background: radial-gradient(circle at 50% 40%, rgba($adv-gold, 0.25), transparent 70%);
+    }
+
+    &__mark {
+        font-size: 1.9rem;
+        color: $adv-gold;
+        text-shadow: 0 0 18px rgba($adv-gold, 0.7);
+        &--muted { color: rgba($adv-cream, 0.45); text-shadow: none; font-size: 1.4rem; }
+    }
+
+    &__leaf {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 0.45rem 0.55rem;
+        border-radius: inherit;
+        transform-origin: left center;
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        transition: transform 0.75s cubic-bezier(0.3, 0.7, 0.2, 1), box-shadow 0.75s ease;
+        box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        // Papier mit feiner Musterung
+        background-image:
+            radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.5px),
+            radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.12) 0 1px, transparent 1.5px),
+            linear-gradient(145deg, var(--leaf-a), var(--leaf-b));
+        background-size: 14px 14px, 22px 22px, auto;
+    }
+
+    &--tone0 { --leaf-a: #c0463a; --leaf-b: #8f2c23; }
+    &--tone1 { --leaf-a: #3b7059; --leaf-b: #244a3a; }
+    &--tone2 { --leaf-a: #e9dcc0; --leaf-b: #cdb88d; color: #3a2b1a; }
+    &--tone3 { --leaf-a: #d39b3b; --leaf-b: #a8731f; color: #2b1d08; }
+    &--tone4 { --leaf-a: #2c4b72; --leaf-b: #1b314f; }
+    &--tone5 { --leaf-a: #8a3d5a; --leaf-b: #5f253c; }
+
+    &__num {
+        font-family: var(--wh-serif);
+        font-size: clamp(1.5rem, 5vw, 2.3rem);
+        line-height: 1;
+        text-align: left;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    &__date {
+        align-self: flex-end;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        opacity: 0.75;
+    }
+
+    &__knob {
+        position: absolute;
+        right: 0.45rem;
+        top: 50%;
+        width: 0.4rem;
+        height: 0.4rem;
+        margin-top: -0.2rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.55);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    // Zu: leicht entsättigt, kein Hover-Effekt
+    &[data-state='locked'] {
+        cursor: not-allowed;
+        .adv-door__leaf { filter: saturate(0.55) brightness(0.85); }
+    }
+
+    // Offen, noch nicht beantwortet: wackelt leicht beim Darüberfahren
+    &[data-state='ready']:hover .adv-door__leaf,
+    &[data-state='ready']:focus-visible .adv-door__leaf { transform: rotateY(-14deg); }
+
+    // Heutige Tür: goldener Schimmer
+    &.is-today .adv-door__leaf { animation: adv-glow 2.4s ease-in-out infinite; }
+
+    // Aufgeschwungen (gerade geöffnet oder beantwortet)
+    &.is-open .adv-door__leaf {
+        transform: rotateY(-108deg);
+        box-shadow: 14px 0 22px -10px rgba(0, 0, 0, 0.8);
+    }
+}
+
+@keyframes adv-glow {
+    0%, 100% { box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.7), 0 0 0 0 rgba($adv-gold, 0); }
+    50% { box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba($adv-gold, 0.8), 0 0 22px rgba($adv-gold, 0.55); }
+}
+
+// ---------------------------------------------------------------- Gewinne
+.adv-wins {
+    margin-top: 2.5rem;
+    padding: 1.25rem 1.25rem 0.5rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    h2 { margin: 0 0 0.75rem; font-family: var(--wh-serif); font-weight: 500; font-size: 1.5rem; }
+    ul { list-style: none; margin: 0; padding: 0; }
+
+    li {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+        padding: 0.7rem 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        color: rgba($adv-cream, 0.45);
+
+        &.is-reached { color: $adv-cream; .adv-wins__label { color: $adv-gold; } }
+    }
+
+    &__label { min-width: 8rem; font-weight: 700; font-size: 0.9rem; }
+    &__prize { flex: 1; }
+}
+
+// ---------------------------------------------------------------- Dialog
+.adv-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    @media (min-width: 48em) { align-items: center; padding: 2rem; }
+
+    &__backdrop {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: rgba(4, 9, 17, 0.72);
+        backdrop-filter: blur(3px);
+        animation: adv-fade-in 0.35s ease-out 0.25s both;
+        cursor: default;
+    }
+}
+
+.adv-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 42rem;
+    max-height: 92vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1.1rem 1.25rem 1.5rem;
+    border-radius: 1.25rem 1.25rem 0 0;
+    background: linear-gradient(180deg, #fbf4e6, $adv-cream);
+    color: #2a2118;
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+    // erst nach dem Aufschwingen der Tür
+    animation: adv-sheet-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s both;
+
+    @media (min-width: 48em) { border-radius: 1.25rem; padding: 1.5rem 2rem 2rem; animation-name: adv-pop-in; }
+
+    &__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+
+    &__door {
+        font-size: 0.78rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: $adv-red;
+        font-weight: 700;
+    }
+
+    &__close {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 0;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.06);
+        color: inherit;
+        cursor: pointer;
+        svg { width: 1.2rem; height: 1.2rem; }
+        &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.12); outline: none; }
+    }
+
+    &__question {
+        margin: 0 0 1rem;
+        font-family: var(--wh-serif);
+        font-weight: 500;
+        font-size: clamp(1.35rem, 4.5vw, 1.8rem);
+        line-height: 1.25;
+    }
+
+    &__image {
+        display: block;
+        width: 100%;
+        max-height: 50vh;
+        object-fit: contain;
+        margin: 0 0 1rem;
+        border-radius: 0.75rem;
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    &__error {
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.6rem;
+        background: rgba($adv-red, 0.12);
+        color: $adv-red;
+    }
+
+    &__done {
+        width: 100%;
+        margin-top: 1.25rem;
+        padding: 0.9rem 1rem;
+        border: 0;
+        border-radius: 0.8rem;
+        background: #2a2118;
+        color: $adv-cream;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        &:hover, &:focus-visible { background: $adv-red; outline: none; }
+    }
+}
+
+.adv-choices { display: grid; gap: 0.6rem; }
+
+.adv-choice {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(42, 33, 24, 0.15);
+    border-radius: 0.8rem;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &__key {
+        flex: 0 0 auto;
+        width: 1.9rem;
+        height: 1.9rem;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba($adv-red, 0.1);
+        color: $adv-red;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    &:hover, &:focus-visible {
+        border-color: $adv-red;
+        box-shadow: 0 6px 16px -10px rgba($adv-red, 0.8);
+        outline: none;
+    }
+    &:active { transform: scale(0.98); }
+    &[disabled] { opacity: 0.6; cursor: progress; }
+}
+
+.adv-result {
+    position: relative;
+    padding: 1rem 1.1rem;
+    border-radius: 0.9rem;
+    animation: adv-pop-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    &--right { background: rgba($adv-green, 0.12); }
+    &--wrong { background: rgba($adv-red, 0.08); }
+
+    &__badge {
+        margin: 0 0 0.6rem;
+        font-family: var(--wh-serif);
+        font-size: 1.4rem;
+    }
+    &--right &__badge { color: $adv-green; }
+    &--wrong &__badge { color: $adv-red; }
+
+    &__chosen { margin: 0 0 0.35rem; }
+    &__text { margin: 0.75rem 0 1rem; line-height: 1.5; }
+
+    &__video {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        margin-top: 0.75rem;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #000;
+
+        iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    }
+}
+
+// Konfetti bei richtiger Antwort (nur CSS)
+.adv-confetti {
+    position: absolute;
+    left: 50%;
+    top: 1.2rem;
+    pointer-events: none;
+
+    i {
+        position: absolute;
+        width: 0.45rem;
+        height: 0.8rem;
+        border-radius: 2px;
+        background: $adv-gold;
+        opacity: 0;
+        animation: adv-confetti 1.1s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+
+        @for $i from 1 through 14 {
+            &:nth-child(#{$i}) {
+                --x: #{(($i * 47) % 260) - 130}px;
+                --y: #{-60 - (($i * 31) % 90)}px;
+                --r: #{($i * 67) % 360}deg;
+                animation-delay: #{0.05 * ($i % 5)}s;
+                @if $i % 3 == 0 { background: $adv-red; }
+                @if $i % 3 == 1 { background: $adv-green; }
+            }
+        }
+    }
+}
+
+@keyframes adv-confetti {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+    100% { opacity: 0; transform: translate(var(--x), calc(var(--y) * -1.6)) rotate(var(--r)); }
+}
+
+@keyframes adv-fade-in { from { opacity: 0; } }
+@keyframes adv-sheet-in { from { transform: translateY(100%); } }
+@keyframes adv-pop-in { from { opacity: 0; transform: translateY(12px) scale(0.97); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .adv-snow::before, .adv-snow::after, .adv-door.is-today .adv-door__leaf, .adv-confetti { animation: none; }
+    .adv-door__leaf { transition: none; }
+    .adv-sheet, .adv-dialog__backdrop, .adv-result { animation: none; }
+}

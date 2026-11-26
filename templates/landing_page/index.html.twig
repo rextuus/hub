@@ -1,57 +1,70 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hub - Your Mini App Collection{% endblock %}
+{% set show_header = false %}
+{% set show_footer = false %}
+
+{% block title %}WH-Company{% endblock %}
+{% block meta %}
+    <meta name="description" content="WH-Company – Debes, Nimbus, Secret Santa und weitere Projekte.">
+    <link rel="canonical" href="https://{{ app.request.host|replace({'www.': ''}) }}/">
+{% endblock %}
+{% block body_class %}wh-page{% endblock %}
 
 {% block body %}
-<div class="hero-section text-center">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-        <span class="badge badge-custom px-3 py-2 mb-3">Hub</span>
-        <h1 class="display-3 fw-extra-bold mb-4 tracking-tight">App-Collection</h1>
-        <p class="lead mb-0 opacity-75">Eine kuratierte Sammlung kleiner, nützlicher Werkzeuge für deinen Alltag. Alles, was du brauchst, an einem Ort. Build with ♥ von deiner WH-Company</p>
-            </div>
-        </div>
-    </div>
-</div>
+<main class="wh-landing" data-controller="wh-gallery">
+    <aside class="wh-sidebar">
+        {# Bewusst unauffällig: Die Anmeldung erreicht man nur über das Logo. #}
+        <a class="wh-sidebar__logo" href="{{ app.user ? path('app_projects') : path('app_login') }}" aria-label="WH-Company">
+            <img src="{{ asset('images/brand/logo.svg') }}" alt="WH-Company – Software Architecture in Perfection" width="350" height="236">
+        </a>
 
-<div class="container projects-container pb-5">
-    <div class="row g-4">
-        {% for project in projects %}
-            <div class="col-12 col-lg-6 col-xl-4">
-                <div class="project-card d-flex flex-column h-100 overflow-hidden">
-                    {% if project.image %}
-                        <div class="project-image-wrapper">
-                            <img src="{{ project.image }}" class="img-fluid w-100" alt="{{ project.name }}">
-                        </div>
-                    {% endif %}
-                    <div class="p-4 d-flex flex-column flex-grow-1">
-                        <div class="icon-wrapper">
-                            {{ ux_icon(project.icon) }}
-                        </div>
-                        <h3 class="h4 fw-bold mb-3">{{ project.name }}</h3>
-                        <p class="text-muted mb-4 flex-grow-1">{{ project.description }}</p>
+        <nav class="wh-sidebar__nav" aria-label="Projekte">
+            <ul>
+                {% for project in featured %}
+                    <li>
+                        <a href="{{ project.route ? path(project.route) : project.url }}"
+                           data-wh-gallery-target="link"
+                           data-wh-gallery-index-param="{{ loop.index0 }}"
+                           data-action="mouseenter->wh-gallery#activate focus->wh-gallery#activate">{{ project.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
 
-                        <div class="mt-auto">
-                            {% if project.route or project.url %}
-                                <a href="{{ project.route ? path(project.route) : project.url }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-                                    Tool öffnen {{ ux_icon('lucide:arrow-right', {class: 'ms-2', style: 'font-size: 0.8em;'}) }}
-                                </a>
-                            {% else %}
-                                <button class="btn btn-light w-100 disabled" title="In Kürze verfügbar">
-                                    In Kürze verfügbar
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <a class="wh-sidebar__all" href="{{ path('app_projects') }}">
+            <span>Alle Projekte</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </aside>
+
+    <section class="wh-gallery" aria-label="Unsere Projekte">
+        {% for project in featured %}
+            {% set href = project.route ? path(project.route) : project.url %}
+            <a class="wh-tile{{ loop.first ? ' is-active' }}" href="{{ href }}"
+               data-wh-gallery-target="tile"
+               data-wh-gallery-index-param="{{ loop.index0 }}"
+               data-action="mouseenter->wh-gallery#activate focus->wh-gallery#activate">
+                {% if project.video %}
+                    <video class="wh-tile__media" muted loop playsinline preload="metadata"
+                           {% if project.image %}poster="{{ media_url(project.image, 'tile', 960) }}"{% endif %}
+                           data-wh-gallery-target="video"
+                           style="object-position: {{ project.imagePosition ?: '50% 50%' }}">
+                        <source src="{{ media_original(project.video) }}" type="video/mp4">
+                    </video>
+                {% elseif project.image %}
+                    <img class="wh-tile__media" alt=""
+                         src="{{ media_url(project.image, 'tile', 960) }}"
+                         srcset="{{ media_srcset(project.image, 'tile') }}"
+                         sizes="(min-width: 75em) 45vw, 100vw"
+                         {% if not loop.first %}loading="lazy"{% endif %}
+                         style="object-position: {{ project.imagePosition ?: '50% 50%' }}">
+                {% endif %}
+                <span class="wh-tile__text">
+                    <span class="wh-tile__title">{{ project.name }}</span>
+                    <span class="wh-tile__desc">{{ project.description }}</span>
+                </span>
+            </a>
         {% endfor %}
-    </div>
-</div>
-
-<style>
-    .fw-extra-bold { font-weight: 800; }
-    .tracking-tight { letter-spacing: -0.025em; }
-</style>
+    </section>
+</main>
 {% endblock %}

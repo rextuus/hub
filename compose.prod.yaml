@@ -25,14 +25,18 @@ x-app: &app
   restart: unless-stopped
   logging: *logging
   volumes:
-    # Team-Logos (BetAI): in der DB als /assets/bet_ai/logos/… hinterlegt, eingelesen mit app:bet-ai:import-logos.
-    - media_data:/srv/app/public/assets/bet_ai/logos:rw
+    # Gemeinsamer Medienordner (src/Media/MediaStorage.php), je Tool ein Unterordner: bet_ai/logos, fotokalender,
+    # advent, projekte. Nur app schreibt (Uploads in EasyAdmin); imgproxy liest, web sieht ihn gar nicht.
+    - media_data:/srv/app/var/media:rw
   environment:
     APP_ENV: prod
     APP_SECRET: ${APP_SECRET:?APP_SECRET fehlt in .env.prod.local}
     DEFAULT_URI: ${DEFAULT_URI:?DEFAULT_URI fehlt in .env.prod.local}
     DATABASE_URL: mysql://${MYSQL_USER:-hub}:${MYSQL_PASSWORD:?MYSQL_PASSWORD fehlt}@database:3306/${MYSQL_DATABASE:-hub}?serverVersion=8.4.13&charset=utf8mb4
     MESSENGER_TRANSPORT_DSN: doctrine://default?auto_setup=0
+    # Signierte Bild-URLs (src/Media/Imgproxy/ImgproxyUrlSigner.php); dieselben Werte wie beim Dienst imgproxy.
+    IMGPROXY_KEY: ${IMGPROXY_KEY:?IMGPROXY_KEY fehlt}
+    IMGPROXY_SALT: ${IMGPROXY_SALT:?IMGPROXY_SALT fehlt}
     # Pflicht, auch wenn BetAI nicht genutzt wird: GeminiService liest den Schlüssel beim Erzeugen.
     GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY fehlt}
     SENTRY_DSN: ${SENTRY_DSN:-}
@@ -83,7 +87,6 @@ services:
       # Nur von diesen Adressen gelten X-Forwarded-* (Gast-IP, https): die WireGuard-IP des VPS.
       REVERSE_PROXY_IPS: ${REVERSE_PROXY_IPS:-private_ranges}
     volumes:
-      - media_data:/srv/app/public/assets/bet_ai/logos:ro
       - caddy_data:/data
       - caddy_config:/config
     ports:
@@ -99,6 +102,41 @@ services:
     depends_on:
       app:
         condition: service_healthy
+      imgproxy:
+        condition: service_healthy
+
+  # Bilder in passender Größe auf Abruf (Baustein homelab/docs/baustein-imgproxy.md): nur über web (/img/…)
+  # erreichbar und nur mit gültiger Signatur. Liest den Medienordner nur lesend; Benutzer nobody in der Gruppe
+  # www-data (GID 82), der die Dateien gehören.
+  imgproxy:
+    image: ghcr.io/imgproxy/imgproxy:v4.0.25
+    restart: unless-stopped
+    logging: *logging
+    user: "65534:82"
+    environment:
+      IMGPROXY_KEY: ${IMGPROXY_KEY:?IMGPROXY_KEY fehlt}
+      IMGPROXY_SALT: ${IMGPROXY_SALT:?IMGPROXY_SALT fehlt}
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /images
+      IMGPROXY_ALLOWED_SOURCES: local:///
+      # Passt zum Upload (20 MB, docker/php/conf.d/app.ini); Kamerafotos haben ~14 Megapixel.
+      IMGPROXY_MAX_SRC_RESOLUTION: "50"
+      IMGPROXY_MAX_SRC_FILE_SIZE: "20971520"
+      IMGPROXY_WORKERS: "2"
+      IMGPROXY_STRIP_METADATA: "true"
+      IMGPROXY_AUTO_ROTATE: "true"
+    volumes:
+      - media_data:/images:ro
+    healthcheck:
+      test: ["CMD", "imgproxy", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512m
 
   database:
     image: mysql:8.4.13

@@ -1,0 +1,8 @@
+{# Bild aus dem Medienordner (src/Media/Admin/MediaImageField.php), über imgproxy verkleinert. #}
+{% if field.value %}
+    <a href="{{ media_url(field.value, 'photo') }}" target="_blank" rel="noopener">
+        <img src="{{ media_url(field.value, 'admin') }}" alt="" loading="lazy" style="max-width: 120px; max-height: 90px; border-radius: 6px; object-fit: cover;">
+    </a>
+{% else %}
+    <span class="badge badge-secondary">–</span>
+{% endif %}

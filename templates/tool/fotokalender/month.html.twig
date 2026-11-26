@@ -1,0 +1,65 @@
+{% extends 'tool/fotokalender/_layout.html.twig' %}
+
+{% block title %}{{ sheet.name }} {{ calendar.year }}: {{ sheet.motto }} · WH-Company{% endblock %}
+
+{% block nav %}
+    <a class="fk-back" href="{{ path('app_fotokalender_calendar', {year: calendar.year}) }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Alle Monate
+    </a>
+{% endblock %}
+
+{% block content %}
+    {% set gallery = sheet.gallery %}
+    <section class="fk-month" data-controller="fk-gallery" data-action="keydown@window->fk-gallery#key">
+        <header class="fk-month__head">
+            <p class="fk-month__eyebrow">{{ calendar.title }}</p>
+            <h1>{{ sheet.name }} <span>{{ sheet.motto }}</span></h1>
+        </header>
+
+        <div class="fk-stage">
+            <ul class="fk-slides" data-fk-gallery-target="track" data-action="scroll->fk-gallery#sync" tabindex="0" aria-label="Bilder {{ sheet.name }}">
+                {% for item in gallery %}
+                    <li class="fk-slide" data-fk-gallery-target="slide" aria-label="Bild {{ loop.index }} von {{ gallery|length }}">
+                        <img src="{{ media_url(item.image, 'photo', 1600) }}"
+                             srcset="{{ media_srcset(item.image, 'photo') }}"
+                             sizes="(min-width: 80em) 75rem, 100vw"
+                             alt="{{ item.caption ?: sheet.motto ~ ' – Bild ' ~ loop.index }}"
+                             {% if not loop.first %}loading="lazy"{% endif %}>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if gallery|length > 1 %}
+                <button type="button" class="fk-arrow fk-arrow--prev" data-action="fk-gallery#prev" aria-label="Vorheriges Bild">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button type="button" class="fk-arrow fk-arrow--next" data-action="fk-gallery#next" aria-label="Nächstes Bild">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            {% endif %}
+        </div>
+
+        <p class="fk-caption" aria-live="polite"><span data-fk-gallery-target="counter">1</span> / {{ gallery|length }}</p>
+
+        {% if gallery|length > 1 %}
+            <ol class="fk-thumbs">
+                {% for item in gallery %}
+                    <li>
+                        <button type="button" data-fk-gallery-target="thumb" data-action="fk-gallery#go" data-fk-gallery-index-param="{{ loop.index0 }}" aria-label="Bild {{ loop.index }}" {% if loop.first %}aria-current="true"{% endif %}>
+                            <img src="{{ media_url(item.image, 'thumb', 320) }}" alt="" loading="lazy" width="160" height="120">
+                        </button>
+                    </li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+
+        <nav class="fk-pager" aria-label="Monate">
+            {% if previous %}
+                <a href="{{ path('app_fotokalender_month', {year: calendar.year, month: previous.slug}) }}" rel="prev"><small>Vorher</small>{{ previous.name }}</a>
+            {% else %}<span></span>{% endif %}
+            {% if next %}
+                <a href="{{ path('app_fotokalender_month', {year: calendar.year, month: next.slug}) }}" rel="next"><small>Danach</small>{{ next.name }}</a>
+            {% endif %}
+        </nav>
+    </section>
+{% endblock %}
